@@ -112,6 +112,13 @@
 
       document.body.classList.add("opener-revealed");
 
+      /* Lets the SOUND block (below) know the teaser is done, so
+         music only ever starts once the opener has finished —
+         never during the teaser itself. */
+      document.dispatchEvent(
+        new CustomEvent("casa:opener-finished")
+      );
+
       if (
         hasGSAP &&
         typeof ScrollTrigger !== "undefined"
@@ -578,7 +585,32 @@
   const mobileMenu =
     document.querySelector("[data-mobile-menu]");
 
+  /* FIX: the mobile menu is a full-screen overlay stacked above
+     the header (z-index), so the header's own "Menu" button is
+     covered once it's open and can't be used to close it — there
+     was previously no way out except tapping a nav link (which
+     navigates away). Added a dedicated close (×) button rendered
+     inside the overlay itself, plus Escape as a keyboard route. */
+  const menuCloseBtn =
+    document.querySelector("[data-menu-close]");
+
   if (menuToggle && mobileMenu) {
+    function closeMobileMenu() {
+      mobileMenu.classList.remove("is-open");
+
+      menuToggle.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
+      mobileMenu.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      unlock("menu-open");
+    }
+
     menuToggle.addEventListener("click", () => {
       const open =
         mobileMenu.classList.toggle("is-open");
@@ -598,24 +630,26 @@
         : unlock("menu-open");
     });
 
+    if (menuCloseBtn) {
+      menuCloseBtn.addEventListener(
+        "click",
+        closeMobileMenu
+      );
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        mobileMenu.classList.contains("is-open")
+      ) {
+        closeMobileMenu();
+      }
+    });
+
     mobileMenu
       .querySelectorAll("a")
       .forEach((a) => {
-        a.addEventListener("click", () => {
-          mobileMenu.classList.remove("is-open");
-
-          menuToggle.setAttribute(
-            "aria-expanded",
-            "false"
-          );
-
-          mobileMenu.setAttribute(
-            "aria-hidden",
-            "true"
-          );
-
-          unlock("menu-open");
-        });
+        a.addEventListener("click", closeMobileMenu);
       });
   }
 
@@ -1811,6 +1845,40 @@
     );
   });
 
+  /* Music should only ever start once the teaser has finished, not
+     on the first tap/click/key while it's still playing — but a
+     browser will only allow unmuted audio to start from within a
+     real user gesture, and the opener can finish with no gesture
+     having happened yet (it plays on its own). So we track both
+     conditions independently and only call startSound() once both
+     are true — whichever of the two finishes second is what
+     actually triggers playback. */
+  let openerHasFinished = document.body.classList.contains(
+    "opener-revealed"
+  );
+  let userHasGestured = false;
+
+  function maybeAutoStartSound() {
+    if (
+      openerHasFinished &&
+      userHasGestured &&
+      audio &&
+      audioAvailable &&
+      audio.paused
+    ) {
+      startSound().then(syncSoundUI);
+    }
+  }
+
+  document.addEventListener(
+    "casa:opener-finished",
+    () => {
+      openerHasFinished = true;
+      maybeAutoStartSound();
+    },
+    { once: true }
+  );
+
   [
     "pointerdown",
     "keydown",
@@ -1819,15 +1887,8 @@
     window.addEventListener(
       eventName,
       () => {
-        if (
-          audio &&
-          audioAvailable &&
-          audio.paused
-        ) {
-          startSound().then(
-            syncSoundUI
-          );
-        }
+        userHasGestured = true;
+        maybeAutoStartSound();
       },
       {
         once: true,

@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="is-locked">
-<audio id="casaGelsoAudio" preload="metadata" loop playsinline src="assets/audio/casa-gelso.mp3"></audio>
+<audio id="casaGelsoAudio" preload="metadata" loop playsinline src="assets/audio/mp3.mp3"></audio>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="film-grain" aria-hidden="true"></div>
 
@@ -48,12 +48,21 @@
     </button>
   </div>
 
-  <button class="nav-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu">
-    <span>Menu</span>
+  <div class="language-switcher nav-lang-mobile" data-language-switcher aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <span aria-hidden="true">/</span>
+    <button type="button" data-lang="ka" aria-pressed="false">KA</button>
+    <span aria-hidden="true">/</span>
+    <button type="button" data-lang="it" aria-pressed="false">IT</button>
+  </div>
+
+  <button class="nav-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
+    <span class="nav-toggle-bars" aria-hidden="true"></span>
   </button>
 </header>
 
 <div class="mobile-menu" id="mobileMenu" data-mobile-menu aria-hidden="true">
+  <button class="mobile-menu-close" type="button" data-menu-close aria-label="Close menu">&times;</button>
   <nav aria-label="Mobile">
     <a href="#digital-ad" style="--i:0" data-nav-label="digital">Digital Ad</a>
     <a href="#invitation" style="--i:1" data-nav-label="invitation">Invitation</a>
@@ -143,7 +152,7 @@
   <div class="reveal-hero" data-reveal-hero>
     <picture class="reveal-background" aria-hidden="true">
       <source media="(max-width: 800px)" srcset="assets/reveal/hero-02.jpg">
-      <img src="assets/reveal/hero-02.JPG" alt="">
+      <img src="assets/reveal/hero-01.jpg" alt="">
     </picture>
     <div class="reveal-atmosphere" aria-hidden="true"></div>
     <div class="reveal-shadow" aria-hidden="true"></div>
