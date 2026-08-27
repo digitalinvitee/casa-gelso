@@ -815,8 +815,13 @@
     const successEl =
       document.getElementById("rsvpSuccess");
 
+    /* FIX: the live markup's submit button is .response-submit —
+       .rsvp-submit belonged to an earlier RSVP layout that is no
+       longer in the DOM. With the old selector this returned null
+       and every submit crashed on submitBtn.classList.add(...),
+       so the RSVP could never actually complete. */
     const submitBtn =
-      rsvpForm.querySelector(".rsvp-submit");
+      rsvpForm.querySelector(".response-submit");
 
     const attendingOnlyFields =
       rsvpForm.querySelectorAll(
@@ -1115,7 +1120,7 @@
 
   /* ============================================================
      LANGUAGE SYSTEM
-     
+
      IMPORTANT:
      We DO NOT translate:
      - teaser
@@ -1123,7 +1128,7 @@
      - coming soon
      - digital ad
      - reveal hero
-     
+
      We ONLY translate:
      - Invitation
      - RSVP
@@ -1420,9 +1425,9 @@
 
   /* ============================================================
      APPLY LANGUAGE
-     
+
      ONLY INVITATION + RSVP ARE MODIFIED.
-     
+
      NOTHING ABOVE THIS POINT IS TOUCHED.
   ============================================================ */
 
@@ -1465,7 +1470,7 @@
        coming soon
        digital ad
        reveal
-       
+
        They stay in their original English HTML.
     ======================================================== */
 
@@ -1638,7 +1643,7 @@
 
     /* ========================================================
        FOOTER
-       
+
        Footer is kept in English conceptually, but the existing
        footer translation is retained here because it is outside
        the teaser / digital-ad copy.

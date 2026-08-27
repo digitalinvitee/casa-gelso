@@ -35,8 +35,7 @@
   <nav class="nav-links" aria-label="Primary">
     <a href="#digital-ad" data-nav-label="digital">Digital&nbsp;Ad</a>
     <a href="#invitation" data-nav-label="invitation">Invitation</a>
-    <a href="#rsvp" class="nav-links-rsvp" data-nav-label="rsvp">RSVP</a>
-  </nav>
+      </nav>
   <div class="site-controls" aria-label="Site controls">
     <div class="language-switcher" data-language-switcher>
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
@@ -59,7 +58,6 @@
   <nav aria-label="Mobile">
     <a href="#digital-ad" style="--i:0" data-nav-label="digital">Digital Ad</a>
     <a href="#invitation" style="--i:1" data-nav-label="invitation">Invitation</a>
-    <a href="#rsvp" style="--i:2" data-nav-label="rsvp">RSVP</a>
   </nav>
   <div class="mobile-controls">
     <div class="language-switcher" data-language-switcher>
@@ -256,167 +254,444 @@
 </section>
 
 <!-- ============================================================
-     INVITATION
+     INVITATION + RSVP
 ============================================================ -->
-<section id="invitation" class="invite" aria-labelledby="invite-heading" data-translatable-section="invitation">
-  <p class="chapter-mark chapter-mark--light" aria-hidden="true">02</p>
 
+<section
+  id="invitation"
+  class="invite invite--combined"
+  aria-labelledby="invite-heading"
+  data-translatable-section="invitation"
+>
+
+  <p class="chapter-mark chapter-mark--light" aria-hidden="true">
+    03 — INVITATION &amp; RSVP
+  </p>
+
+
+  <!-- LEFT / IMAGE -->
   <div class="invite-media">
-    <img src="assets/reveal/5.JPG" alt="A Casa Gelso campaign portrait in black, worn for the opening invitation.">
+
+    <img
+      src="assets/reveal/5.JPG"
+      alt="Casa Gelso campaign portrait"
+    >
+
   </div>
 
-  <div class="invite-panel">
-    <div class="invite-card">
-      <img class="invite-card-mark reveal-up" src="assets/logo/monogram-wine.png" alt="" width="72" height="72">
-      <p class="eyebrow reveal-up">Private opening · Tbilisi</p>
 
-      <h2 id="invite-heading" class="display-lg mask-lines">
-        <span class="mask"><span class="mask-in mask-in--italic">You are invited.</span></span>
+  <!-- RIGHT / INVITATION + RSVP -->
+  <div class="invite-panel">
+
+    <div class="invite-card">
+
+
+      <!-- MONOGRAM -->
+      <img
+        class="invite-card-mark reveal-up"
+        src="assets/logo/monogram-wine.png"
+        alt=""
+        width="72"
+        height="72"
+      >
+
+
+      <!-- INVITATION -->
+      <p
+        class="eyebrow reveal-up"
+        data-i18n="invite.eyebrow"
+      >
+        Private opening · Tbilisi
+      </p>
+
+
+      <h2
+        id="invite-heading"
+        class="display-lg mask-lines"
+      >
+        <span class="mask">
+          <span
+            class="mask-in mask-in--italic"
+            data-i18n="invite.title"
+          >
+            You are invited.
+          </span>
+        </span>
       </h2>
 
-      <div class="invite-rule reveal-up" data-rule-draw></div>
 
-      <p class="invite-lede reveal-up">Join us for the opening of Casa Gelso — an evening dedicated to the pieces, and the people, that make style personal.</p>
+      <div
+        class="invite-rule reveal-up"
+        data-rule-draw
+      ></div>
 
+
+      <p
+        class="invite-lede reveal-up"
+        data-i18n="invite.lede"
+      >
+        Join us for the opening of Casa Gelso —
+        an evening dedicated to the pieces,
+        and the people, that make style personal.
+      </p>
+
+
+      <!-- DATE / TIME / PLACE -->
       <dl class="invite-meta reveal-up">
-        <div><dt>Date</dt><dd>13 September 2026</dd></div>
-        <div><dt>Time</dt><dd>19:00</dd></div>
-        <div><dt>Place</dt><dd>Tbilisi, Georgia</dd></div>
+
+        <div>
+          <dt data-i18n="invite.dateLabel">Date</dt>
+          <dd data-i18n="invite.date">
+            13 September 2026
+          </dd>
+        </div>
+
+        <div>
+          <dt data-i18n="invite.timeLabel">Time</dt>
+          <dd data-i18n="invite.time">
+            19:00
+          </dd>
+        </div>
+
+        <div>
+          <dt data-i18n="invite.placeLabel">Place</dt>
+          <dd data-i18n="invite.place">
+            Tbilisi, Georgia
+          </dd>
+        </div>
+
       </dl>
 
-      <div class="invite-countdown reveal-up" data-countdown aria-label="Time remaining until the opening">
-        <div><strong data-cd="d">00</strong><span>Days</span></div>
-        <div><strong data-cd="h">00</strong><span>Hrs</span></div>
-        <div><strong data-cd="m">00</strong><span>Min</span></div>
-        <div><strong data-cd="s">00</strong><span>Sec</span></div>
-      </div>
 
-      <button class="btn btn--outline reveal-up" type="button" data-open-invite aria-expanded="false" aria-controls="inviteMore">
-        Open the invitation
-      </button>
+      <!-- ========================================================
+           RSVP
+      ========================================================= -->
 
-      <div class="invite-more" id="inviteMore" data-invite-more>
-        <p class="invite-quote">"Come discover a new luxury destination, curated with the spirit of Italy — accessible refinement, curated individuality, quiet confidence."</p>
+      <div
+        class="response-experience reveal-up"
+        data-response-experience
+      >
 
-        <div class="invite-calendar">
-          <span>Add to calendar</span>
-          <a data-cal-google href="#" target="_blank" rel="noopener">Google</a>
-          <a data-cal-ics href="#" download="casa-gelso-opening.ics">Apple / Outlook</a>
+        <div class="response-intro">
+
+          <span class="response-index">
+            03
+          </span>
+
+          <p
+            class="response-kicker"
+            data-i18n="response.kicker"
+          >
+            RSVP
+          </p>
+
+          <p class="response-subtitle">
+            Kindly confirm your attendance.
+          </p>
+
         </div>
 
-        <a class="btn btn--solid invite-rsvp-cta" href="#rsvp">RSVP to the opening</a>
+
+        <form
+          class="rsvp-form rsvp-form--editorial"
+          id="rsvpForm"
+          novalidate
+        >
+
+          <p
+            class="rsvp-form-status"
+            id="rsvpFormStatus"
+            role="alert"
+            aria-live="assertive"
+          ></p>
+
+
+          <!-- NAME -->
+          <div class="editorial-field">
+
+            <label
+              for="rsvpName"
+              data-i18n="response.name"
+            >
+              Name &amp; surname
+            </label>
+
+            <input
+              type="text"
+              id="rsvpName"
+              name="name"
+              autocomplete="name"
+              required
+            >
+
+            <span
+              class="field-error"
+              data-error-for="name"
+            ></span>
+
+          </div>
+
+
+          <!-- ATTENDANCE -->
+          <fieldset
+            class="editorial-field editorial-choice"
+          >
+
+            <legend data-i18n="response.attending">
+              Will you be joining us?
+            </legend>
+
+            <div class="editorial-options">
+
+              <label>
+
+                <input
+                  type="radio"
+                  name="attending"
+                  value="yes"
+                  required
+                >
+
+                <span data-i18n="response.yes">
+                  Yes, I'll be there
+                </span>
+
+              </label>
+
+
+              <label>
+
+                <input
+                  type="radio"
+                  name="attending"
+                  value="no"
+                >
+
+                <span data-i18n="response.no">
+                  I won't be able to make it
+                </span>
+
+              </label>
+
+            </div>
+
+            <span
+              class="field-error"
+              data-error-for="attending"
+            ></span>
+
+          </fieldset>
+
+
+          <!-- TOP 3 -->
+          <div
+            class="editorial-field editorial-designers"
+          >
+
+            <label data-i18n="response.designers">
+              Top 3 designer / fashion house
+            </label>
+
+
+            <div class="top-three">
+
+              <div>
+
+                <span>01.</span>
+
+                <input
+                  type="text"
+                  id="rsvpDesigner1"
+                  name="designer1"
+                  aria-label="Favourite designer one"
+                >
+
+              </div>
+
+
+              <div>
+
+                <span>02.</span>
+
+                <input
+                  type="text"
+                  id="rsvpDesigner2"
+                  name="designer2"
+                  aria-label="Favourite designer two"
+                >
+
+              </div>
+
+
+              <div>
+
+                <span>03.</span>
+
+                <input
+                  type="text"
+                  id="rsvpDesigner3"
+                  name="designer3"
+                  aria-label="Favourite designer three"
+                >
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- DIVIDER BEFORE WISHES -->
+          <div class="rsvp-divider"></div>
+
+
+          <!-- ====================================================
+               ONE LAST THING
+          ===================================================== -->
+
+          <div
+            class="wish-step"
+            id="wishStep"
+          >
+
+            <p
+              class="wish-kicker"
+              data-i18n="wish.kicker"
+            >
+              One last thing
+            </p>
+
+
+            <h3
+              class="wish-title"
+              data-i18n="wish.title"
+            >
+              What do you wish for Casa Gelso?
+            </h3>
+
+
+            <label
+              class="sr-only"
+              for="casaWish"
+              data-i18n="wish.label"
+            >
+              Your wish for Casa Gelso
+            </label>
+
+
+            <form
+              class="wish-form"
+              id="wishForm"
+            >
+
+              <textarea
+                id="casaWish"
+                name="wish"
+                rows="2"
+                placeholder=""
+                data-i18n-placeholder="wish.placeholder"
+              ></textarea>
+
+
+              <button
+                class="response-submit"
+                type="submit"
+              >
+
+                <span
+                  class="btn-label"
+                  data-i18n="wish.send"
+                >
+                  Submit
+                </span>
+
+                <span
+                  class="btn-arrow"
+                  aria-hidden="true"
+                >
+                  ⟶
+                </span>
+
+                <span
+                  class="btn-spinner"
+                  aria-hidden="true"
+                ></span>
+
+              </button>
+
+            </form>
+
+          </div>
+
+
+          <!-- SUCCESS -->
+          <div
+            class="response-success"
+            id="rsvpSuccess"
+            hidden
+            tabindex="-1"
+          >
+
+            <img
+              src="assets/logo/monogram-wine.png"
+              alt=""
+              width="56"
+              height="56"
+            >
+
+            <p
+              class="response-success-eyebrow"
+              data-success-eyebrow
+            >
+              Thank you.
+            </p>
+
+            <h3
+              class="response-success-title"
+              data-i18n="success.title"
+            >
+              See you at Casa Gelso.
+            </h3>
+
+            <p
+              class="response-success-note"
+              data-success-note
+            >
+              We look forward to welcoming you.
+            </p>
+
+            <button
+              class="text-link"
+              type="button"
+              data-rsvp-again
+              data-i18n="success.again"
+            >
+              Submit another response
+            </button>
+
+          </div>
+
+        </form>
+
       </div>
+
     </div>
+
   </div>
 
+
+  <!-- FOOTLINE -->
   <p class="invite-footline">
+
     <span>Casa Gelso</span>
-    <span>Tbilisi · 13 / 09 / 2026</span>
+
+    <span>
+      Tbilisi · 13 / 09 / 2026
+    </span>
+
   </p>
+
 </section>
-
-<!-- ============================================================
-     RSVP
-============================================================ -->
-<section id="rsvp" class="rsvp" aria-labelledby="rsvp-heading" data-translatable-section="rsvp">
-  <p class="chapter-mark" aria-hidden="true">03</p>
-
-  <div class="section-intro">
-    <h2 id="rsvp-heading" class="display-xl mask-lines">
-      <span class="mask"><span class="mask-in">Reserve</span></span>
-      <span class="mask"><span class="mask-in mask-in--italic">your place.</span></span>
-    
-
-  <div class="rsvp-panel reveal-up">
-
-    <!-- FORM STATE -->
-    <form class="rsvp-form" id="rsvpForm" novalidate>
-      <p class="rsvp-form-status" id="rsvpFormStatus" role="alert" aria-live="assertive"></p>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="rsvpName">Full name</label>
-          <input type="text" id="rsvpName" name="name" autocomplete="name" required>
-          <span class="field-error" data-error-for="name"></span>
-        </div>
-        <div class="field">
-          <label for="rsvpEmail">Email</label>
-          <input type="email" id="rsvpEmail" name="email" autocomplete="email" required>
-          <span class="field-error" data-error-for="email"></span>
-        </div>
-      </div>
-
-      <fieldset class="field field--fieldset">
-        <legend>Will you be attending?</legend>
-        <div class="pill-group">
-          <label class="pill">
-            <input type="radio" name="attending" value="yes" required>
-            <span>Yes, I'll be there</span>
-          </label>
-          <label class="pill">
-            <input type="radio" name="attending" value="no">
-            <span>Can't make it</span>
-          </label>
-        </div>
-        <span class="field-error" data-error-for="attending"></span>
-      </fieldset>
-
-      <div class="field-row rsvp-attending-only" data-attending-only>
-        <div class="field">
-          <label for="rsvpGuests">Guests, including yourself</label>
-          <select id="rsvpGuests" name="guests">
-            <option value="1">Just me</option>
-            <option value="2">2 guests</option>
-            <option value="3">3 guests</option>
-            <option value="4">4 guests</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="rsvpGuestNames">Guest name(s)</label>
-          <input type="text" id="rsvpGuestNames" name="guestNames" placeholder="Optional">
-        </div>
-      </div>
-
-      <div class="field rsvp-attending-only" data-attending-only>
-        <label for="rsvpDietary">Dietary requirements</label>
-        <input type="text" id="rsvpDietary" name="dietary" placeholder="Optional — allergies, preferences">
-      </div>
-
-      <div class="field">
-        <label for="rsvpDesigners">Which house are you most excited to see? Name your top three.</label>
-        <input type="text" id="rsvpDesigners" name="designers" placeholder="e.g. Tom Ford, Bottega Veneta, Ferragamo">
-      </div>
-
-      <div class="field">
-        <label for="rsvpMessage">Anything else we should know?</label>
-        <textarea id="rsvpMessage" name="message" rows="3" placeholder="Optional"></textarea>
-      </div>
-
-      <button class="btn btn--solid rsvp-submit" type="submit">
-        <span class="btn-label">Confirm RSVP</span>
-        <span class="btn-spinner" aria-hidden="true"></span>
-      </button>
-    </form>
-
-    <!-- SUCCESS STATE -->
-    <div class="rsvp-success" id="rsvpSuccess" hidden tabindex="-1">
-      <img class="rsvp-success-mark" src="assets/logo/monogram-wine.png" alt="" width="56" height="56">
-      <p class="rsvp-success-eyebrow" data-success-eyebrow>Your place is reserved</p>
-      <h3 class="display-lg">Casa Gelso</h3>
-      <p class="rsvp-success-meta">Tbilisi · 13 September 2026</p>
-      <p class="rsvp-success-note" data-success-note>We look forward to welcoming you on the evening.</p>
-      <div class="invite-calendar rsvp-success-calendar">
-        <span>Add to calendar</span>
-        <a data-cal-google-success href="#" target="_blank" rel="noopener">Google</a>
-        <a data-cal-ics-success href="#" download="casa-gelso-opening.ics">Apple / Outlook</a>
-      </div>
-      <button class="text-link" type="button" data-rsvp-again>Submit another response</button>
-    </div>
-
-  </div>
-</section>
-
-</main>
 
 <!-- ============================================================
      FOOTER
