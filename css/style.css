@@ -162,6 +162,13 @@ button{
   border: 0;
 }
 
+fieldset{
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 img{
   display: block;
   max-width: 100%;
@@ -278,7 +285,6 @@ figure{
 .editorial-field > label,
 .editorial-field > legend,
 .editorial-options span,
-.top-three span,
 .wish-kicker,
 .response-success-eyebrow{
   font-family: var(--sans);
@@ -1499,21 +1505,10 @@ body.lang-ka .display-md{
 
   overflow: hidden;
 
-  background: var(--ivory);
+  /* The invitation + RSVP now sit on a wine backdrop, as one sheet
+     of paper laid on the table — see .invite-card below. */
+  background: var(--wine);
   color: var(--wine);
-}
-
-.invite::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: .035;
-  mix-blend-mode: multiply;
-
-  background-image:
-    url("https://i.pinimg.com/originals/33/5b/69/335b6956f37ac4126fbfc3d18c0bc8a0.png");
 }
 
 /* Superseded by the full-bleed single-column layout above (see
@@ -1527,14 +1522,15 @@ body.lang-ka .display-md{
 
   position: absolute;
   top: 50%;
-  right: 27px;
+  right: max(18px, calc((100% - min(1120px, 94vw)) / 2 + 8px));
   z-index: 5;
 
   transform: translateY(-50%) rotate(90deg);
   transform-origin: center;
   white-space: nowrap;
 
-  color: var(--wine);
+  color: var(--cream);
+  opacity: .5;
   font-weight: 600;
   letter-spacing: .29em;
 }
@@ -1556,19 +1552,71 @@ body.lang-ka .display-md{
 
 .invite-card{
   position: relative;
+  z-index: 1;
+
   width: 100%;
+  max-width: min(1120px, 94vw);
   min-height: 100svh;
 
-  padding: 72px clamp(70px, 7vw, 110px) 100px;
+  /* top/bottom margin reserves room for the torn-edge bands (see
+     ::before/::after below) so .invite's overflow:hidden doesn't
+     clip them — keep this equal to their height at every breakpoint */
+  margin: 96px auto;
+
+  padding: 96px clamp(70px, 7vw, 110px) 128px;
 
   text-align: left;
+  color: var(--wine);
+
+  /* The paper itself: a torn/deckled sheet — same wine and ivory
+     tones as the rest of the palette, just given real fibre. */
+  /* A translucent ivory-warm wash over the grain keeps the fibre
+     subtle — a full-strength blend read as an obvious tiled pattern. */
+  background-color: var(--ivory-warm);
+  background-image:
+    linear-gradient(rgba(234,225,214,.86), rgba(234,225,214,.86)),
+    url("../assets/textures/paper-tile.jpg");
+  background-repeat: no-repeat, repeat;
+  background-size: cover, 420px 420px;
+
+  box-shadow: 0 50px 110px rgba(15,4,6,.4);
+}
+
+.invite-card::before,
+.invite-card::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+
+  height: 96px;
+
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+
+  pointer-events: none;
+}
+
+.invite-card::before{
+  top: 0;
+  transform: translateY(-100%);
+  background-image: url("../assets/textures/paper-edge-top.jpg");
+}
+
+.invite-card::after{
+  bottom: 0;
+  transform: translateY(100%);
+  background-image: url("../assets/textures/paper-edge-bottom.jpg");
 }
 
 .invite .chapter-mark{
-  top: 73px;
-  left: clamp(75px, 7vw, 110px);
+  /* Anchored to the paper card's own left edge (same centering math
+     as .invite-card) plus a small inset, so it always floats in the
+     wine margin above the paper instead of drifting onto it. */
+  top: 28px;
+  left: max(18px, calc((100% - min(1120px, 94vw)) / 2 + 8px));
   z-index: 5;
-  opacity: .82;
 }
 
 .invite-card-mark{
@@ -1821,49 +1869,9 @@ body.lang-ka .display-md{
 }
 
 
-/* ------------------------------------------------------------
-   Top three designers
------------------------------------------------------------- */
-
-.top-three{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  width: 100%;
-}
-
-.top-three > div{
-  display: grid;
-  grid-template-columns: 45px 1fr;
-  align-items: end;
-  min-width: 0;
-
-  border-bottom: 1px solid rgba(79,24,31,.38);
-}
-
-.top-three span{
-  padding-bottom: 10px;
-  color: var(--wine);
-  font-family: var(--sans);
-  font-size: var(--type-label);
-  line-height: 1;
-  letter-spacing: .08em;
-}
-
-.top-three input{
-  width: 100%;
-  height: 35px;
-  padding: 5px 0 9px;
-
-  border: 0;
-  outline: none;
-  background: transparent;
-
-  color: var(--wine);
-  font-family: var(--sans);
-  font-size: var(--type-label);
-  font-weight: 400;
-}
+/* Top 3 designer field now reuses the single-line
+   .editorial-field input[type="text"] treatment (see Fields
+   above) — the old 3-input grid and its rules are removed. */
 
 /* .rsvp-divider is intentionally unstyled — matches current build */
 
@@ -1889,41 +1897,51 @@ body.lang-ka .display-md{
 }
 
 .wish-title{
-  margin: 0 0 20px;
-  color: var(--burgundy);
+  margin: 0 0 22px;
+  color: var(--wine);
 
   font-family: var(--display);
-  font-size: var(--type-small);
-  font-style: italic;
-  line-height: 1.3;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.1;
 }
 
-.wish-form{
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
+/* NOTE: the markup nests a <form class="wish-form"> inside the
+   outer #rsvpForm. The HTML parser drops a <form> start tag while
+   another is already open, so .wish-form never exists as a real
+   element — its children (textarea + submit button) land directly
+   inside .wish-step. Scoping to .wish-step (not .wish-form) below
+   is what actually reaches them; left as-is since app.js already
+   relies on this same flattening (one #rsvpForm, one submit). */
 
-.wish-form textarea{
+.wish-step textarea{
+  display: block;
   width: 100%;
-  min-height: 65px;
-  padding: 9px 0;
+  min-height: 92px;
+  margin: 0 0 25px;
+  padding: 16px 18px;
 
   resize: none;
 
-  border: 0;
-  border-top: 1px solid rgba(79,24,31,.34);
-  border-bottom: 1px solid rgba(79,24,31,.34);
+  border: 1px solid rgba(79,24,31,.34);
   outline: none;
-  background: transparent;
+  background: rgba(79,24,31,.045);
 
   color: var(--wine);
   font-family: var(--display);
   font-size: var(--type-small);
   line-height: 1.5;
+
+  transition: border-color .3s, background-color .3s;
 }
 
-.wish-form textarea::placeholder{
+.wish-step textarea:focus{
+  border-color: var(--wine);
+  background: rgba(79,24,31,.075);
+}
+
+.wish-step textarea::placeholder{
   color: var(--burgundy);
   opacity: .45;
 }
@@ -1952,13 +1970,10 @@ body.lang-ka .display-md{
 }
 
 .response-submit .btn-arrow{
-  margin-left: 25px;
-  font-family: var(--sans);
-  font-size: 1.4375rem;
-  font-weight: 300;
-  line-height: .5;
-
-  transition: transform .3s ease;
+  /* arrow removed per request — kept in the DOM/JS hooks, just
+     not rendered, so the hover/loading-state JS below stays inert
+     rather than needing changes. */
+  display: none;
 }
 
 .response-submit:hover .btn-arrow{
@@ -2238,7 +2253,16 @@ body.lang-ka .display-md{
   .ad-copy--e{   left: 18px; top: 2180px; max-width: calc(54% - 34px); }
 
   /* invitation */
-  .invite-card{ padding: 72px 27px 65px; }
+  .invite-card{
+    max-width: calc(100% - 20px);
+    margin: 48px auto;
+    padding: 72px 27px 65px;
+  }
+
+  .invite-card::before,
+  .invite-card::after{
+    height: 48px;
+  }
 
   .invite .chapter-mark{ top: 25px; left: 27px; font-size: .4375rem; letter-spacing: .19em; }
 
@@ -2277,12 +2301,6 @@ body.lang-ka .display-md{
   .editorial-options{ gap: 17px; }
   .editorial-options span{ font-size: .4375rem; letter-spacing: .07em; }
 
-  .top-three{ grid-template-columns: 1fr; gap: 0; }
-  .top-three > div{ height: 38px; grid-template-columns: 35px 1fr; }
-  .top-three input{ height: 38px; }
-
-  .wish-title{ font-size: .875rem; }
-
   /* footer */
   .site-footer{ padding: 10vh 18px 5vh; }
 }
@@ -2319,10 +2337,29 @@ body.lang-ka .display-md{
   .ad-copy h3{ font-size: 22px; }
   .ad-copy p{ font-size: 9px; }
 
-  .invite-card{ padding: 65px 21px 55px; }
-  #invite-heading{ font-size: 51px; }
-  .invite-lede{ font-size: 12px; }
+  .invite-card{ max-width: calc(100% - 12px); margin: 28px auto; padding: 56px 21px 46px; }
+  .invite-card::before,
+  .invite-card::after{ height: 34px; }
+
+  /* Shrunk from the ≤800px block's 51px so "You are invited." (the
+     text is uppercased via text-transform) reads on one line down
+     to a 320px-wide phone instead of wrapping to two — also lets
+     us pull in the generous top/bottom margins around it, which
+     were sized for the two-line wrap. */
+  #invite-heading{
+    margin: 46px 0 20px;
+    font-size: clamp(28px, 9vw, 38px);
+    letter-spacing: -.03em;
+  }
+
+  .invite-rule{ margin-bottom: 20px; }
+
+  .invite-lede{ margin-bottom: 26px; font-size: 12px; }
+
   .invite-meta dd{ font-size: .4375rem; }
+
+  .response-experience{ margin-top: 32px; padding-top: 24px; }
+  .rsvp-form--editorial{ gap: 22px; }
 }
 
 
