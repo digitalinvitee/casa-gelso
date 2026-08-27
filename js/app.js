@@ -1845,28 +1845,49 @@
     );
   });
 
-  /* Music should only ever start once the teaser has finished, not
-     on the first tap/click/key while it's still playing — but a
-     browser will only allow unmuted audio to start from within a
-     real user gesture, and the opener can finish with no gesture
-     having happened yet (it plays on its own). So we track both
-     conditions independently and only call startSound() once both
-     are true — whichever of the two finishes second is what
-     actually triggers playback. */
+  /* Music should only start once the teaser has finished — but
+     mobile browsers (iOS Safari especially, and Chrome on Android)
+     only allow audio.play() to succeed when it's called
+     SYNCHRONOUSLY inside a real user-gesture event handler. If we
+     wait for the gesture to happen, then wait AGAIN for the opener
+     to finish before calling play(), that second call happens
+     outside the gesture's call stack and mobile browsers silently
+     refuse it — which is why this worked in quick desktop testing
+     (Chrome desktop is more lenient) but not on a phone.
+
+     The fix: call play() synchronously on the very first gesture,
+     no matter when it happens — this "unlocks" the audio element.
+     If the teaser isn't done yet, immediately pause it again in
+     the same tick, before any sound is audible. Once unlocked, a
+     later play() call (e.g. once the teaser actually finishes)
+     is allowed to succeed without needing a fresh gesture. */
   let openerHasFinished = document.body.classList.contains(
     "opener-revealed"
   );
-  let userHasGestured = false;
+  let audioUnlocked = false;
 
-  function maybeAutoStartSound() {
-    if (
-      openerHasFinished &&
-      userHasGestured &&
-      audio &&
-      audioAvailable &&
-      audio.paused
-    ) {
-      startSound().then(syncSoundUI);
+  function primeAudio() {
+    if (!audio || audioUnlocked) return;
+
+    audioUnlocked = true;
+    audio.muted = false;
+
+    const playPromise = audio.play();
+
+    if (!openerHasFinished) {
+      audio.pause();
+    }
+
+    if (playPromise && playPromise.catch) {
+      playPromise
+        .then(() => {
+          if (openerHasFinished) syncSoundUI();
+        })
+        .catch(() => {
+          /* Autoplay refused even with a gesture (rare) — leave
+             muted; the manual sound-toggle buttons still work. */
+          audio.muted = true;
+        });
     }
   }
 
@@ -1874,7 +1895,13 @@
     "casa:opener-finished",
     () => {
       openerHasFinished = true;
-      maybeAutoStartSound();
+
+      if (audioUnlocked && audio && audio.paused) {
+        audio
+          .play()
+          .then(syncSoundUI)
+          .catch(() => {});
+      }
     },
     { once: true }
   );
@@ -1886,10 +1913,7 @@
   ].forEach((eventName) => {
     window.addEventListener(
       eventName,
-      () => {
-        userHasGestured = true;
-        maybeAutoStartSound();
-      },
+      primeAudio,
       {
         once: true,
         passive: true
