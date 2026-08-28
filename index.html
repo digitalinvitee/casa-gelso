@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#4F181F">
 <title>Casa Gelso — Opening in Tbilisi, 12 September 2026</title>
-<meta name="description" content="Casa Gelso — a new luxury fashion destination opening in Tbilisi on 13 September 2026. Accessible refinement. Curated individuality. Quiet confidence.">
+<meta name="description" content="Casa Gelso — a new luxury fashion destination opening in Tbilisi on 12 September 2026. Accessible refinement. Curated individuality. Quiet confidence.">
 
 <!-- TODO: replace with the live production domain before launch —
      canonical + og:url + og:image must be absolute URLs for link
@@ -43,8 +43,8 @@
   "@context": "https://schema.org",
   "@type": "Event",
   "name": "Casa Gelso — Opening",
-  "startDate": "2026-09-13T19:00:00+04:00",
-  "endDate": "2026-09-13T22:00:00+04:00",
+  "startDate": "2026-09-12T19:00:00+04:00",
+  "endDate": "2026-09-12T22:00:00+04:00",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "location": {
@@ -52,6 +52,7 @@
     "name": "Casa Gelso",
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "Kostava St 67",
       "addressLocality": "Tbilisi",
       "addressCountry": "GE"
     }
@@ -127,7 +128,7 @@
   </div>
   <div class="mobile-menu-foot">
     <span>Tbilisi</span>
-    <span>13 / 09 / 2026</span>
+    <span>12 / 09 / 2026</span>
   </div>
 </div>
 
@@ -181,7 +182,7 @@
     </figure>
   </div>
 
-  <!-- Beat 6 — 13.09 / Coming Soon: analog broken-TV signal -->
+  <!-- Beat 6 — 12.09 / Coming Soon: analog broken-TV signal -->
   <div class="coming-soon" data-coming-soon aria-hidden="true">
     <div class="signal-noise" aria-hidden="true"></div>
     <div class="signal-scanlines" aria-hidden="true"></div>
@@ -189,7 +190,7 @@
     <div class="signal-slice signal-slice--b" aria-hidden="true"></div>
     <div class="coming-soon-content">
       <p class="coming-soon-eyebrow">Casa Gelso</p>
-      <div class="coming-soon-date">13.09</div>
+      <div class="coming-soon-date">12.09</div>
       <h2 class="coming-soon-title">Coming Soon</h2>
       <p class="coming-soon-place">Tbilisi · MMXXVI</p>
 
@@ -258,7 +259,7 @@
       <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <span class="ad-curtain-word">Casa Gelso</span>
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--b reveal-up">
@@ -290,7 +291,7 @@
       <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <span class="ad-curtain-word">Casa Gelso</span>
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--d reveal-up">
@@ -316,8 +317,8 @@
   <div class="section-outro">
     <p class="eyebrow reveal-up">Casa Gelso · Tbilisi</p>
     <h2 class="display-lg mask-lines">
-      <span class="mask"><span class="mask-in">See the collection,</span></span>
-      <span class="mask"><span class="mask-in mask-in--italic">in real life.</span></span>
+      <span class="mask"><span class="mask-in">See the collection, in real life</span></span>
+      
     </h2>
     <p class="lede reveal-up">12 September 2026</p>
     <a class="text-link reveal-up" href="#invitation">Continue to the invitation <span aria-hidden="true"></span></a>
@@ -387,12 +388,6 @@
       </h2>
 
 
-      <div
-        class="invite-rule reveal-up"
-        data-rule-draw
-      ></div>
-
-
       <p
         class="invite-lede reveal-up"
         data-i18n="invite.lede"
@@ -422,15 +417,30 @@
 
         <div>
           <dt data-i18n="invite.placeLabel">Place</dt>
-          <dd data-i18n="invite.place">
-            Tbilisi, Georgia
+          <dd>
+            <a
+              class="invite-cta"
+              href="https://www.google.com/maps/search/?api=1&query=Kostava+St+67%2C+Tbilisi%2C+Georgia"
+              target="_blank"
+              rel="noopener"
+              data-tooltip="Click to see location in Google Maps"
+              data-i18n-tooltip="invite.placeTooltip"
+            ><span data-i18n="invite.place">Kostava St 67, Tbilisi</span></a>
           </dd>
         </div>
 
       </dl>
 
       <div class="invite-calendar-links reveal-up">
-        <a class="text-link" data-cal-google href="#" target="_blank" rel="noopener"><span data-i18n="invite.calendar">Add to calendar</span></a>
+        <a
+          class="invite-cta"
+          data-cal-google
+          href="#"
+          target="_blank"
+          rel="noopener"
+          data-tooltip="Click to save in calendar"
+          data-i18n-tooltip="invite.calendarTooltip"
+        ><span data-i18n="invite.calendar">Add to calendar</span></a>
       </div>
 
 
@@ -748,7 +758,6 @@
   <div class="site-footer-top">
     <img src="assets/logo/monogram-wine.png" alt="" width="46" height="46">
     <p class="display-md">Casa Gelso</p>
-    <p class="site-footer-tag" data-i18n="footer.tag">Accessible refinement. Curated individuality. Quiet confidence.</p>
   </div>
 
 
@@ -759,8 +768,10 @@
     <a href="#top" data-i18n="footer.back">Back to top ↑</a>
   </div>
 
-  <p class="site-footer-fine">© 2026 Casa Gelso. All rights reserved.</p>
-</footer>
+<p class="site-footer-fine">© 2026 Casa Gelso. All rights reserved.</p>
+<p class="site-footer-credit">
+  Created by <a href="https://invitee.ge/" target="_blank" rel="noopener noreferrer">INVITÉ</a>
+</p>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>

@@ -292,6 +292,7 @@ figure{
 .reveal-languages,
 .ad-copy-index,
 .invite-meta dd,
+.invite-cta,
 .mobile-menu-foot,
 .site-footer-links a,
 .site-footer-meta,
@@ -380,11 +381,19 @@ body.lang-ka .mobile-menu{
   letter-spacing: -.035em;
 }
 
+/* line-height: .86/.88/.92 on the Latin rules above were tuned for
+   Fraunces set in caps (text-transform:uppercase strips descenders
+   from Latin, so a sub-1 line-box is safe). Mkhedruli has no
+   upper/lowercase split, so Georgian headlines keep real descenders
+   (ხ ფ ყ ჯ ღ წ ჭ) — the tight Latin value was clipping their lower
+   strokes, which is compounded by the .mask-lines overflow:hidden
+   wrapper below. Relaxed to a value with room for them. */
 body.lang-ka .display-xl,
 body.lang-ka .display-lg,
 body.lang-ka .display-md{
   font-family: var(--geo-display);
   letter-spacing: -.02em;
+  line-height: 1.05;
 }
 
 
@@ -417,6 +426,18 @@ body.lang-ka .display-md{
 body.lang-ka .mask-in--italic{
   font-style: normal;
   -webkit-text-stroke: .4px currentColor;
+}
+
+/* .mask{overflow:hidden; padding-bottom:.08em} above was sized for
+   Latin display type, whose descenders are shallow (or absent,
+   under text-transform:uppercase). Georgian headlines sit inside
+   this same mask for the scroll-reveal, and their real descenders
+   were getting sheared off by the overflow — this is the "lower
+   part of the letters looks hidden" cut visible on several
+   headings in the Georgian version. Extra bottom padding here only
+   applies in lang-ka, so the Latin reveal is untouched. */
+body.lang-ka .mask-lines .mask{
+  padding-bottom: .26em;
 }
 
 .reveal-up{
@@ -850,6 +871,18 @@ body.lang-ka .mask-in--italic{
   transition-delay: calc(var(--i) * .06s);
 }
 
+/* Nothing swapped the font here for Georgian, so lang-ka menu items
+   were falling through var(--display) (Fraunces, no Georgian
+   glyphs) to whatever serif the browser substitutes per-glyph —
+   an unpredictable font whose descent this .88 line-height wasn't
+   tuned for, clipping the lower strokes of letters like ხ/ფ/ყ/ჯ.
+   Same fix pattern as .display-xl/lg/md: real Georgian face, and
+   room in the line box for its descenders. */
+body.lang-ka .mobile-menu a{
+  font-family: var(--geo-display);
+  line-height: 1.05;
+}
+
 .mobile-menu.is-open a{
   opacity: 1;
   transform: none;
@@ -1022,6 +1055,15 @@ body.lang-ka .mask-in--italic{
 
   font-kerning: normal;
   text-rendering: geometricPrecision;
+}
+
+/* Same Georgian-descender fix as .display-xl/lg/md: swap to the
+   Georgian-capable face and give the line box room, instead of the
+   Fraunces line-height (.9) clipping the lower strokes of letters
+   that fall back to an unpredictable serif for Georgian glyphs. */
+body.lang-ka .frame-title{
+  font-family: var(--geo-display);
+  line-height: 1.1;
 }
 
 .frame-title::before{
@@ -1492,6 +1534,14 @@ body.lang-ka .mask-in--italic{
   text-rendering: geometricPrecision;
 }
 
+/* Same Georgian-descender fix as .display-xl/lg/md and .frame-title
+   — real Georgian face plus a line box sized for its descenders,
+   instead of the Fraunces-tuned .9 line-height clipping them. */
+body.lang-ka .ad-copy h3{
+  font-family: var(--geo-display);
+  line-height: 1.1;
+}
+
 .ad-copy p{
   font-family: var(--sans);
   font-weight: 300;
@@ -1822,7 +1872,7 @@ body.lang-ka .mask-in--italic{
 
 #invite-heading{
   width: min(650px, 70vw);
-  margin: 105px 0 48px;
+  margin: 105px 0 64px;
 
   color: var(--wine);
 
@@ -1853,22 +1903,21 @@ body.lang-ka #invite-heading{
   letter-spacing: -.01em;
 }
 
-.invite-rule{
-  width: 34px;
-  height: 2px;
-  margin: 0 0 43px;
-  background: var(--wine);
-}
-
+/* Sans (matching the site's general .lede), not the display serif —
+   the invitation's one display moment is the heading above; every
+   other line in this section, body copy included, shares the same
+   DM Sans voice. */
 .invite-lede{
   width: min(430px, 45vw);
   margin: 0 0 46px;
 
   color: var(--wine);
 
-  font-family: var(--display);
+  font-family: var(--sans);
+  font-weight: 300;
   font-size: var(--type-small);
-  line-height: 1.55;
+  line-height: 1.65;
+  letter-spacing: .008em;
 }
 
 
@@ -1909,7 +1958,28 @@ body.lang-ka #invite-heading{
 }
 
 /* ------------------------------------------------------------
-   Calendar links
+   Invite CTAs — Location (opens Google Maps) and Add to calendar.
+   Both are metadata-weight links: same family/size/tracking as the
+   date/time/place text above them (no separate "button" treatment,
+   no permanent underline) so the block reads as one continuous
+   line of facts. A small branded tooltip on hover/focus carries the
+   affordance instead of a static rule under the text. */
+.invite-cta{
+  display: inline-block;
+  color: var(--wine);
+  font-size: var(--type-label);
+  letter-spacing: .2em;
+  opacity: .82;
+  transition: opacity .3s;
+}
+
+.invite-cta:hover,
+.invite-cta:focus-visible{
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------
+   Calendar link
 ------------------------------------------------------------ */
 
 .invite-calendar-links{
@@ -1918,8 +1988,69 @@ body.lang-ka #invite-heading{
   margin: 22px 0 0;
 }
 
-.invite-calendar-links .text-link{
-  font-size: var(--type-micro);
+/* ------------------------------------------------------------
+   Tooltip — reused by any [data-tooltip] element; currently the
+   two invite CTAs above. Pure CSS, no JS beyond app.js swapping
+   the data-tooltip text per language (see data-i18n-tooltip).
+------------------------------------------------------------ */
+
+[data-tooltip]{
+  position: relative;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after{
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+}
+
+[data-tooltip]::after{
+  content: attr(data-tooltip);
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 11px);
+
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+
+  padding: 7px 13px;
+
+  background: var(--wine);
+  color: var(--cream);
+
+  font-family: var(--sans);
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: none;
+}
+
+[data-tooltip]::before{
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 7px);
+
+  width: 6px;
+  height: 6px;
+
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--wine);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:focus-visible::before{
+  opacity: 1;
 }
 
 
@@ -2140,15 +2271,20 @@ body.lang-ka #invite-heading{
   letter-spacing: .27em;
 }
 
+/* Sans, not the display serif — this sits inside the form, one step
+   below "You are invited." in the hierarchy, and needs to read as
+   part of the same DM Sans / uppercase-label system as the fields
+   around it rather than as a second, competing headline. */
 .wish-title{
-  margin: 0 0 22px;
+  margin: 0 0 18px;
   color: var(--wine);
 
-  font-family: var(--display);
-  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
-  font-weight: 400;
+  font-family: var(--sans);
+  font-size: clamp(1.0625rem, 2.2vw, 1.375rem);
+  font-weight: 500;
   font-style: normal;
-  line-height: 1.1;
+  letter-spacing: .008em;
+  line-height: 1.35;
 }
 
 /* NOTE: the markup nests a <form class="wish-form"> inside the
@@ -2173,7 +2309,7 @@ body.lang-ka #invite-heading{
   background: rgba(79,24,31,.045);
 
   color: var(--wine);
-  font-family: var(--display);
+  font-family: var(--sans);
   font-size: var(--type-small);
   line-height: 1.5;
 
@@ -2282,14 +2418,17 @@ body.lang-ka #invite-heading{
   letter-spacing: .25em;
 }
 
+/* Sans to match .wish-title — the success state is still part of the
+   same form, not a new editorial heading moment. */
 .response-success-title{
   margin: 0 0 15px;
   color: var(--wine);
 
-  font-family: var(--display);
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 400;
-  line-height: .95;
+  font-family: var(--sans);
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: .006em;
+  line-height: 1.25;
 }
 
 .response-success-note{
@@ -2297,10 +2436,11 @@ body.lang-ka #invite-heading{
   max-width: 34ch;
 
   color: var(--burgundy);
-  font-family: var(--display);
+  font-family: var(--sans);
+  font-weight: 300;
   font-size: var(--type-small);
-  font-style: italic;
-  line-height: 1.4;
+  line-height: 1.6;
+  letter-spacing: .008em;
 }
 
 /* "Submit another response" reuses .text-link's family/weight but
@@ -2325,6 +2465,10 @@ body.lang-ka #invite-heading{
   text-align: center;
 }
 
+.site-footer-top{
+  margin-bottom: 6vh;
+}
+
 .site-footer-top img{
   margin: 0 auto 20px;
   opacity: .9;
@@ -2332,20 +2476,7 @@ body.lang-ka #invite-heading{
 
 .site-footer-top .display-md{
   color: var(--cream);
-  margin-bottom: 14px;
-}
-
-.site-footer-tag{
-  font-family: var(--sans);
-  font-weight: 300;
-
-  font-size: var(--type-label);
-  line-height: 1.6;
-  letter-spacing: .04em;
-
-  opacity: .6;
-  max-width: 40ch;
-  margin: 0 auto 6vh;
+  margin-bottom: 0;
 }
 
 .site-footer-meta{
@@ -2366,6 +2497,13 @@ body.lang-ka #invite-heading{
 .site-footer-fine{
   letter-spacing: .08em;
   opacity: .35;
+}
+
+.site-footer-credit{
+  margin-top: 6px;
+  font-size: var(--type-micro);
+  letter-spacing: .08em;
+  opacity: .28;
 }
 
 
@@ -2520,13 +2658,11 @@ body.lang-ka #invite-heading{
 
   #invite-heading{
     width: 100%;
-    margin: 78px 0 31px;
+    margin: 78px 0 42px;
     font-size: clamp(51px, 15vw, 78px);
     line-height: .84;
     letter-spacing: -.04em;
   }
-
-  .invite-rule{ width: 30px; margin-bottom: 28px; }
 
   .invite-lede{
     width: 100%;
@@ -2601,12 +2737,10 @@ body.lang-ka #invite-heading{
      us pull in the generous top/bottom margins around it, which
      were sized for the two-line wrap. */
   #invite-heading{
-    margin: 46px 0 20px;
+    margin: 46px 0 28px;
     font-size: clamp(28px, 9vw, 38px);
     letter-spacing: -.03em;
   }
-
-  .invite-rule{ margin-bottom: 20px; }
 
   .invite-lede{ margin-bottom: 26px; font-size: 12px; }
 
@@ -2691,3 +2825,995 @@ body.opener-revealed .nav-links a::after{
 /* ============================================================
    END — CASA GELSO
 ============================================================ */
+/* ============================================================
+   9. INVITATION — REFINED EDITORIAL VERSION
+   Minimal fashion-house invitation.
+   Typography, spacing and hierarchy do the visual work.
+============================================================ */
+
+.invite{
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+
+  overflow: hidden;
+
+  background: var(--wine);
+  color: var(--wine);
+}
+
+
+/* ------------------------------------------------------------
+   Chapter marker
+------------------------------------------------------------ */
+
+.invite .chapter-mark{
+  position: absolute;
+  top: 34px;
+  left: max(
+    24px,
+    calc((100% - min(1180px, 92vw)) / 2)
+  );
+
+  z-index: 5;
+
+  color: var(--cream);
+  opacity: .58;
+
+  font-size: .5625rem;
+  letter-spacing: .28em;
+}
+
+
+/* ------------------------------------------------------------
+   Paper / invitation sheet
+------------------------------------------------------------ */
+
+.invite-panel{
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  min-height: 100svh;
+
+  padding: 7vh 0;
+}
+
+
+.invite-card{
+  position: relative;
+  z-index: 2;
+
+  width: min(1180px, 92vw);
+  min-height: calc(100svh - 14vh);
+
+  margin: 0 auto;
+
+  padding:
+    clamp(76px, 9vw, 120px)
+    clamp(42px, 8vw, 118px)
+    clamp(70px, 8vw, 105px);
+
+  background:
+    linear-gradient(
+      rgba(243,238,229,.92),
+      rgba(243,238,229,.92)
+    ),
+    url("../assets/textures/paper-tile.jpg");
+
+  background-size:
+    cover,
+    420px 420px;
+
+  background-repeat:
+    no-repeat,
+    repeat;
+
+  color: var(--wine);
+
+  box-shadow:
+    0 35px 100px rgba(15,4,6,.32);
+}
+
+
+/* ------------------------------------------------------------
+   Brand mark
+------------------------------------------------------------ */
+
+.invite-card-mark{
+  position: absolute;
+
+  top: clamp(32px, 4vw, 56px);
+  right: clamp(32px, 5vw, 72px);
+
+  width: clamp(46px, 5vw, 68px);
+  height: auto;
+
+  object-fit: contain;
+
+  opacity: .9;
+}
+
+
+/* ------------------------------------------------------------
+   Main invitation composition
+------------------------------------------------------------ */
+
+.invite-content{
+  max-width: 820px;
+}
+
+
+/* ------------------------------------------------------------
+   Eyebrow
+------------------------------------------------------------ */
+
+.invite .eyebrow{
+  margin-bottom: 30px;
+
+  color: var(--burgundy);
+
+  font-size: .5625rem;
+  font-weight: 500;
+
+  letter-spacing: .32em;
+}
+
+
+/* ------------------------------------------------------------
+   Main headline
+------------------------------------------------------------ */
+
+#invite-heading{
+  width: min(780px, 100%);
+
+  margin: 0 0 42px;
+
+  color: var(--wine);
+
+  font-family: var(--display);
+  font-size: clamp(4.2rem, 8vw, 8.8rem);
+  font-weight: 400;
+  font-style: normal;
+
+  line-height: .79;
+  letter-spacing: -.065em;
+
+  text-transform: uppercase;
+
+  text-wrap: balance;
+}
+
+
+/* Georgian headline */
+
+/* .9 here previously still clipped the descenders on words like
+   "მოწვეული" ("invited") — bumped further, matching the line-height
+   used on the other Georgian display headings above. */
+body.lang-ka #invite-heading{
+  width: min(720px, 100%);
+
+  font-family: var(--geo-display);
+
+  font-size: clamp(2.5rem, 5vw, 5.6rem);
+
+  line-height: 1.05;
+  letter-spacing: -.015em;
+
+  text-transform: none;
+}
+
+
+/* ------------------------------------------------------------
+   Intro copy
+------------------------------------------------------------ */
+
+.invite-lede{
+  width: min(440px, 100%);
+
+  margin: 0 0 48px;
+
+  color: var(--muted);
+
+  font-family: var(--sans);
+  font-size: .8125rem;
+  font-weight: 300;
+
+  line-height: 1.8;
+  letter-spacing: .012em;
+}
+
+
+/* ------------------------------------------------------------
+   Event information
+------------------------------------------------------------ */
+
+.invite-meta{
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(100px, 1fr));
+
+  gap: 34px;
+
+  width: min(700px, 100%);
+
+  padding-top: 27px;
+
+  border-top: 1px solid rgba(79,24,31,.25);
+}
+
+
+.invite-meta div{
+  min-width: 0;
+}
+
+
+.invite-meta dt{
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  overflow: hidden;
+
+  clip: rect(0 0 0 0);
+
+  white-space: nowrap;
+}
+
+
+.invite-meta dd{
+  margin: 0;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .6875rem;
+  font-weight: 500;
+
+  line-height: 1.5;
+
+  letter-spacing: .17em;
+}
+
+
+/* ------------------------------------------------------------
+   Location / calendar
+------------------------------------------------------------ */
+
+.invite-calendar-links{
+  display: flex;
+  align-items: center;
+
+  gap: 30px;
+
+  margin-top: 30px;
+}
+
+
+.invite-cta{
+  display: inline-block;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .5625rem;
+  font-weight: 500;
+
+  line-height: 1;
+
+  letter-spacing: .25em;
+  text-transform: uppercase;
+
+  opacity: .68;
+
+  transition:
+    opacity .3s ease,
+    transform .3s var(--ease);
+}
+
+
+.invite-cta:hover,
+.invite-cta:focus-visible{
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+
+/* ------------------------------------------------------------
+   RSVP
+------------------------------------------------------------ */
+
+.response-experience{
+  width: min(700px, 100%);
+
+  margin-top: 76px;
+  padding-top: 42px;
+
+  border-top:
+    1px solid rgba(79,24,31,.25);
+}
+
+
+.response-intro{
+  margin-bottom: 34px;
+}
+
+
+.response-subtitle{
+  max-width: 430px;
+
+  margin: 0;
+
+  color: var(--muted);
+
+  font-family: var(--sans);
+  font-size: .75rem;
+  font-weight: 300;
+
+  line-height: 1.7;
+  letter-spacing: .01em;
+}
+
+
+/* ------------------------------------------------------------
+   Form
+------------------------------------------------------------ */
+
+.rsvp-form--editorial{
+  display: flex;
+  flex-direction: column;
+
+  gap: 32px;
+}
+
+
+.editorial-field > label,
+.editorial-field > legend{
+  display: block;
+
+  width: 100%;
+
+  margin: 0 0 12px;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .5625rem;
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+
+/* ------------------------------------------------------------
+   Text fields
+------------------------------------------------------------ */
+
+.editorial-field input[type="text"]{
+  width: min(460px, 100%);
+  height: 38px;
+
+  padding: 4px 0 10px;
+
+  border: 0;
+  border-bottom: 1px solid rgba(79,24,31,.28);
+
+  border-radius: 0;
+
+  outline: none;
+
+  background: transparent;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .75rem;
+  font-weight: 400;
+
+  transition:
+    border-color .3s ease;
+}
+
+
+.editorial-field input[type="text"]:focus{
+  border-bottom-color: var(--wine);
+}
+
+
+/* ------------------------------------------------------------
+   Attendance
+------------------------------------------------------------ */
+
+.editorial-options{
+  display: flex;
+  align-items: center;
+
+  gap: 34px;
+
+  flex-wrap: wrap;
+}
+
+
+.editorial-options label{
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  cursor: pointer;
+}
+
+
+.editorial-options input{
+  appearance: none;
+
+  width: 13px;
+  height: 13px;
+
+  margin: 0;
+
+  border:
+    1px solid rgba(79,24,31,.52);
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+
+.editorial-options input:checked{
+  background: var(--wine);
+
+  box-shadow:
+    inset 0 0 0 3px var(--ivory);
+}
+
+
+.editorial-options span{
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .625rem;
+  font-weight: 500;
+
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+
+/* ------------------------------------------------------------
+   Wish
+------------------------------------------------------------ */
+
+.wish-step{
+  width: 100%;
+}
+
+
+.wish-kicker{
+  margin: 0 0 12px;
+
+  color: var(--burgundy);
+
+  font-family: var(--sans);
+  font-size: .5625rem;
+  font-weight: 600;
+
+  letter-spacing: .28em;
+}
+
+
+.wish-title{
+  max-width: 520px;
+
+  margin: 0 0 20px;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 400;
+
+  line-height: 1.5;
+  letter-spacing: .005em;
+}
+
+
+/* ------------------------------------------------------------
+   Message
+------------------------------------------------------------ */
+
+.wish-step textarea{
+  display: block;
+
+  width: min(560px, 100%);
+  min-height: 105px;
+
+  margin: 0 0 25px;
+
+  padding: 15px 17px;
+
+  resize: none;
+
+  border:
+    1px solid rgba(79,24,31,.25);
+
+  outline: none;
+
+  background: rgba(79,24,31,.025);
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .75rem;
+
+  line-height: 1.6;
+
+  transition:
+    border-color .3s ease,
+    background-color .3s ease;
+}
+
+
+.wish-step textarea:focus{
+  border-color: var(--wine);
+
+  background:
+    rgba(79,24,31,.045);
+}
+
+
+.wish-step textarea::placeholder{
+  color: var(--muted);
+
+  opacity: .55;
+}
+
+
+/* ------------------------------------------------------------
+   Submit
+------------------------------------------------------------ */
+
+.response-submit{
+  display: inline-flex;
+  align-items: center;
+
+  width: max-content;
+
+  margin: 0;
+  padding: 0;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: .5625rem;
+  font-weight: 600;
+
+  line-height: 1;
+
+  letter-spacing: .28em;
+  text-transform: uppercase;
+
+  transition:
+    opacity .3s ease,
+    transform .3s var(--ease);
+}
+
+
+.response-submit:hover{
+  opacity: .7;
+  transform: translateX(3px);
+}
+
+
+.response-submit .btn-arrow{
+  display: none;
+}
+
+
+.response-submit .btn-spinner{
+  display: none;
+
+  margin-left: 13px;
+
+  width: 11px;
+  height: 11px;
+
+  border:
+    1.5px solid rgba(79,24,31,.22);
+
+  border-top-color: var(--wine);
+
+  border-radius: 50%;
+
+  animation: spin .7s linear infinite;
+}
+
+
+.response-submit.is-loading .btn-spinner{
+  display: inline-block;
+}
+
+
+/* ------------------------------------------------------------
+   Success
+------------------------------------------------------------ */
+
+.response-success{
+  width: 100%;
+
+  padding: 18px 0;
+
+  text-align: left;
+}
+
+
+.response-success > img{
+  width: 46px;
+  height: 46px;
+
+  margin: 0 0 20px;
+}
+
+
+.response-success-eyebrow{
+  margin: 0 0 11px;
+
+  color: var(--burgundy);
+
+  font-size: .5rem;
+
+  letter-spacing: .25em;
+}
+
+
+.response-success-title{
+  margin: 0 0 13px;
+
+  color: var(--wine);
+
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  font-weight: 500;
+
+  line-height: 1.25;
+}
+
+
+.response-success-note{
+  max-width: 360px;
+
+  margin: 0 0 22px;
+
+  color: var(--muted);
+
+  font-family: var(--sans);
+  font-size: .6875rem;
+  font-weight: 300;
+
+  line-height: 1.7;
+}
+
+
+/* ------------------------------------------------------------
+   Decorative vertical message
+   Removed intentionally.
+   The invitation already has enough visual identity.
+------------------------------------------------------------ */
+
+.invite::after{
+  display: none;
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 800px){
+
+  .invite-panel{
+    padding: 48px 0;
+  }
+
+
+  .invite-card{
+    width: calc(100% - 24px);
+    min-height: auto;
+
+    padding:
+      76px
+      27px
+      58px;
+  }
+
+
+  .invite .chapter-mark{
+    top: 22px;
+    left: 28px;
+
+    font-size: .4375rem;
+    letter-spacing: .22em;
+  }
+
+
+  .invite-card-mark{
+    top: 22px;
+    right: 23px;
+
+    width: 48px;
+  }
+
+
+  .invite .eyebrow{
+    margin-bottom: 23px;
+
+    font-size: .4375rem;
+    letter-spacing: .27em;
+  }
+
+
+  #invite-heading{
+    width: 100%;
+
+    margin-bottom: 30px;
+
+    font-size: clamp(
+      3.1rem,
+      15vw,
+      5.2rem
+    );
+
+    line-height: .82;
+    letter-spacing: -.055em;
+  }
+
+
+  body.lang-ka #invite-heading{
+    width: 100%;
+
+    font-size: clamp(
+      2rem,
+      9vw,
+      3.2rem
+    );
+
+    line-height: 1.05;
+    letter-spacing: -.01em;
+  }
+
+
+  .invite-lede{
+    width: 100%;
+
+    margin-bottom: 34px;
+
+    font-size: .75rem;
+
+    line-height: 1.75;
+  }
+
+
+  .invite-meta{
+    grid-template-columns: 1fr;
+
+    gap: 20px;
+
+    width: 100%;
+
+    padding-top: 24px;
+  }
+
+
+  .invite-meta dd{
+    font-size: .5625rem;
+
+    letter-spacing: .16em;
+  }
+
+
+  .invite-calendar-links{
+    gap: 22px;
+
+    margin-top: 25px;
+  }
+
+
+  .invite-cta{
+    font-size: .5rem;
+
+    letter-spacing: .2em;
+  }
+
+
+  .response-experience{
+    width: 100%;
+
+    margin-top: 55px;
+    padding-top: 30px;
+  }
+
+
+  .response-subtitle{
+    font-size: .6875rem;
+  }
+
+
+  .rsvp-form--editorial{
+    gap: 27px;
+  }
+
+
+  .editorial-field input[type="text"]{
+    width: 100%;
+  }
+
+
+  .editorial-options{
+    gap: 18px;
+  }
+
+
+  .editorial-options span{
+    font-size: .5625rem;
+
+    letter-spacing: .08em;
+  }
+
+
+  .wish-title{
+    font-size: .875rem;
+  }
+
+
+  .wish-step textarea{
+    min-height: 100px;
+  }
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 480px){
+
+  .invite-panel{
+    padding: 34px 0;
+  }
+
+
+  .invite-card{
+    width: calc(100% - 12px);
+
+    padding:
+      68px
+      21px
+      48px;
+  }
+
+
+  .invite-card-mark{
+    top: 19px;
+    right: 20px;
+
+    width: 43px;
+  }
+
+
+  .invite .chapter-mark{
+    top: 20px;
+    left: 21px;
+  }
+
+
+  #invite-heading{
+    margin-bottom: 27px;
+
+    font-size: clamp(
+      2.65rem,
+      13vw,
+      3.7rem
+    );
+  }
+
+
+  body.lang-ka #invite-heading{
+    font-size: clamp(
+      1.8rem,
+      8.5vw,
+      2.7rem
+    );
+  }
+
+
+  .invite-lede{
+    font-size: .6875rem;
+
+    line-height: 1.75;
+  }
+
+
+  .invite-meta{
+    gap: 17px;
+  }
+
+
+  .invite-meta dd{
+    font-size: .5rem;
+
+    letter-spacing: .13em;
+  }
+
+
+  .invite-calendar-links{
+    gap: 18px;
+  }
+
+
+  .response-experience{
+    margin-top: 46px;
+  }
+
+
+  .response-submit{
+    font-size: .5rem;
+
+    letter-spacing: .23em;
+  }
+}
+/* ============================================================
+   INVITATION — FIX BOTTOM CLIPPING
+============================================================ */
+
+.invite,
+.invite-panel,
+.invite-card{
+  overflow: visible;
+}
+
+.invite{
+  min-height: auto;
+  height: auto;
+}
+
+.invite-panel{
+  min-height: auto;
+  height: auto;
+}
+
+.invite-card{
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+
+/* Never crop invitation typography */
+.invite-card,
+.invite-card *{
+  clip-path: none;
+}
+
+/* Give the bottom content enough breathing room */
+.invite-card{
+  padding-bottom: 120px;
+}
+
+@media (max-width: 800px){
+  .invite-card{
+    padding-bottom: 75px;
+  }
+}
+
+@media (max-width: 480px){
+  .invite-card{
+    padding-bottom: 60px;
+  }
+}

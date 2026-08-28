@@ -699,9 +699,9 @@
     title: "Casa Gelso — Opening",
     details:
       "Casa Gelso opening in Tbilisi — accessible refinement, curated individuality, quiet confidence.",
-    location: "Tbilisi, Georgia",
-    startUTC: "2026-09-13T15:00:00Z",
-    endUTC: "2026-09-13T18:00:00Z"
+    location: "Kostava St 67, Tbilisi, Georgia",
+    startUTC: "2026-09-12T15:00:00Z",
+    endUTC: "2026-09-12T18:00:00Z"
   };
 
   /* ============================================================
@@ -755,7 +755,7 @@
      to work.
   ============================================================ */
 
-  const RSVP_ENDPOINT = "";
+  const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbxXpXlditvFs1H1dWB1iJyb_zy-y68-buSaxUceW5ZCiA-fp6GSuvZhTYiLFviBcEh_/exec";
 
   const rsvpForm =
     document.getElementById("rsvpForm");
@@ -936,6 +936,28 @@
       };
     }
 
+    /* FIX: RSVP_ENDPOINT is now a Google Apps Script Web App /exec
+       URL, and those don't behave like a normal JSON API endpoint:
+
+       1. A Content-Type of "application/json" makes this a
+          "non-simple" request, so the browser sends a CORS
+          preflight (OPTIONS) first. Apps Script web apps don't
+          implement doOptions(), so the preflight fails and the
+          real POST is never even sent — the guest sees "Something
+          went wrong" every time, with nothing reaching the Sheet.
+          Sending as "text/plain" keeps this a simple request (no
+          preflight); the Apps Script side reads the JSON back out
+          of e.postData.contents.
+
+       2. Even without a preflight, Apps Script's response doesn't
+          carry an Access-Control-Allow-Origin header, so the
+          browser still won't let this page read the response body
+          or its status — res.ok would be false (or the promise
+          would reject) even on a submission that saved correctly.
+          mode: "no-cors" tells the browser we don't need to read
+          the response, only that the request went out; the trade
+          -off is we can no longer distinguish success from failure
+          here, so a request that didn't throw is treated as sent. */
     function submitRSVP(data) {
       const payload = {
         name: data.name,
@@ -962,12 +984,13 @@
 
       return fetch(RSVP_ENDPOINT, {
         method: "POST",
+        mode: "no-cors",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "text/plain;charset=utf-8"
         },
         body: JSON.stringify(payload)
       })
-        .then((res) => ({ ok: res.ok }))
+        .then(() => ({ ok: true }))
         .catch(() => ({ ok: false }));
     }
 
@@ -1149,12 +1172,14 @@
         lede:
           "Join us for the opening of Casa Gelso — an evening dedicated to the pieces, and the people, that make style personal.",
         dateLabel: "Date",
-        date: "13 September 2026",
+        date: "12 September 2026",
         timeLabel: "Time",
         time: "19:00",
         placeLabel: "Place",
-        place: "Tbilisi, Georgia",
-        calendar: "Add to calendar"
+        place: "Kostava St 67, Tbilisi",
+        placeTooltip: "Click to see location in Google Maps",
+        calendar: "Add to calendar",
+        calendarTooltip: "Click to save in calendar"
       },
 
       response: {
@@ -1195,8 +1220,7 @@
       },
 
       footer: {
-        tag:
-          "Accessible refinement. Curated individuality. Quiet confidence.",
+        credit: "Designed & built with care.",
         back: "Back to top ↑"
       }
     },
@@ -1208,12 +1232,14 @@
         lede:
           "შემოგვიერთდით Casa Gelso-ს გახსნაზე — საღამო, რომელიც ეძღვნება ნივთებსა და ადამიანებს, რომლებიც სტილს პირად ისტორიად აქცევენ.",
         dateLabel: "თარიღი",
-        date: "13 სექტემბერი 2026",
+        date: "12 სექტემბერი 2026",
         timeLabel: "დრო",
         time: "19:00",
         placeLabel: "ადგილი",
-        place: "თბილისი, საქართველო",
-        calendar: "კალენდარში დამატება"
+        place: "კოსტავას ქუჩა 67, თბილისი",
+        placeTooltip: "დააჭირეთ Google Maps-ზე სანახავად",
+        calendar: "კალენდარში დამატება",
+        calendarTooltip: "დააჭირეთ კალენდარში დასამატებლად"
       },
 
       response: {
@@ -1254,8 +1280,7 @@
       },
 
       footer: {
-        tag:
-          "ხელმისაწვდომი დახვეწილობა. შერჩეული ინდივიდუალობა. მშვიდი თავდაჯერება.",
+        credit: "შექმნილია სიყვარულით.",
         back: "თავში დაბრუნება ↑"
       }
     },
@@ -1267,12 +1292,14 @@
         lede:
           "Unisciti a noi per l'apertura di Casa Gelso — una serata dedicata ai pezzi e alle persone che rendono lo stile personale.",
         dateLabel: "Data",
-        date: "13 settembre 2026",
+        date: "12 settembre 2026",
         timeLabel: "Ora",
         time: "19:00",
         placeLabel: "Luogo",
-        place: "Tbilisi, Georgia",
-        calendar: "Aggiungi al calendario"
+        place: "Via Kostava 67, Tbilisi",
+        placeTooltip: "Clicca per vedere la posizione su Google Maps",
+        calendar: "Aggiungi al calendario",
+        calendarTooltip: "Clicca per salvare nel calendario"
       },
 
       response: {
@@ -1313,8 +1340,7 @@
       },
 
       footer: {
-        tag:
-          "Raffinatezza accessibile. Individualità curata. Quiet confidence.",
+        credit: "Realizzato con cura.",
         back: "Torna in cima ↑"
       }
     }
@@ -1424,6 +1450,23 @@
 
         if (value !== undefined) {
           el.placeholder = value;
+        }
+      }
+    );
+
+    /* Same pattern as data-i18n-placeholder above, but for the
+       CSS tooltip on the invite CTAs (see [data-tooltip] in
+       style.css) — data-tooltip is what the tooltip actually
+       reads from, so it's what gets updated on language switch. */
+    $$("[data-i18n-tooltip]").forEach(
+      (el) => {
+        const value = lookup(
+          t,
+          el.dataset.i18nTooltip
+        );
+
+        if (value !== undefined) {
+          el.dataset.tooltip = value;
         }
       }
     );
