@@ -1,21 +1,69 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#4F181F">
-<title>Casa Gelso — Opening in Tbilisi, 13 September 2026</title>
+<title>Casa Gelso — Opening in Tbilisi, 12 September 2026</title>
 <meta name="description" content="Casa Gelso — a new luxury fashion destination opening in Tbilisi on 13 September 2026. Accessible refinement. Curated individuality. Quiet confidence.">
 
+<!-- TODO: replace with the live production domain before launch —
+     canonical + og:url + og:image must be absolute URLs for link
+     previews (Facebook/WhatsApp/iMessage/X) to resolve reliably. -->
+<link rel="canonical" href="https://www.casagelso.com/">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://www.casagelso.com/">
+<meta property="og:site_name" content="Casa Gelso">
 <meta property="og:title" content="Casa Gelso — Opening in Tbilisi">
-<meta property="og:description" content="A new luxury fashion destination opens in Tbilisi, 13 September 2026.">
-<meta property="og:image" content="assets/teaser/04-black-gold-dress.jpg">
+<meta property="og:description" content="A new luxury fashion destination opens in Tbilisi, 12 September 2026.">
+<meta property="og:image" content="https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Casa Gelso — Opening in Tbilisi">
+<meta name="twitter:description" content="A new luxury fashion destination opens in Tbilisi, 12 September 2026.">
+<meta name="twitter:image" content="https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg">
 
 <link rel="icon" href="assets/logo/monogram-wine.png">
+<link rel="apple-touch-icon" href="assets/logo/monogram-wine.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"><link rel="preload" as="image" href="assets/teaser/01-shoe.jpg">
+<!-- Single consolidated Google Fonts request — every family/weight the
+     CSS actually uses lives in one link now (Fraunces replaces the old,
+     mostly-unused Bodoni Moda load, and the CSS @import that duplicated
+     this request has been removed from style.css). -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+Georgian:wght@400;500&family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/teaser/01-shoe.jpg" fetchpriority="high">
 <link rel="stylesheet" href="css/style.css">
+
+<!-- Event structured data — lets Google surface this as a rich event
+     result (date, time, location) rather than a plain blue link. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Casa Gelso — Opening",
+  "startDate": "2026-09-13T19:00:00+04:00",
+  "endDate": "2026-09-13T22:00:00+04:00",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": "Casa Gelso",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Tbilisi",
+      "addressCountry": "GE"
+    }
+  },
+  "image": ["https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg"],
+  "description": "Casa Gelso — a new luxury fashion destination opening in Tbilisi. Accessible refinement. Curated individuality. Quiet confidence.",
+  "organizer": {
+    "@type": "Organization",
+    "name": "Casa Gelso"
+  }
+}
+</script>
 </head>
 <body class="is-locked">
 <audio id="casaGelsoAudio" preload="metadata" loop playsinline src="assets/audio/mp3.mp3"></audio>
@@ -38,9 +86,9 @@
   <div class="site-controls" aria-label="Site controls">
     <div class="language-switcher" data-language-switcher>
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
-      <span aria-hidden="true">/</span>
+      <span class="lang-sep" aria-hidden="true"></span>
       <button type="button" data-lang="ka" aria-pressed="false">KA</button>
-      <span aria-hidden="true">/</span>
+      <span class="lang-sep" aria-hidden="true"></span>
       <button type="button" data-lang="it" aria-pressed="false">IT</button>
     </div>
     <button class="sound-toggle" type="button" data-sound-toggle aria-pressed="false" aria-label="Sound off">
@@ -50,9 +98,9 @@
 
   <div class="language-switcher nav-lang-mobile" data-language-switcher aria-label="Language">
     <button type="button" data-lang="en" aria-pressed="true">EN</button>
-    <span aria-hidden="true">/</span>
+    <span class="lang-sep" aria-hidden="true"></span>
     <button type="button" data-lang="ka" aria-pressed="false">KA</button>
-    <span aria-hidden="true">/</span>
+    <span class="lang-sep" aria-hidden="true"></span>
     <button type="button" data-lang="it" aria-pressed="false">IT</button>
   </div>
 
@@ -69,8 +117,8 @@
   </nav>
   <div class="mobile-controls">
     <div class="language-switcher" data-language-switcher>
-      <button type="button" data-lang="en" aria-pressed="true">EN</button><span>/</span>
-      <button type="button" data-lang="ka" aria-pressed="false">KA</button><span>/</span>
+      <button type="button" data-lang="en" aria-pressed="true">EN</button><span class="lang-sep" aria-hidden="true"></span>
+      <button type="button" data-lang="ka" aria-pressed="false">KA</button><span class="lang-sep" aria-hidden="true"></span>
       <button type="button" data-lang="it" aria-pressed="false">IT</button>
     </div>
     <button class="sound-toggle sound-toggle--mobile" type="button" data-sound-toggle aria-pressed="false" aria-label="Sound off">
@@ -151,8 +199,8 @@
   <!-- Beat 7 — main brand page, based on the supplied Casa Gelso reference -->
   <div class="reveal-hero" data-reveal-hero>
     <picture class="reveal-background" aria-hidden="true">
-      <source media="(max-width: 800px)" srcset="assets/reveal/hero-02.JPG">
-      <img src="assets/reveal/hero-02.JPG" alt="">
+      <source media="(max-width: 800px)" srcset="assets/reveal/cover4.png">
+      <img src="assets/reveal/cover4.png" alt="">
     </picture>
     <div class="reveal-atmosphere" aria-hidden="true"></div>
     <div class="reveal-shadow" aria-hidden="true"></div>
@@ -183,29 +231,35 @@
   <p class="chapter-mark" aria-hidden="true">01</p>
 
   <div class="section-intro">
-    <p class="eyebrow reveal-up">Chapter One — The Edit</p>
+    <p class="eyebrow reveal-up">Chapter One </p>
     <h2 id="ad-heading" class="display-xl mask-lines">
-      <span class="mask"><span class="mask-in">Luxury,</span></span>
-      <span class="mask"><span class="mask-in mask-in--italic">reframed.</span></span>
+      <span class="mask"><span class="mask-in">Accessible Luxury</span></span>
+      
     </h2>
-    <p class="lede reveal-up">A curated edit of the houses you already love, now with an address in Tbilisi.</p>
+    <p class="lede reveal-up">A curated world of fashion, now in Tbilisi.</p>
   </div>
 
   <div class="ad-canvas">
 
     <figure class="ad-figure ad-figure--a" data-parallax>
-      <img src="assets/reveal/1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy">
-      <span class="ad-curtain" aria-hidden="true"></span>
+      <img src="assets/reveal/add1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy">
+      <span class="ad-curtain" aria-hidden="true">
+        <span class="ad-curtain-fill"></span>
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+      </span>
     </figure>
     <div class="ad-copy ad-copy--a reveal-up">
       <span class="ad-copy-index">01</span>
-      <h3>A new address for<br>names you already know.</h3>
+      <h3>The fashion you dreamed of, <br>now in your city</h3>
       <p>Ferragamo. Moschino. Tom Ford. Bottega&nbsp;Veneta. Casa Gelso brings the icons of Italian style to a single house in Tbilisi.</p>
     </div>
 
     <figure class="ad-figure ad-figure--b" data-parallax>
-      <img src="assets/reveal/2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy">
-      <span class="ad-curtain" aria-hidden="true"></span>
+      <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy">
+      <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
+        <span class="ad-curtain-fill"></span>
+        <span class="ad-curtain-word">Casa Gelso</span>
+      </span>
     </figure>
     <div class="ad-copy ad-copy--b reveal-up">
       <span class="ad-copy-index">02</span>
@@ -220,8 +274,11 @@
     </div>
 
     <figure class="ad-figure ad-figure--c" data-parallax>
-      <img src="assets/reveal/3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy">
-      <span class="ad-curtain" aria-hidden="true"></span>
+      <img src="assets/reveal/add3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy">
+      <span class="ad-curtain" aria-hidden="true">
+        <span class="ad-curtain-fill"></span>
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+      </span>
     </figure>
     <div class="ad-copy ad-copy--c reveal-up">
       <span class="ad-copy-index">03</span>
@@ -230,8 +287,11 @@
     </div>
 
     <figure class="ad-figure ad-figure--d" data-parallax>
-      <img src="assets/reveal/5.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy">
-      <span class="ad-curtain" aria-hidden="true"></span>
+      <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy">
+      <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
+        <span class="ad-curtain-fill"></span>
+        <span class="ad-curtain-word">Casa Gelso</span>
+      </span>
     </figure>
     <div class="ad-copy ad-copy--d reveal-up">
       <span class="ad-copy-index">04</span>
@@ -239,8 +299,11 @@
     </div>
 
     <figure class="ad-figure ad-figure--e" data-parallax>
-      <img src="assets/reveal/4.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy">
-      <span class="ad-curtain" aria-hidden="true"></span>
+      <img src="assets/reveal/add5.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy">
+      <span class="ad-curtain" aria-hidden="true">
+        <span class="ad-curtain-fill"></span>
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+      </span>
     </figure>
     <div class="ad-copy ad-copy--e reveal-up">
       <span class="ad-copy-index">05</span>
@@ -256,7 +319,7 @@
       <span class="mask"><span class="mask-in">See the collection,</span></span>
       <span class="mask"><span class="mask-in mask-in--italic">in real life.</span></span>
     </h2>
-    <p class="lede reveal-up">13 September 2026</p>
+    <p class="lede reveal-up">12 September 2026</p>
     <a class="text-link reveal-up" href="#invitation">Continue to the invitation <span aria-hidden="true"></span></a>
   </div>
 </section>
@@ -277,16 +340,12 @@
   </p>
 
 
-  <!-- LEFT / IMAGE -->
-  <div class="invite-media">
-
-    <img
-      src="assets/reveal/5.JPG"
-      alt="Casa Gelso campaign portrait"
-    >
-
-  </div>
-
+  <!-- The single-column paper-card layout (see .invite-card in the CSS)
+       retired the image/text split this section used to have. The old
+       .invite-media image stayed in the DOM as a permanently
+       display:none element — a full-resolution photo downloaded on
+       every visit for nothing. Removed outright; restore it (and its
+       CSS) if the split layout ever comes back. -->
 
   <!-- RIGHT / INVITATION + RSVP -->
   <div class="invite-panel">
@@ -350,7 +409,7 @@
         <div>
           <dt data-i18n="invite.dateLabel">Date</dt>
           <dd data-i18n="invite.date">
-            13 September 2026
+            12 September 2026
           </dd>
         </div>
 
@@ -370,6 +429,10 @@
 
       </dl>
 
+      <div class="invite-calendar-links reveal-up">
+        <a class="text-link" data-cal-google href="#" target="_blank" rel="noopener"><span data-i18n="invite.calendar">Add to calendar</span></a>
+      </div>
+
 
       <!-- ========================================================
            RSVP
@@ -386,14 +449,7 @@
             03
           </span>
 
-          <p
-            class="response-kicker"
-            data-i18n="response.kicker"
-          >
-            RSVP
-          </p>
-
-          <p class="response-subtitle">
+          <p class="response-subtitle" data-i18n="response.subtitle">
             Kindly confirm your attendance.
           </p>
 
@@ -413,15 +469,24 @@
             aria-live="assertive"
           ></p>
 
+          <!-- Honeypot — invisible to people, irresistible to bots.
+               Real users never see or reach this field (off-screen,
+               aria-hidden, removed from tab order); anything that
+               fills it in gets silently dropped in app.js. -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="rsvpWebsite">Leave this field blank</label>
+            <input type="text" id="rsvpWebsite" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
 
           <!-- NAME -->
           <div class="editorial-field">
 
             <label
               for="rsvpName"
-              data-i18n="response.name"
             >
-              Name &amp; surname
+              <span data-i18n="response.name">Name &amp; surname</span>
+              <abbr class="req-mark" title="Required" aria-hidden="true">*</abbr>
             </label>
 
             <input
@@ -445,8 +510,9 @@
             class="editorial-field editorial-choice"
           >
 
-            <legend data-i18n="response.attending">
-              Will you be joining us?
+            <legend>
+              <span data-i18n="response.attending">Will you be joining us?</span>
+              <abbr class="req-mark" title="Required" aria-hidden="true">*</abbr>
             </legend>
 
             <div class="editorial-options">
@@ -552,10 +618,13 @@
             </label>
 
 
-            <form
-              class="wish-form"
-              id="wishForm"
-            >
+            <!-- Was a nested <form>, which HTML doesn't allow — the
+                 browser silently dropped the inner tag and these
+                 fields ended up as plain children of #rsvpForm anyway
+                 (that's the only reason it ever worked). Now that's
+                 explicit: one <div>, one real <form> for the whole
+                 RSVP + wish flow, one submit button. -->
+            <div class="wish-form">
 
               <textarea
                 id="casaWish"
@@ -592,7 +661,7 @@
 
               </button>
 
-            </form>
+            </div>
 
           </div>
 
@@ -659,29 +728,35 @@
     <span>Casa Gelso</span>
 
     <span>
-      Tbilisi · 13 / 09 / 2026
+      Tbilisi · 12 / 09 / 2026
     </span>
 
   </p>
 
 </section>
 
+</main>
+
 <!-- ============================================================
-     FOOTER
+     FOOTER — a sibling of <main>, not nested inside it. The
+     original markup never closed <main>, so the footer landmark
+     was silently swallowed into the main landmark — invisible
+     visually, but it breaks landmark navigation for screen reader
+     users, who rely on "main" containing only the primary content.
 ============================================================ -->
 <footer class="site-footer">
   <div class="site-footer-top">
     <img src="assets/logo/monogram-wine.png" alt="" width="46" height="46">
     <p class="display-md">Casa Gelso</p>
-    <p class="site-footer-tag">Accessible refinement. Curated individuality. Quiet confidence.</p>
+    <p class="site-footer-tag" data-i18n="footer.tag">Accessible refinement. Curated individuality. Quiet confidence.</p>
   </div>
 
 
 
   <div class="site-footer-meta">
     <span>Tbilisi, Georgia</span>
-    <span>13 September 2026</span>
-    <a href="#top">Back to top ↑</a>
+    <span>12 September 2026</span>
+    <a href="#top" data-i18n="footer.back">Back to top ↑</a>
   </div>
 
   <p class="site-footer-fine">© 2026 Casa Gelso. All rights reserved.</p>

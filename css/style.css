@@ -31,7 +31,11 @@
    14. Reduced motion / no-JS fallback / nav state
 ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Georgian:wght@300;400;500;600&family=Noto+Serif+Georgian:wght@400;500&display=swap");
+/* Font loading moved to a single <link> in index.html's <head>.
+   This @import used to duplicate that request AND made the browser
+   wait for style.css to download before it could even discover the
+   Fraunces request — a fully serial extra round-trip on the exact
+   font every headline on the page renders in. Removed. */
 
 
 /* ============================================================
@@ -52,7 +56,11 @@
   --cream:      #FBF8F2;
 
   --ink:        var(--charcoal);
-  --muted:      #8B7A6E;
+  /* Was #8B7A6E — measured ~3.6:1 against --ivory, below WCAG AA's
+     4.5:1 for normal text (this color runs the .lede body copy and
+     the ad-copy paragraphs, not just decorative labels). Darkened to
+     ~5.1:1 while staying in the same warm-taupe family. */
+  --muted:      #74604F;
   --muted-on-wine: rgba(251,248,242,.62);
 
   --line:          rgba(44,41,39,.15);
@@ -76,7 +84,7 @@
   --type-h3:      clamp(1.6rem, 2.8vw, 2.75rem);   /* editorial captions: frame titles, ad copy */
   --type-body:    .875rem;                          /* running copy (lede) */
   --type-small:   .8125rem;                         /* secondary copy (invite lede, success note) */
-  --type-label:   .6875rem;                         /* metadata / field values */
+  --type-label:   .78125rem;                        /* metadata / field values — bumped from .6875rem (11px→12.5px) for AA-comfortable reading on real content: dates, form input text */
   --type-micro:   .5625rem;                         /* uppercase tracked labels, nav, buttons */
 
   --tracking-tight:  -.045em;   /* display headings */
@@ -116,6 +124,13 @@
 
 html{
   scroll-behavior: auto;
+}
+
+/* Anchor targets land under the fixed nav bar without this — clicking
+   "Digital Ad" / "Invitation" (or any deep link to #digital-ad /
+   #invitation) tucked the section heading partly behind --nav-h. */
+main section[id]{
+  scroll-margin-top: var(--nav-h);
 }
 
 body{
@@ -393,6 +408,17 @@ body.lang-ka .display-md{
   color: var(--burgundy);
 }
 
+/* Noto Serif Georgian ships one weight (400) and no real italic on
+   Google Fonts, so font-style:italic here was triggering the
+   browser's synthetic/oblique slant on Georgian glyphs — that faux
+   slant is the "gadaxrili" look. Set upright, and use a hairline
+   text-stroke to give the heading a touch more optical weight in
+   place of a heavier cut that doesn't exist for this family. */
+body.lang-ka .mask-in--italic{
+  font-style: normal;
+  -webkit-text-stroke: .4px currentColor;
+}
+
 .reveal-up{
   opacity: 0;
   transform: translateY(26px);
@@ -591,11 +617,24 @@ body.lang-ka .display-md{
 .language-switcher{
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   letter-spacing: var(--tracking-wide);
 }
 
+/* Was a plain "/" character between each language — replaced with the
+   same thin hairline used throughout the rest of the site (frame
+   captions, the invite rule, the nav-toggle bars) instead of a
+   punctuation mark doing double duty as a divider. */
+.lang-sep{
+  display: inline-block;
+  width: 1px;
+  height: 9px;
+  background: currentColor;
+  opacity: .3;
+}
+
 .language-switcher button{
+  position: relative;
   padding: 7px 0;
   color: currentColor;
   opacity: .48;
@@ -603,9 +642,29 @@ body.lang-ka .display-md{
   transition: opacity .3s ease, transform .3s ease;
 }
 
+/* Same underline-reveal the primary nav links use (see .nav-links a)
+   — the active language reads clearly without needing a heavier
+   background pill or bigger type, and it reuses a pattern the page
+   already teaches the eye rather than inventing a new one. */
+.language-switcher button::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transition: right .35s var(--ease);
+}
+
 .language-switcher button[aria-pressed="true"],
 .language-switcher button:hover{
   opacity: 1;
+}
+
+.language-switcher button[aria-pressed="true"]::after,
+.language-switcher button:hover::after{
+  right: 0;
 }
 
 .language-switcher button:hover{
@@ -1437,7 +1496,9 @@ body.lang-ka .display-md{
   font-family: var(--sans);
   font-weight: 300;
 
-  font-size: .625rem;
+  /* Was .625rem (10px) — real running copy, not a decorative label;
+     bumped for comfortable reading. */
+  font-size: .75rem;
   line-height: 1.75;
   letter-spacing: .01em;
 
@@ -1462,7 +1523,12 @@ body.lang-ka .display-md{
   background: var(--ivory-warm);
 }
 
-.ad-figure img{
+/* FIX: was ".ad-figure img", a descendant selector — harmless while
+   .ad-curtain was an empty span, but it would now also catch the
+   logo mark nested inside .ad-curtain-mark below and stretch/blend
+   it exactly like the photo. Scoped to the direct child (the actual
+   photo) so the curtain's own image is unaffected. */
+.ad-figure > img{
   width: 100%;
   height: 100%;
 
@@ -1483,13 +1549,69 @@ body.lang-ka .display-md{
     linear-gradient(135deg, transparent 50%, rgba(79,24,31,.12));
 }
 
+/* ------------------------------------------------------------
+   Ad curtain — covers the photo, then wipes away on scroll (see
+   the .ad-figure loop in app.js). Three of the five (a/c/e, the
+   photos positioned on the right) wipe horizontally and carry the
+   monogram; the other two (b/d, positioned on the left) wipe
+   vertically bottom-to-top and carry the wordmark instead — split
+   deliberately rather than all five doing the same thing.
+
+   Structure: .ad-curtain is just a centering box; .ad-curtain-fill
+   is the solid colour panel that actually gets scaled by GSAP. Mark
+   and fill are separate elements so the mark can fade out on its
+   own instead of visibly stretching/squashing as the fill's scale
+   animates toward 0.
+------------------------------------------------------------ */
+
 .ad-curtain{
   position: absolute;
   inset: 0;
   z-index: 3;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-curtain-fill{
+  position: absolute;
+  inset: 0;
+
   background: var(--wine);
   transform-origin: left center;
+}
+
+.ad-curtain--vertical .ad-curtain-fill{
+  transform-origin: center top;
+}
+
+.ad-curtain-mark{
+  position: relative;
+  z-index: 1;
+
+  width: clamp(30px, 4.5vw, 46px);
+  height: auto;
+
+  opacity: .92;
+}
+
+.ad-curtain-word{
+  position: relative;
+  z-index: 1;
+
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+
+  font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+  letter-spacing: -.01em;
+
+  color: var(--ivory);
+  opacity: .92;
+
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
 }
 
 
@@ -1605,12 +1727,9 @@ body.lang-ka .display-md{
   letter-spacing: .29em;
 }
 
-/* The campaign portrait is retired for this build (full-bleed
-   editorial text takes its place) — kept in the DOM/markup for
-   art direction flexibility, hidden here by design. */
-.invite-media{
-  display: none;
-}
+/* .invite-media removed from the markup — see the comment in
+   index.html. It was a permanently display:none image, downloaded
+   on every visit for nothing. */
 
 .invite-panel{
   position: relative;
@@ -1714,7 +1833,24 @@ body.lang-ka .display-md{
   line-height: .82;
   letter-spacing: var(--tracking-tight);
 
+  /* No effect on the Georgian version below — Mkhedruli (the
+     Georgian script) has no upper/lowercase distinction, so
+     text-transform can't do anything to it. Left in place for the
+     English/Italian (Latin-script) headline it's actually styling. */
   text-transform: uppercase;
+}
+
+/* Reduced from the Latin sizing above — Georgian glyphs read
+   visually denser at the same font-size, and without the uppercase
+   punch (see the note above) the full display size felt heavier
+   than intended. Own letter-spacing here (rather than the general
+   body.lang-ka .display-lg rule) because #invite-heading's ID
+   specificity would otherwise win over that rule and keep the
+   Latin-tuned -.045em tracking. */
+body.lang-ka #invite-heading{
+  width: min(560px, 78vw);
+  font-size: clamp(1.9rem, 4.2vw, 3.6rem);
+  letter-spacing: -.01em;
 }
 
 .invite-rule{
@@ -1765,7 +1901,25 @@ body.lang-ka .display-md{
 .invite-meta dd{
   margin: 0;
   color: var(--wine);
-  letter-spacing: .27em;
+  letter-spacing: .2em;
+  /* This carries the actual date/time/place — real content, not a
+     decorative caption — so it overrides the shared micro-label
+     block's 9px default rather than inheriting it. */
+  font-size: var(--type-label);
+}
+
+/* ------------------------------------------------------------
+   Calendar links
+------------------------------------------------------------ */
+
+.invite-calendar-links{
+  display: flex;
+  gap: 28px;
+  margin: 22px 0 0;
+}
+
+.invite-calendar-links .text-link{
+  font-size: var(--type-micro);
 }
 
 
@@ -1788,21 +1942,12 @@ body.lang-ka .display-md{
 }
 
 .response-index{
-  /* index number retained for markup/i18n hooks, not displayed —
-     the kicker alone carries the "RSVP" heading */
+  /* index number retained for markup/i18n hooks, not displayed */
   display: none;
 }
 
-.response-kicker{
-  margin: 0 0 6px;
-  color: var(--wine);
-
-  font-family: var(--display);
-  font-size: clamp(1.35rem, 2vw, 1.7rem);
-  line-height: 1;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-}
+/* .response-kicker ("RSVP") removed from the markup — the subtitle
+   now carries this intro on its own. */
 
 .response-subtitle{
   margin: 0;
@@ -1857,6 +2002,25 @@ body.lang-ka .display-md{
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: var(--tracking-label);
+  /* These are the actual questions being asked, not decoration —
+     overrides the shared 9px micro-label default. */
+  font-size: var(--type-label);
+}
+
+.req-mark{
+  margin-left: 3px;
+  color: var(--wine);
+  text-decoration: none;
+}
+
+/* Real people never see this — off-screen, out of the tab order,
+   and aria-hidden. A filled-in value means a bot filled the form. */
+.hp-field{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  left: -9999px;
 }
 
 .editorial-field input[type="text"]{
@@ -1892,6 +2056,15 @@ body.lang-ka .display-md{
 
 .field-error.is-visible{
   display: block;
+}
+
+.has-error > label,
+.has-error > legend{
+  color: var(--wine);
+}
+
+.has-error input[type="text"]{
+  border-bottom-color: var(--wine);
 }
 
 
@@ -1935,7 +2108,8 @@ body.lang-ka .display-md{
 .editorial-options span{
   color: var(--wine);
   font-weight: 500;
-  letter-spacing: .14em;
+  letter-spacing: .1em;
+  font-size: var(--type-label);
 }
 
 
@@ -2304,7 +2478,7 @@ body.lang-ka .display-md{
   .ad-canvas{ min-height: 2500px; padding: 0; }
 
   .ad-copy h3{ font-size: clamp(21px, 6.2vw, 29px); line-height: .92; overflow-wrap: break-word; }
-  .ad-copy p{ font-size: 9.5px; line-height: 1.7; overflow-wrap: break-word; }
+  .ad-copy p{ font-size: 11.5px; line-height: 1.7; overflow-wrap: break-word; }
 
   /* Each caption's max-width is sized to its photo's width on the
      opposite side (100% − figure width − 18px inset − 16px gap),
@@ -2363,19 +2537,23 @@ body.lang-ka .display-md{
   }
 
   .invite-meta{ gap: 14px; }
-  .invite-meta dd{ font-size: .5rem; letter-spacing: .19em; }
+  /* Kept at the same readable floor as desktop (var(--type-label)) —
+     the old .5rem (8px) override undid the AA contrast/size fix on
+     the viewport most guests will actually RSVP from. */
+  .invite-meta dd{ font-size: var(--type-label); letter-spacing: .16em; }
+
+  .invite-calendar-links{ margin-top: 20px; gap: 22px; }
 
   .invite::after{ display: none; }
 
   /* rsvp */
   .response-experience{ width: 100%; margin-top: 45px; padding-top: 31px; }
-  .response-kicker{ font-size: clamp(1.2rem, 5vw, 1.35rem); letter-spacing: .11em; }
   .rsvp-form--editorial{ gap: 27px; }
 
   .editorial-field input[type="text"]{ width: 100%; }
 
   .editorial-options{ gap: 17px; }
-  .editorial-options span{ font-size: .4375rem; letter-spacing: .07em; }
+  .editorial-options span{ font-size: .6875rem; letter-spacing: .05em; }
 
   /* footer */
   .site-footer{ padding: 10vh 18px 5vh; }
@@ -2411,7 +2589,7 @@ body.lang-ka .display-md{
   .display-lg{ font-size: clamp(38px, 14vw, 58px); }
 
   .ad-copy h3{ font-size: 22px; }
-  .ad-copy p{ font-size: 9px; }
+  .ad-copy p{ font-size: 11px; }
 
   .invite-card{ max-width: calc(100% - 12px); margin: 28px auto; padding: 56px 21px 46px; }
   .invite-card::before,
@@ -2477,8 +2655,21 @@ html.no-gsap [data-rule-draw]{
   transform: scaleX(1) !important;
 }
 
-html.no-gsap .ad-curtain{
+/* FIX: targeted .ad-curtain, which is now just the centering box —
+   the element that actually needs hiding is .ad-curtain-fill. Also
+   split by axis so the vertical pair (b/d) collapse the right way
+   without JS. */
+html.no-gsap .ad-curtain-fill{
   transform: scaleX(0);
+}
+
+html.no-gsap .ad-curtain--vertical .ad-curtain-fill{
+  transform: scaleY(0);
+}
+
+html.no-gsap .ad-curtain-mark,
+html.no-gsap .ad-curtain-word{
+  display: none;
 }
 
 html.no-gsap .opener-skip{

@@ -14,6 +14,13 @@
 
   const hasGSAP = typeof gsap !== "undefined";
 
+  /* Tracked here (rather than re-reading localStorage on every call)
+     so renderSuccess() and any other non-language code can format
+     text in whichever language is currently active. applyLanguage()
+     below keeps this in sync. */
+  let currentLang =
+    localStorage.getItem("casa-gelso-language") || "en";
+
   if (hasGSAP && typeof ScrollTrigger !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
   }
@@ -476,31 +483,62 @@
 
     /* Digital Ad animation stays English */
 
+    /* Three of the five curtains (a/c/e) wipe left→right and carry
+       the monogram; the other two (b/d, marked .ad-curtain--vertical
+       in the HTML) wipe bottom→top and carry the wordmark instead —
+       see the .ad-curtain comment in style.css for why it's split
+       across two elements (fill + mark). */
     gsap.utils
       .toArray("[data-parallax]")
       .forEach((fig, i) => {
-        const img = fig.querySelector("img");
+        const img = fig.querySelector(":scope > img");
         const curtain = fig.querySelector(".ad-curtain");
+        const fill = fig.querySelector(".ad-curtain-fill");
+        const mark = fig.querySelector(
+          ".ad-curtain-mark, .ad-curtain-word"
+        );
 
-        if (!img || !curtain) return;
+        if (!img || !curtain || !fill) return;
+
+        const vertical = curtain.classList.contains(
+          "ad-curtain--vertical"
+        );
+
+        const fillTarget = vertical
+          ? { scaleY: 0 }
+          : { scaleX: 0 };
 
         if (reduceMotion || !hasScrollTrigger) {
-          gsap.set(curtain, {
-            scaleX: 0
-          });
+          gsap.set(fill, fillTarget);
+
+          if (mark) {
+            gsap.set(mark, { autoAlpha: 0 });
+          }
+
           return;
         }
 
-        gsap.to(curtain, {
-          scaleX: 0,
+        const revealTrigger = {
+          trigger: fig,
+          start: "top 80%",
+          once: true
+        };
+
+        gsap.to(fill, {
+          ...fillTarget,
           duration: 1.1,
           ease: "power4.inOut",
-          scrollTrigger: {
-            trigger: fig,
-            start: "top 80%",
-            once: true
-          }
+          scrollTrigger: revealTrigger
         });
+
+        if (mark) {
+          gsap.to(mark, {
+            autoAlpha: 0,
+            duration: 0.4,
+            ease: "power2.in",
+            scrollTrigger: revealTrigger
+          });
+        }
 
         gsap.to(img, {
           yPercent: i % 2 ? 7 : -7,
@@ -667,55 +705,6 @@
   };
 
   /* ============================================================
-     COUNTDOWN
-  ============================================================ */
-
-  const countdownEl =
-    document.querySelector("[data-countdown]");
-
-  if (countdownEl) {
-    const target =
-      new Date(EVENT.startUTC).getTime();
-
-    const fields = {
-      d: countdownEl.querySelector('[data-cd="d"]'),
-      h: countdownEl.querySelector('[data-cd="h"]'),
-      m: countdownEl.querySelector('[data-cd="m"]'),
-      s: countdownEl.querySelector('[data-cd="s"]')
-    };
-
-    function tick() {
-      const diff =
-        Math.max(0, target - Date.now());
-
-      fields.d.textContent = String(
-        Math.floor(diff / 86400000)
-      ).padStart(2, "0");
-
-      fields.h.textContent = String(
-        Math.floor(
-          (diff % 86400000) / 3600000
-        )
-      ).padStart(2, "0");
-
-      fields.m.textContent = String(
-        Math.floor(
-          (diff % 3600000) / 60000
-        )
-      ).padStart(2, "0");
-
-      fields.s.textContent = String(
-        Math.floor(
-          (diff % 60000) / 1000
-        )
-      ).padStart(2, "0");
-    }
-
-    tick();
-    setInterval(tick, 1000);
-  }
-
-  /* ============================================================
      CALENDAR
   ============================================================ */
 
@@ -742,35 +731,7 @@
     );
   }
 
-  function icsBlobUrl() {
-    const dt = (iso) =>
-      iso
-        .replace(/[-:]/g, "")
-        .replace(".000Z", "Z");
-
-    const content = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Casa Gelso//Opening//EN",
-      "BEGIN:VEVENT",
-      `DTSTART:${dt(EVENT.startUTC)}`,
-      `DTEND:${dt(EVENT.endUTC)}`,
-      `SUMMARY:${EVENT.title}`,
-      `LOCATION:${EVENT.location}`,
-      `DESCRIPTION:${EVENT.details}`,
-      "END:VEVENT",
-      "END:VCALENDAR"
-    ].join("\r\n");
-
-    return URL.createObjectURL(
-      new Blob([content], {
-        type: "text/calendar"
-      })
-    );
-  }
-
   const googleURL = googleCalUrl();
-  const icsURL = icsBlobUrl();
 
   document
     .querySelectorAll(
@@ -780,64 +741,21 @@
       a.href = googleURL;
     });
 
-  document
-    .querySelectorAll(
-      "[data-cal-ics], [data-cal-ics-success]"
-    )
-    .forEach((a) => {
-      a.href = icsURL;
-    });
-
-  /* ============================================================
-     INVITATION OPEN / CLOSE
-  ============================================================ */
-
-  const openInviteBtn =
-    document.querySelector("[data-open-invite]");
-
-  const inviteMore =
-    document.querySelector("[data-invite-more]");
-
-  if (openInviteBtn && inviteMore) {
-    openInviteBtn.addEventListener("click", () => {
-      const open =
-        inviteMore.classList.toggle("is-open");
-
-      openInviteBtn.setAttribute(
-        "aria-expanded",
-        String(open)
-      );
-
-      const lang =
-        localStorage.getItem(
-          "casa-gelso-language"
-        ) || "en";
-
-      const labels = {
-        en: {
-          open: "Open the invitation",
-          close: "Close the invitation"
-        },
-        ka: {
-          open: "მოსაწვევის გახსნა",
-          close: "მოსაწვევის დახურვა"
-        },
-        it: {
-          open: "Apri l'invito",
-          close: "Chiudi l'invito"
-        }
-      };
-
-      openInviteBtn.textContent =
-        open
-          ? labels[lang].close
-          : labels[lang].open;
-    });
-  }
-
   /* ============================================================
      RSVP
+
+     NOTE ON SUBMISSION: set RSVP_ENDPOINT below to a real
+     form-handling URL before launch (a serverless function, a
+     Formspree-style endpoint, whatever the backend ends up being).
+     Until it's set, submissions are validated and shown a success
+     state in the UI, but are only logged to the console — nothing
+     is actually saved anywhere. That was already true before this
+     rewrite (the old submitRSVP was a bare setTimeout); the
+     difference now is it's explicit instead of silently pretending
+     to work.
   ============================================================ */
+
+  const RSVP_ENDPOINT = "";
 
   const rsvpForm =
     document.getElementById("rsvpForm");
@@ -907,9 +825,13 @@
       const err = errorEl(name);
       const input = fieldEl(name);
 
+      /* FIX: the previous selector (".field, .field--fieldset")
+         doesn't match anything in this markup — the real wrapper
+         classes are .editorial-field / .editorial-choice — so
+         has-error was silently never applied. */
       const wrap = input
         ? input.closest(
-            ".field, .field--fieldset"
+            ".editorial-field, .editorial-choice"
           )
         : null;
 
@@ -929,7 +851,9 @@
       }
     }
 
-    ["name", "email", "attending"].forEach(
+    /* FIX: this used to include "email" — there is no email field in
+       this form. Scoped to the fields that actually exist. */
+    ["name", "attending"].forEach(
       (name) => {
         rsvpForm
           .querySelectorAll(
@@ -949,84 +873,102 @@
       }
     );
 
+    /* FIX: this previously also validated a non-existent "email"
+       field (always failing, since fieldEl("email") is null) and
+       fell back to focusing ".pill-group" for a missing "attending"
+       answer — a class that doesn't exist anywhere in this build.
+       Net effect: whenever "attending" was the only missing field,
+       firstInvalid stayed null/falsy, the submit handler's `if
+       (firstInvalid)` guard never fired, and the form submitted
+       successfully without the guest ever answering Yes/No. Fixed
+       to validate only the fields that exist and to fall back to
+       the real fieldset (.editorial-choice). */
     function validate(data) {
       let firstInvalid = null;
 
+      const t =
+        (translations[currentLang] ||
+          translations.en).errors;
+
       setError("name", "");
-      setError("email", "");
       setError("attending", "");
 
       if (!data.name.trim()) {
-        setError(
-          "name",
-          "Please tell us your name."
-        );
+        setError("name", t.name);
 
         firstInvalid =
           fieldEl("name");
       }
 
-      const emailOK =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-          data.email.trim()
-        );
-
-      if (!emailOK) {
-        setError(
-          "email",
-          "Please enter a valid email address."
-        );
-
-        firstInvalid =
-          firstInvalid ||
-          fieldEl("email");
-      }
-
       if (!data.attending) {
-        setError(
-          "attending",
-          "Please let us know if you'll attend."
-        );
+        setError("attending", t.attending);
 
         firstInvalid =
           firstInvalid ||
           rsvpForm.querySelector(
-            ".pill-group"
+            ".editorial-choice"
           );
       }
 
       return firstInvalid;
     }
 
+    /* FIX: previously read guests/guestNames/dietary/email/message —
+       none of which exist in this form — and never read "wish" at
+       all, so the one field the "One last thing" step exists to
+       collect was silently dropped on every submission. Also reads
+       the honeypot field (see the hp-field markup) so the submit
+       handler can silently drop bot submissions. */
     function readForm() {
       const fd =
         new FormData(rsvpForm);
 
       return {
         name: fd.get("name") || "",
-        email: fd.get("email") || "",
         attending:
           fd.get("attending") || "",
-        guests:
-          fd.get("guests") || "1",
-        guestNames:
-          fd.get("guestNames") || "",
-        dietary:
-          fd.get("dietary") || "",
         designers:
           fd.get("designers") || "",
-        message:
-          fd.get("message") || ""
+        wish:
+          fd.get("wish") || "",
+        website:
+          fd.get("website") || ""
       };
     }
 
     function submitRSVP(data) {
-      return new Promise((resolve) => {
-        setTimeout(
-          () => resolve({ ok: true }),
-          900
+      const payload = {
+        name: data.name,
+        attending: data.attending,
+        designers: data.designers,
+        wish: data.wish
+      };
+
+      if (!RSVP_ENDPOINT) {
+        console.warn(
+          "[Casa Gelso] RSVP_ENDPOINT is not set — this submission " +
+            "was not sent anywhere. Set RSVP_ENDPOINT in app.js to a " +
+            "real form-handling URL before launch.",
+          payload
         );
-      });
+
+        return new Promise((resolve) => {
+          setTimeout(
+            () => resolve({ ok: true }),
+            600
+          );
+        });
+      }
+
+      return fetch(RSVP_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+        .then((res) => ({ ok: res.ok }))
+        .catch(() => ({ ok: false }));
     }
 
     function showFormMessage(message) {
@@ -1045,13 +987,29 @@
 
         const data = readForm();
 
+        /* Honeypot: a real visitor never sees or reaches this field
+           (see .hp-field in the CSS), so a filled-in value means a
+           bot filled the form. Show the normal success state — so
+           the bot doesn't learn the submission was rejected and try
+           to adapt — but never actually send it. */
+        if (data.website) {
+          renderSuccess({
+            name: data.name,
+            attending: "yes"
+          });
+
+          return;
+        }
+
         const firstInvalid =
           validate(data);
 
         if (firstInvalid) {
-          showFormMessage(
-            "Please check the highlighted fields below."
-          );
+          const t =
+            (translations[currentLang] ||
+              translations.en).errors;
+
+          showFormMessage(t.checkFields);
 
           firstInvalid.focus({
             preventScroll: false
@@ -1077,9 +1035,11 @@
             renderSuccess(data);
           })
           .catch(() => {
-            showFormMessage(
-              "Something went wrong sending your RSVP. Please try again."
-            );
+            const t =
+              (translations[currentLang] ||
+                translations.en).errors;
+
+            showFormMessage(t.network);
           })
           .finally(() => {
             submitBtn.classList.remove(
@@ -1091,32 +1051,37 @@
       }
     );
 
+    /* FIX: these two strings were hardcoded English, so switching
+       to KA/IT translated everything else in this success state
+       except the two lines that actually confirm what happened.
+       Now pulled from `translations` via the same `currentLang`
+       the language switcher maintains (see the LANGUAGE SYSTEM
+       block below). */
     function renderSuccess(data) {
       const attending =
         data.attending === "yes";
 
+      const t =
+        (translations[currentLang] ||
+          translations.en).success;
+
+      const firstName =
+        data.name.split(" ")[0] || "";
+
       successEl.querySelector(
         "[data-success-eyebrow]"
       ).textContent = attending
-        ? "Your place is reserved"
-        : "Thank you for letting us know";
+        ? t.reservedEyebrow
+        : t.declinedEyebrow;
 
       successEl.querySelector(
         "[data-success-note]"
       ).textContent = attending
-        ? `We look forward to welcoming you on the evening, ${
-            data.name.split(" ")[0] || "there"
-          }.`
-        : "We'll miss you at the opening — we hope to see you at Casa Gelso soon.";
-
-      const calendar =
-        successEl.querySelector(
-          ".rsvp-success-calendar"
-        );
-
-      if (calendar) {
-        calendar.hidden = !attending;
-      }
+        ? t.reservedNote.replace(
+            "{name}",
+            firstName || t.reservedNoteFallback
+          )
+        : t.declinedNote;
 
       rsvpForm.hidden = true;
       successEl.hidden = false;
@@ -1136,7 +1101,7 @@
 
           setAttendingVisibility();
 
-          ["name", "email", "attending"]
+          ["name", "attending"]
             .forEach((name) =>
               setError(name, "")
             );
@@ -1168,6 +1133,14 @@
      - RSVP
   ============================================================ */
 
+  /* FIX: this object's keys used to be invite/rsvp/footer, but the
+     markup's data-i18n attributes (added when the RSVP/wish/success
+     markup was last reworked) expect invite/response/wish/success/
+     footer. applyLanguage() below now walks [data-i18n] generically
+     and looks values up by that dotted key path, so the two have to
+     agree — restructured to match what the HTML actually asks for,
+     and extended with the response/wish/success copy that never had
+     a translated home before. */
   const translations = {
     en: {
       invite: {
@@ -1175,266 +1148,174 @@
         title: "You are invited.",
         lede:
           "Join us for the opening of Casa Gelso — an evening dedicated to the pieces, and the people, that make style personal.",
+        dateLabel: "Date",
         date: "13 September 2026",
+        timeLabel: "Time",
         time: "19:00",
+        placeLabel: "Place",
         place: "Tbilisi, Georgia",
-        days: "Days",
-        hrs: "Hrs",
-        min: "Min",
-        sec: "Sec",
-        open: "Open the invitation",
-        close: "Close the invitation",
-        quote:
-          "Come discover a new luxury destination, curated with the spirit of Italy — accessible refinement, curated individuality, quiet confidence.",
-        calendar: "Add to calendar",
-        rsvp: "RSVP to the opening"
+        calendar: "Add to calendar"
       },
 
-      rsvp: {
-        title1: "Reserve",
-        title2: "your place.",
-        name: "Full name",
-        email: "Email",
+      response: {
+        subtitle: "Kindly confirm your attendance.",
+        name: "Name & surname",
+        attending: "Will you be joining us?",
         yes: "Yes, I'll be there",
-        no: "Can't make it",
-        guests:
-          "Guests, including yourself",
-        guestNames: "Guest name(s)",
-        dietary:
-          "Dietary requirements",
-        designers:
-          "Which house are you most excited to see? Name your top three.",
-        message:
-          "Anything else we should know?",
-        optional: "Optional",
-        confirm: "Confirm RSVP",
-        success:
-          "Your place is reserved",
-        note:
-          "We look forward to welcoming you on the evening.",
-        again:
-          "Submit another response"
+        no: "I won't be able to make it",
+        designers: "Top 3 designer / fashion house"
+      },
+
+      wish: {
+        kicker: "One last thing",
+        title: "What do you wish for Casa Gelso?",
+        label: "Your wish for Casa Gelso",
+        placeholder: "",
+        send: "Submit"
+      },
+
+      success: {
+        title: "See you at Casa Gelso.",
+        again: "Submit another response",
+        reservedEyebrow: "Your place is reserved",
+        reservedNote:
+          "We look forward to welcoming you on the evening, {name}.",
+        reservedNoteFallback: "there",
+        declinedEyebrow: "Thank you for letting us know",
+        declinedNote:
+          "We'll miss you at the opening — we hope to see you at Casa Gelso soon."
+      },
+
+      errors: {
+        name: "Please tell us your name.",
+        attending: "Please let us know if you'll attend.",
+        checkFields: "Please check the highlighted fields below.",
+        network:
+          "Something went wrong sending your RSVP. Please try again."
       },
 
       footer: {
         tag:
           "Accessible refinement. Curated individuality. Quiet confidence.",
-        back:
-          "Back to top ↑"
+        back: "Back to top ↑"
       }
     },
 
     ka: {
       invite: {
-        eyebrow:
-          "კერძო გახსნა · თბილისი",
-
-        title:
-          "თქვენ მოწვეული ხართ.",
-
+        eyebrow: "კერძო გახსნა · თბილისი",
+        title: "თქვენ მოწვეული ხართ.",
         lede:
           "შემოგვიერთდით Casa Gelso-ს გახსნაზე — საღამო, რომელიც ეძღვნება ნივთებსა და ადამიანებს, რომლებიც სტილს პირად ისტორიად აქცევენ.",
-
-        date:
-          "13 სექტემბერი 2026",
-
-        time:
-          "19:00",
-
-        place:
-          "თბილისი, საქართველო",
-
-        days:
-          "დღე",
-
-        hrs:
-          "სთ",
-
-        min:
-          "წთ",
-
-        sec:
-          "წმ",
-
-        open:
-          "მოსაწვევის გახსნა",
-
-        close:
-          "მოსაწვევის დახურვა",
-
-        quote:
-          "აღმოაჩინეთ ახალი ლუქს-დანიშნულება, იტალიის სულისკვეთებით — ხელმისაწვდომი დახვეწილობა, შერჩეული ინდივიდუალობა, მშვიდი თავდაჯერება.",
-
-        calendar:
-          "კალენდარში დამატება",
-
-        rsvp:
-          "RSVP გახსნაზე"
+        dateLabel: "თარიღი",
+        date: "13 სექტემბერი 2026",
+        timeLabel: "დრო",
+        time: "19:00",
+        placeLabel: "ადგილი",
+        place: "თბილისი, საქართველო",
+        calendar: "კალენდარში დამატება"
       },
 
-      rsvp: {
-        title1:
-          "დაიჯავშნე",
+      response: {
+        subtitle: "გთხოვთ, დაადასტუროთ თქვენი დასწრება.",
+        name: "სახელი და გვარი",
+        attending: "დაესწრებით ღონისძიებას?",
+        yes: "დიახ, მოვალ",
+        no: "ვერ მოვალ",
+        designers: "საყვარელი 3 დიზაინერი / მოდის სახლი"
+      },
 
-        title2:
-          "შენი ადგილი.",
+      wish: {
+        kicker: "ბოლო რამ",
+        title: "რას უსურვებდით Casa Gelso-ს?",
+        label: "თქვენი სურვილი Casa Gelso-სთვის",
+        placeholder: "",
+        send: "გაგზავნა"
+      },
 
-        name:
-          "სახელი და გვარი",
+      success: {
+        title: "გელოდებით Casa Gelso-ში.",
+        again: "სხვა პასუხის გაგზავნა",
+        reservedEyebrow: "თქვენი ადგილი დაჯავშნილია",
+        reservedNote:
+          "მოუთმენლად ველით თქვენს სტუმრობას საღამოს, {name}.",
+        reservedNoteFallback: "თქვენ",
+        declinedEyebrow: "მადლობა შეტყობინებისთვის",
+        declinedNote:
+          "დაგვენატრებით გახსნაზე — იმედი გვაქვს, მალე ვნახავთ Casa Gelso-ში."
+      },
 
-        email:
-          "ელფოსტა",
-
-        yes:
-          "დიახ, მოვალ",
-
-        no:
-          "ვერ მოვალ",
-
-        guests:
-          "სტუმრები, საკუთარი თავის ჩათვლით",
-
-        guestNames:
-          "სტუმრის/სტუმრების სახელი",
-
-        dietary:
-          "კვების მოთხოვნები",
-
-        designers:
-          "რომელი მოდის სახლის ნახვას ელოდები ყველაზე მეტად? დაასახელე შენი ტოპ 3.",
-
-        message:
-          "კიდევ რამე უნდა ვიცოდეთ?",
-
-        optional:
-          "არასავალდებულო",
-
-        confirm:
-          "RSVP-ის დადასტურება",
-
-        success:
-          "შენი ადგილი დაჯავშნილია",
-
-        note:
-          "მოუთმენლად ველით შენს სტუმრობას.",
-
-        again:
-          "სხვა პასუხის გაგზავნა"
+      errors: {
+        name: "გთხოვთ, მიუთითოთ თქვენი სახელი.",
+        attending: "გთხოვთ, გვაცნობოთ დაესწრებით თუ არა.",
+        checkFields: "გთხოვთ, შეამოწმოთ მონიშნული ველები.",
+        network:
+          "დაფიქსირდა შეცდომა RSVP-ის გაგზავნისას. გთხოვთ, სცადოთ ხელახლა."
       },
 
       footer: {
         tag:
           "ხელმისაწვდომი დახვეწილობა. შერჩეული ინდივიდუალობა. მშვიდი თავდაჯერება.",
-
-        back:
-          "თავში დაბრუნება ↑"
+        back: "თავში დაბრუნება ↑"
       }
     },
 
     it: {
       invite: {
-        eyebrow:
-          "Apertura privata · Tbilisi",
-
-        title:
-          "Sei invitato.",
-
+        eyebrow: "Apertura privata · Tbilisi",
+        title: "Sei invitato.",
         lede:
           "Unisciti a noi per l'apertura di Casa Gelso — una serata dedicata ai pezzi e alle persone che rendono lo stile personale.",
-
-        date:
-          "13 settembre 2026",
-
-        time:
-          "19:00",
-
-        place:
-          "Tbilisi, Georgia",
-
-        days:
-          "Giorni",
-
-        hrs:
-          "Ore",
-
-        min:
-          "Min",
-
-        sec:
-          "Sec",
-
-        open:
-          "Apri l'invito",
-
-        close:
-          "Chiudi l'invito",
-
-        quote:
-          "Scopri una nuova destinazione del lusso, curata nello spirito dell'Italia — raffinatezza accessibile, individualità curata, quiet confidence.",
-
-        calendar:
-          "Aggiungi al calendario",
-
-        rsvp:
-          "RSVP all'apertura"
+        dateLabel: "Data",
+        date: "13 settembre 2026",
+        timeLabel: "Ora",
+        time: "19:00",
+        placeLabel: "Luogo",
+        place: "Tbilisi, Georgia",
+        calendar: "Aggiungi al calendario"
       },
 
-      rsvp: {
-        title1:
-          "Riserva",
+      response: {
+        subtitle: "Vi preghiamo di confermare la vostra presenza.",
+        name: "Nome e cognome",
+        attending: "Sarai con noi?",
+        yes: "Sì, ci sarò",
+        no: "Non posso venire",
+        designers: "Le tue 3 maison preferite"
+      },
 
-        title2:
-          "il tuo posto.",
+      wish: {
+        kicker: "Un'ultima cosa",
+        title: "Cosa auguri a Casa Gelso?",
+        label: "Il tuo augurio per Casa Gelso",
+        placeholder: "",
+        send: "Invia"
+      },
 
-        name:
-          "Nome e cognome",
+      success: {
+        title: "Ti aspettiamo da Casa Gelso.",
+        again: "Invia un'altra risposta",
+        reservedEyebrow: "Il tuo posto è riservato",
+        reservedNote:
+          "Non vediamo l'ora di accoglierti la sera dell'evento, {name}.",
+        reservedNoteFallback: "tu",
+        declinedEyebrow: "Grazie per avercelo fatto sapere",
+        declinedNote:
+          "Ci mancherai all'apertura — speriamo di vederti presto da Casa Gelso."
+      },
 
-        email:
-          "Email",
-
-        yes:
-          "Sì, ci sarò",
-
-        no:
-          "Non posso venire",
-
-        guests:
-          "Ospiti, incluso te",
-
-        guestNames:
-          "Nome degli ospiti",
-
-        dietary:
-          "Esigenze alimentari",
-
-        designers:
-          "Quale maison non vedi l'ora di scoprire? Indica le tue tre preferite.",
-
-        message:
-          "C'è altro che dovremmo sapere?",
-
-        optional:
-          "Facoltativo",
-
-        confirm:
-          "Conferma RSVP",
-
-        success:
-          "Il tuo posto è riservato",
-
-        note:
-          "Non vediamo l'ora di accoglierti.",
-
-        again:
-          "Invia un'altra risposta"
+      errors: {
+        name: "Indicaci il tuo nome, per favore.",
+        attending: "Facci sapere se parteciperai, per favore.",
+        checkFields: "Controlla i campi evidenziati qui sotto.",
+        network:
+          "Si è verificato un problema nell'invio dell'RSVP. Riprova."
       },
 
       footer: {
         tag:
           "Raffinatezza accessibile. Individualità curata. Quiet confidence.",
-
-        back:
-          "Torna in cima ↑"
+        back: "Torna in cima ↑"
       }
     }
   };
@@ -1449,26 +1330,51 @@
   const $$ = (selector, root = document) =>
     Array.from(root.querySelectorAll(selector));
 
-  function setText(selector, value) {
-    const element = $(selector);
-
-    if (element) {
-      element.textContent = value;
-    }
+  /* Reads a dotted path ("response.attending") out of a translation
+     object — the same shape as the data-i18n attribute values in
+     the HTML, so a key always means exactly one thing in both
+     places. */
+  function lookup(t, path) {
+    return path
+      .split(".")
+      .reduce(
+        (node, key) =>
+          node && node[key] !== undefined
+            ? node[key]
+            : undefined,
+        t
+      );
   }
 
   /* ============================================================
      APPLY LANGUAGE
 
-     ONLY INVITATION + RSVP ARE MODIFIED.
+     ONLY INVITATION + RSVP ARE MODIFIED — teaser, opening sequence
+     and digital ad carry no data-i18n attributes at all, so this
+     walker never touches them; that's what keeps them English by
+     construction rather than by convention.
 
-     NOTHING ABOVE THIS POINT IS TOUCHED.
+     FIX: this function used to hand-wire ~25 individual selectors
+     (#rsvp-heading, .pill span, .rsvp-submit, #rsvpEmail,
+     .invite-quote, .invite-calendar span, [data-open-invite]...) —
+     none of which exist in the current markup, which was reworked
+     to use a generic data-i18n="response.attending"-style contract
+     instead. The old function silently updated nothing for most of
+     the RSVP form because every selector it queried returned null.
+     Replaced with a generic walker over [data-i18n] /
+     [data-i18n-placeholder] so every translatable element in the
+     HTML is covered automatically, and adding a new one later never
+     needs a matching line here.
   ============================================================ */
 
   function applyLanguage(lang) {
     const t =
       translations[lang] ||
       translations.en;
+
+    currentLang = translations[lang]
+      ? lang
+      : "en";
 
     document.documentElement.lang =
       lang === "ka"
@@ -1498,199 +1404,28 @@
       );
     });
 
-    /* ========================================================
-       DO NOT TOUCH:
-       teaser
-       coming soon
-       digital ad
-       reveal
+    $$("[data-i18n]").forEach((el) => {
+      const value = lookup(
+        t,
+        el.dataset.i18n
+      );
 
-       They stay in their original English HTML.
-    ======================================================== */
+      if (value !== undefined) {
+        el.textContent = value;
+      }
+    });
 
-
-    /* ========================================================
-       INVITATION ONLY
-    ======================================================== */
-
-    setText(
-      ".invite-card .eyebrow",
-      t.invite.eyebrow
-    );
-
-    setText(
-      "#invite-heading .mask-in",
-      t.invite.title
-    );
-
-    setText(
-      ".invite-lede",
-      t.invite.lede
-    );
-
-    const meta =
-      $$(".invite-meta dd");
-
-    if (meta[0])
-      meta[0].textContent =
-        t.invite.date;
-
-    if (meta[1])
-      meta[1].textContent =
-        t.invite.time;
-
-    if (meta[2])
-      meta[2].textContent =
-        t.invite.place;
-
-    const countdownLabels =
-      $$(".invite-countdown span");
-
-    if (countdownLabels[0])
-      countdownLabels[0].textContent =
-        t.invite.days;
-
-    if (countdownLabels[1])
-      countdownLabels[1].textContent =
-        t.invite.hrs;
-
-    if (countdownLabels[2])
-      countdownLabels[2].textContent =
-        t.invite.min;
-
-    if (countdownLabels[3])
-      countdownLabels[3].textContent =
-        t.invite.sec;
-
-    const inviteOpenButton =
-      $("[data-open-invite]");
-
-    if (inviteOpenButton) {
-      const isOpen =
-        inviteMore &&
-        inviteMore.classList.contains(
-          "is-open"
+    $$("[data-i18n-placeholder]").forEach(
+      (el) => {
+        const value = lookup(
+          t,
+          el.dataset.i18nPlaceholder
         );
 
-      inviteOpenButton.textContent =
-        isOpen
-          ? t.invite.close
-          : t.invite.open;
-    }
-
-    setText(
-      ".invite-quote",
-      t.invite.quote
-    );
-
-    setText(
-      ".invite-calendar span",
-      t.invite.calendar
-    );
-
-    setText(
-      ".invite-rsvp-cta",
-      t.invite.rsvp
-    );
-
-
-    /* ========================================================
-       RSVP ONLY
-    ======================================================== */
-
-    setText(
-      "#rsvp-heading .mask-in",
-      t.rsvp.title1
-    );
-
-    setText(
-      "#rsvp-heading .mask-in--italic",
-      t.rsvp.title2
-    );
-
-    const labels = {
-      rsvpName: t.rsvp.name,
-      rsvpEmail: t.rsvp.email,
-      rsvpGuests: t.rsvp.guests,
-      rsvpGuestNames:
-        t.rsvp.guestNames,
-      rsvpDietary:
-        t.rsvp.dietary,
-      rsvpDesigners:
-        t.rsvp.designers,
-      rsvpMessage:
-        t.rsvp.message
-    };
-
-    Object.entries(labels).forEach(
-      ([id, value]) => {
-        const label =
-          document.querySelector(
-            `label[for="${id}"]`
-          );
-
-        if (label) {
-          label.textContent = value;
+        if (value !== undefined) {
+          el.placeholder = value;
         }
       }
-    );
-
-    const pills =
-      $$(".pill span");
-
-    if (pills[0])
-      pills[0].textContent =
-        t.rsvp.yes;
-
-    if (pills[1])
-      pills[1].textContent =
-        t.rsvp.no;
-
-    const messageField =
-      $("#rsvpMessage");
-
-    if (messageField) {
-      messageField.placeholder =
-        t.rsvp.optional;
-    }
-
-    setText(
-      ".rsvp-submit .btn-label",
-      t.rsvp.confirm
-    );
-
-    setText(
-      "[data-success-eyebrow]",
-      t.rsvp.success
-    );
-
-    setText(
-      "[data-success-note]",
-      t.rsvp.note
-    );
-
-    setText(
-      "[data-rsvp-again]",
-      t.rsvp.again
-    );
-
-
-    /* ========================================================
-       FOOTER
-
-       Footer is kept in English conceptually, but the existing
-       footer translation is retained here because it is outside
-       the teaser / digital-ad copy.
-    ======================================================== */
-
-    setText(
-      ".site-footer-tag",
-      t.footer.tag
-    );
-
-    setText(
-      ".site-footer-meta a",
-      t.footer.back
     );
   }
 
