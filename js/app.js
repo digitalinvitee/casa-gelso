@@ -282,6 +282,13 @@
         if (openBtn && !skipped) {
           openBtn.classList.add("is-visible");
         }
+
+        /* No auto-continue timer here on purpose: the site must not
+           open on its own — only "Enter" or "Skip intro" (both call
+           openIntro()/finishOpener() directly) may start it. The
+           try/catch around runOpener() further down is the only
+           remaining safety net, and it only fires on an actual JS
+           error — not simply because nobody has tapped yet. */
       });
 
     let introOpened = false;
@@ -481,7 +488,31 @@
       }, "-=0.25");
   }
 
-  runOpener();
+  /* SAFETY NET: the opener locks body scroll the instant it starts
+     (see lock("is-locked") at the top of runOpener()) and only
+     unlocks it once finishOpener() runs. If anything inside throws
+     before that point — a selector that doesn't match on some
+     browser, a third-party script conflict, anything unforeseen —
+     the whole rest of app.js (RSVP form, language switcher, nav,
+     everything below) would never run either, AND the visitor would
+     be stuck on a locked, non-scrolling page with no way out. That
+     is worse than any visual glitch, so: if runOpener() throws,
+     force an unlock and get the opener out of the way immediately
+     rather than leaving the site frozen. */
+  try {
+    runOpener();
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] Opener failed — recovering:", err);
+    }
+
+    unlock("is-locked");
+    document.body.classList.add("opener-revealed");
+
+    if (opener) {
+      opener.style.display = "none";
+    }
+  }
 
   /* ============================================================
      SCROLL REVEALS
