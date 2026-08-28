@@ -965,8 +965,11 @@ body.lang-ka .mobile-menu a{
   inset: 0;
   z-index: 40;
 
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 3.4vh, 34px);
 
   background: #0B0505;
 }
@@ -974,6 +977,42 @@ body.lang-ka .mobile-menu a{
 .title-card img{
   width: min(11vw, 120px);
   opacity: 0;
+}
+
+/* ------------------------------------------------------------
+   Enter — the actual click/tap that starts the sequence. Revealed
+   once the monogram has faded in (see the OPEN GATE block in
+   app.js). Pressing it is the real user gesture browsers require
+   before audio with sound is allowed to play, so the rest of the
+   opener — and the music, once it reaches the brand reveal — is
+   gated behind it instead of trying (and failing) to autoplay.
+------------------------------------------------------------ */
+
+.title-card-enter{
+  opacity: 0;
+  visibility: hidden;
+
+  color: var(--cream);
+
+  font-family: var(--sans);
+  font-size: .5625rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+
+  border-bottom: 1px solid rgba(251,248,242,.4);
+  padding-bottom: 6px;
+
+  transition: opacity .6s ease;
+}
+
+.title-card-enter.is-visible{
+  opacity: .68;
+  visibility: visible;
+}
+
+.title-card-enter.is-visible:hover,
+.title-card-enter.is-visible:focus-visible{
+  opacity: 1;
 }
 
 

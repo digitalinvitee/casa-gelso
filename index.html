@@ -139,9 +139,17 @@
 
   <button class="opener-skip" type="button" data-skip-intro>Skip intro</button>
 
-  <!-- Beat 0 — monogram title card -->
-  <div class="title-card" data-title-card aria-hidden="true">
+  <!-- Beat 0 — monogram title card. Not aria-hidden: it now holds a
+       real "Enter" control (see the OPEN GATE block in app.js) that
+       keyboard/screen-reader users need to be able to reach — the
+       rest of the sequence, and any chance of the music starting
+       (browsers refuse unmuted audio without a real user gesture),
+       waits for it to be pressed. -->
+  <div class="title-card" data-title-card>
     <img src="assets/logo/monogram-ivory.png" alt="">
+    <button type="button" class="title-card-enter" data-open-intro>
+      <span class="title-card-enter-label">Enter</span>
+    </button>
   </div>
 
   <!-- Beats 1–5 — the five campaign frames -->

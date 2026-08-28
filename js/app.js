@@ -109,6 +109,7 @@
 
     const heroScroll = hero?.querySelector(".reveal-hero-scroll");
     const skipBtn = opener.querySelector("[data-skip-intro]");
+    const openBtn = titleCard?.querySelector("[data-open-intro]");
 
     function finishOpener() {
       unlock("is-locked");
@@ -119,9 +120,9 @@
 
       document.body.classList.add("opener-revealed");
 
-      /* Lets the SOUND block (below) know the teaser is done, so
-         music only ever starts once the opener has finished —
-         never during the teaser itself. */
+      /* Not used to gate music anymore (see the FIX note by
+         primeAudio() in the SOUND block for why) — kept in case
+         something else on the page wants to know the teaser ended. */
       document.dispatchEvent(
         new CustomEvent("casa:opener-finished")
       );
@@ -234,12 +235,78 @@
       }
     });
 
+    /* ============================================================
+       OPEN GATE
+
+       Browsers refuse to play audio with sound unless playback is
+       started by a real user gesture — no JS trick talks them out
+       of that. Autoplaying the whole teaser (as this used to do)
+       meant a visitor who never touched the page before the reveal
+       never gave the music a gesture to hang off, so it silently
+       stayed muted for the rest of the visit.
+
+       Fix: the monogram fades in on its own (tlIntro, below, plays
+       immediately), then an "Enter" prompt appears. The main
+       timeline (tl) is created paused and stays that way until
+       "Enter" — or "Skip intro" — is actually pressed, so pressing
+       either one is itself the gesture — both handlers call
+       primeAudio() (defined in the SOUND block further down)
+       directly and synchronously, so the music starts playing for
+       real right on that click (see the FIX note by primeAudio()
+       for why it can't wait any longer than that).
+    ============================================================ */
+
     const tl = gsap.timeline({
       defaults: {
         ease: "power3.out"
       },
+      paused: true,
       onComplete: finishOpener
     });
+
+    const tlIntro = gsap.timeline({
+      defaults: {
+        ease: "power3.out"
+      }
+    });
+
+    tlIntro
+      .to(titleMark, {
+        autoAlpha: 1,
+        scale: 1,
+        filter: "blur(0px)",
+        duration: 1.3,
+        ease: "power2.out"
+      })
+      .call(() => {
+        if (openBtn && !skipped) {
+          openBtn.classList.add("is-visible");
+        }
+      });
+
+    let introOpened = false;
+
+    function openIntro() {
+      if (introOpened || skipped) return;
+
+      introOpened = true;
+
+      /* Explicit + synchronous, right inside this click handler — see
+         the FIX note above primeAudio()'s listeners in the SOUND
+         block for why a generic pointerdown/touchstart listener
+         alone isn't reliable here (it silently fails on touch). */
+      primeAudio();
+
+      if (openBtn) {
+        openBtn.classList.remove("is-visible");
+      }
+
+      tl.play();
+    }
+
+    if (openBtn) {
+      openBtn.addEventListener("click", openIntro);
+    }
 
     if (skipBtn) {
       skipBtn.addEventListener("click", () => {
@@ -247,7 +314,14 @@
 
         skipped = true;
 
+        primeAudio();
+
+        tlIntro.kill();
         tl.kill();
+
+        if (openBtn) {
+          openBtn.classList.remove("is-visible");
+        }
 
         titleCard.style.display = "none";
 
@@ -282,25 +356,18 @@
       });
     }
 
-    /* Beat 0 */
+    /* Beat 0 — the fade-IN happens above in tlIntro, before anyone
+       has interacted with anything; this is only the fade-OUT, which
+       plays once "Enter" (or "Skip intro") has actually been
+       pressed. */
 
     tl.to(titleMark, {
-      autoAlpha: 1,
-      scale: 1,
-      filter: "blur(0px)",
-      duration: 1.3,
-      ease: "power2.out"
+      autoAlpha: 0,
+      scale: 0.96,
+      filter: "blur(6px)",
+      duration: 0.55,
+      ease: "power2.in"
     })
-      .to({}, {
-        duration: 0.6
-      })
-      .to(titleMark, {
-        autoAlpha: 0,
-        scale: 0.96,
-        filter: "blur(6px)",
-        duration: 0.55,
-        ease: "power2.in"
-      })
       .to(titleCard, {
         autoAlpha: 0,
         duration: 0.4
@@ -1623,25 +1690,27 @@
     );
   });
 
-  /* Music should only start once the teaser has finished — but
-     mobile browsers (iOS Safari especially, and Chrome on Android)
-     only allow audio.play() to succeed when it's called
-     SYNCHRONOUSLY inside a real user-gesture event handler. If we
-     wait for the gesture to happen, then wait AGAIN for the opener
-     to finish before calling play(), that second call happens
-     outside the gesture's call stack and mobile browsers silently
-     refuse it — which is why this worked in quick desktop testing
-     (Chrome desktop is more lenient) but not on a phone.
+  /* FIX: an earlier version of this tried to have music wait for the
+     teaser to finish while still only needing one early gesture: it
+     called play()-then-immediately-pause() on the very first click
+     to "unlock" the element, then, many seconds later once the
+     teaser's animation actually completed, called play() again for
+     real via the casa:opener-finished event. That second call is no
+     longer a direct, synchronous consequence of the original
+     gesture — a GSAP timeline runs across dozens of animation-frame
+     callbacks in between — and real-world testing on a phone showed
+     the browser silently refusing it every time, even though the
+     exact same click DID successfully start the music when it
+     skipped straight to the end ("Skip intro"; that handler calls
+     finishOpener() synchronously, so its play() call never left the
+     gesture's call stack).
 
-     The fix: call play() synchronously on the very first gesture,
-     no matter when it happens — this "unlocks" the audio element.
-     If the teaser isn't done yet, immediately pause it again in
-     the same tick, before any sound is audible. Once unlocked, a
-     later play() call (e.g. once the teaser actually finishes)
-     is allowed to succeed without needing a fresh gesture. */
-  let openerHasFinished = document.body.classList.contains(
-    "opener-revealed"
-  );
+     Fix: don't defer the real play() at all. "Enter" and "Skip
+     intro" (see the OPEN GATE block in runOpener()) both call
+     primeAudio() directly and synchronously from their own click
+     handlers, and this now starts playback for real, immediately —
+     no cosmetic wait for the brand reveal, because that wait is
+     exactly what broke it. */
   let audioUnlocked = false;
 
   function primeAudio() {
@@ -1650,44 +1719,32 @@
     audioUnlocked = true;
     audio.muted = false;
 
-    const playPromise = audio.play();
-
-    if (!openerHasFinished) {
-      audio.pause();
-    }
-
-    if (playPromise && playPromise.catch) {
-      playPromise
-        .then(() => {
-          if (openerHasFinished) syncSoundUI();
-        })
-        .catch(() => {
-          /* Autoplay refused even with a gesture (rare) — leave
-             muted; the manual sound-toggle buttons still work. */
-          audio.muted = true;
-        });
-    }
+    audio
+      .play()
+      .then(syncSoundUI)
+      .catch(() => {
+        /* Autoplay refused even with a gesture (rare) — leave
+           muted; the manual sound-toggle buttons still work. */
+        audio.muted = true;
+      });
   }
 
-  document.addEventListener(
-    "casa:opener-finished",
-    () => {
-      openerHasFinished = true;
-
-      if (audioUnlocked && audio && audio.paused) {
-        audio
-          .play()
-          .then(syncSoundUI)
-          .catch(() => {});
-      }
-    },
-    { once: true }
-  );
-
+  /* FIX: per the WHATWG spec's "activation triggering input event"
+     list, pointerdown only counts as a real user gesture when
+     pointerType is "mouse", and touchstart doesn't count at all. So
+     on a phone, the very first tap on "Enter" fired touchstart (and
+     a non-"mouse" pointerdown) here, primeAudio()'s audio.play() ran
+     without a gesture the browser actually recognised, the promise
+     was rejected, and the .catch below permanently muted the
+     element — audioUnlocked was already true, so nothing ever
+     retried. "Enter" and "Skip intro" now call primeAudio() directly
+     from their own click handlers (see runOpener() above), which is
+     always valid; these listeners are just a fallback for any other
+     first interaction. click/keydown are both valid on every input
+     type, unlike pointerdown/touchstart. */
   [
-    "pointerdown",
-    "keydown",
-    "touchstart"
+    "click",
+    "keydown"
   ].forEach((eventName) => {
     window.addEventListener(
       eventName,
