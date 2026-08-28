@@ -33,7 +33,17 @@
      mostly-unused Bodoni Moda load, and the CSS @import that duplicated
      this request has been removed from style.css). -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+Georgian:wght@400;500&family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="assets/teaser/01-shoe.jpg" fetchpriority="high">
+<!-- FIX: the true first-painted content is the opener's monogram
+     (title-card img, fades in ~0-1.3s after load) — the teaser's
+     first campaign frame (01-shoe.jpg) only appears once "Enter" is
+     pressed, several seconds later at the earliest, and is a much
+     larger asset. Preloading the shoe photo at fetchpriority=high
+     was competing with the actually-critical logo for early
+     bandwidth; the logo now gets the priority hint instead, and the
+     shoe frame is still preloaded (it's needed soon) just without
+     jumping the queue ahead of first paint. -->
+<link rel="preload" as="image" href="assets/logo/monogram-ivory.png" fetchpriority="high">
+<link rel="preload" as="image" href="assets/teaser/01-shoe.jpg">
 <link rel="stylesheet" href="css/style.css">
 
 <!-- Event structured data — lets Google surface this as a rich event
@@ -67,6 +77,15 @@
 </script>
 </head>
 <body class="is-locked">
+<!-- FIX: the page had no <h1> anywhere — every heading (chapter
+     marks, "You are invited.", etc.) is an h2, and the brand name
+     itself is only ever an <img alt="Casa Gelso">, never a heading
+     element. Screen-reader users and SEO crawlers rely on exactly
+     one h1 to identify what a page is; added visually-hidden
+     (reuses the existing .sr-only utility, so nothing on screen
+     changes) rather than promoting an existing visual heading and
+     disturbing the section-by-section h2/h3 hierarchy below it. -->
+<h1 class="sr-only">Casa Gelso — Opening in Tbilisi, 12 September 2026</h1>
 <audio id="casaGelsoAudio" preload="metadata" loop playsinline src="assets/audio/mp3.mp3"></audio>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="film-grain" aria-hidden="true"></div>
@@ -251,7 +270,7 @@
   <div class="ad-canvas">
 
     <figure class="ad-figure ad-figure--a" data-parallax>
-      <img src="assets/reveal/add1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy">
+      <img src="assets/reveal/add1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
         <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
@@ -264,7 +283,7 @@
     </div>
 
     <figure class="ad-figure ad-figure--b" data-parallax>
-      <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy">
+      <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy" decoding="async">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
         <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
@@ -283,7 +302,7 @@
     </div>
 
     <figure class="ad-figure ad-figure--c" data-parallax>
-      <img src="assets/reveal/add3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy">
+      <img src="assets/reveal/add3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
         <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
@@ -296,7 +315,7 @@
     </div>
 
     <figure class="ad-figure ad-figure--d" data-parallax>
-      <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy">
+      <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy" decoding="async">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
         <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
@@ -308,7 +327,7 @@
     </div>
 
     <figure class="ad-figure ad-figure--e" data-parallax>
-      <img src="assets/reveal/add5.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy">
+      <img src="assets/reveal/add5.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
         <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
@@ -740,17 +759,6 @@
   </div>
 
 
-  <!-- FOOTLINE -->
-  <p class="invite-footline">
-
-    <span>Casa Gelso</span>
-
-    <span>
-      Tbilisi · 12 / 09 / 2026
-    </span>
-
-  </p>
-
 </section>
 
 </main>
@@ -781,14 +789,19 @@
   Created by <a href="https://invitee.ge/" target="_blank" rel="noopener noreferrer">INVITÉ</a>
 </p>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<!-- defer (not async) on all four: keeps them non-render-blocking
+     while preserving strict execution order (gsap → ScrollTrigger →
+     lenis → app.js, each depending on the one before it) — async
+     would let them run in whatever order they happen to finish
+     downloading, which could run app.js before gsap exists. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js" defer></script>
 <!-- LANGUAGE SCOPE:
      Teaser / Opening Sequence / Digital Ad are ALWAYS English.
      KA/IT translation is allowed ONLY inside Invitation + RSVP.
      app.js should scope translation to [data-translatable-section].
 -->
-<script src="js/app.js"></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>

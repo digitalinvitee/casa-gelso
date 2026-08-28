@@ -14,12 +14,38 @@
 
   const hasGSAP = typeof gsap !== "undefined";
 
+  /* ============================================================
+     SAFE STORAGE
+     localStorage.getItem/setItem can throw (Safari private mode,
+     an org policy disabling storage, a full quota, storage access
+     blocked in an embedded context) — and since this used to run
+     as a bare top-level statement, a throw here killed this entire
+     IIFE before any try/catch below ever got a chance to run: no
+     opener unlock, no RSVP, no nav, nothing. Wrapped so a storage
+     failure degrades to "always English, don't remember sound
+     state" instead of a blank/frozen site. */
+  function safeStorageGet(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function safeStorageSet(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_) {
+      /* ignore — non-critical, language still works for this visit */
+    }
+  }
+
   /* Tracked here (rather than re-reading localStorage on every call)
      so renderSuccess() and any other non-language code can format
      text in whichever language is currently active. applyLanguage()
      below keeps this in sync. */
   let currentLang =
-    localStorage.getItem("casa-gelso-language") || "en";
+    safeStorageGet("casa-gelso-language") || "en";
 
   if (hasGSAP && typeof ScrollTrigger !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -101,9 +127,13 @@
         )
       : [];
 
+    /* FIX: ".reveal-chrome" doesn't match any element in the current
+       markup (a leftover from an earlier layout) — dropped, since a
+       selector that can never match anything is dead weight, not a
+       hook for something that still exists. */
     const heroChrome = hero
       ? hero.querySelectorAll(
-          ".reveal-chrome, .reveal-languages"
+          ".reveal-languages"
         )
       : [];
 
@@ -154,7 +184,7 @@
 
       hero
         .querySelectorAll(
-          ".reveal-lockup, .reveal-brand-rule, .reveal-season, .reveal-manifesto, .reveal-year, .reveal-chrome, .reveal-languages, .reveal-hero-scroll"
+          ".reveal-lockup, .reveal-brand-rule, .reveal-season, .reveal-manifesto, .reveal-year, .reveal-languages, .reveal-hero-scroll"
         )
         .forEach((el) => {
           el.style.opacity = "1";
@@ -522,6 +552,14 @@
     hasGSAP &&
     typeof ScrollTrigger !== "undefined";
 
+  /* Wrapped in its own try/catch (see "SAFETY NET" note above
+     runOpener()) — an unusual selector mismatch anywhere in this
+     large scroll-animation block used to be able to throw and take
+     down every feature declared after it (mobile menu, calendar,
+     RSVP, language, sound), since nothing here was isolated before.
+     A failure now degrades to "no scroll animation" instead of
+     "no RSVP form". */
+  try {
   if (hasGSAP) {
     if (reduceMotion || !hasScrollTrigger) {
       gsap.set(".reveal-up", {
@@ -710,6 +748,11 @@
       }
     }
   }
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] Scroll reveals failed — continuing without them:", err);
+    }
+  }
 
   /* ============================================================
      MOBILE MENU
@@ -730,6 +773,7 @@
   const menuCloseBtn =
     document.querySelector("[data-menu-close]");
 
+  try {
   if (menuToggle && mobileMenu) {
     function closeMobileMenu() {
       mobileMenu.classList.remove("is-open");
@@ -788,11 +832,17 @@
         a.addEventListener("click", closeMobileMenu);
       });
   }
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] Mobile menu failed to initialize:", err);
+    }
+  }
 
   /* ============================================================
      EVENT DATA
   ============================================================ */
 
+  try {
   const EVENT = {
     title: "Casa Gelso — Opening",
     details:
@@ -838,6 +888,11 @@
     .forEach((a) => {
       a.href = googleURL;
     });
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] Calendar link setup failed:", err);
+    }
+  }
 
   /* ============================================================
      RSVP
@@ -858,6 +913,7 @@
   const rsvpForm =
     document.getElementById("rsvpForm");
 
+  try {
   if (rsvpForm) {
     const statusEl =
       document.getElementById("rsvpFormStatus");
@@ -1080,16 +1136,34 @@
         });
       }
 
+      /* On a slow/unstable connection a hung request would otherwise
+         leave the submit button spinning forever (fetch has no
+         built-in timeout) — AbortController bounds it so the guest
+         always gets a definite success or "try again" within a few
+         seconds instead of an indefinite spinner. */
+      const controller =
+        typeof AbortController !== "undefined"
+          ? new AbortController()
+          : null;
+
+      const timeoutId = controller
+        ? setTimeout(() => controller.abort(), 12000)
+        : null;
+
       return fetch(RSVP_ENDPOINT, {
         method: "POST",
         mode: "no-cors",
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined
       })
         .then(() => ({ ok: true }))
-        .catch(() => ({ ok: false }));
+        .catch(() => ({ ok: false }))
+        .finally(() => {
+          if (timeoutId) clearTimeout(timeoutId);
+        });
     }
 
     function showFormMessage(message) {
@@ -1235,6 +1309,11 @@
           fieldEl("name").focus();
         }
       );
+    }
+  }
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] RSVP form failed to initialize:", err);
     }
   }
 
@@ -1512,7 +1591,7 @@
       lang === "ka"
     );
 
-    localStorage.setItem(
+    safeStorageSet(
       "casa-gelso-language",
       lang
     );
@@ -1574,6 +1653,7 @@
      LANGUAGE BUTTONS
   ============================================================ */
 
+  try {
   $$("[data-lang]").forEach((button) => {
     button.addEventListener(
       "click",
@@ -1586,15 +1666,31 @@
   });
 
   applyLanguage(
-    localStorage.getItem(
+    safeStorageGet(
       "casa-gelso-language"
     ) || "en"
   );
+  } catch (err) {
+    if (window.console) {
+      console.error("[Casa Gelso] Language switcher failed to initialize:", err);
+    }
+  }
 
   /* ============================================================
      SOUND
-  ============================================================ */
 
+     NOT wrapped in its own try/catch like the sections above —
+     primeAudio() below is called from openIntro() and the
+     skip-intro handler inside runOpener() (much earlier in this
+     file, see the OPEN GATE block). A `function` declaration inside
+     a try{} block is block-scoped in strict mode, so wrapping this
+     whole section broke that cross-reference: openIntro() threw a
+     silent ReferenceError right before tl.play(), while the
+     separate window-level click/keydown listener (scoped correctly,
+     inside this same block) still played the audio on its own —
+     producing exactly "sound turns on, nothing else happens" on
+     Enter. Left unwrapped to keep primeAudio() at the same IIFE-wide
+     scope it was always meant to have. */
   const audio =
     $("#casaGelsoAudio");
 
@@ -1617,20 +1713,37 @@
       }
     );
 
+    function markAudioUnavailable() {
+      audioAvailable = false;
+
+      soundButtons.forEach((button) =>
+        button.classList.add(
+          "is-unavailable"
+        )
+      );
+    }
+
     audio.addEventListener(
       "error",
-      () => {
-        audioAvailable = false;
-
-        soundButtons.forEach((button) =>
-          button.classList.add(
-            "is-unavailable"
-          )
-        );
-      }
+      markAudioUnavailable
     );
 
     audio.volume = 0.42;
+
+    /* FIX: preload="metadata" (see index.html) means the browser can
+       start — and fail — loading the audio during HTML parsing,
+       before this deferred script has even run, let alone attached
+       the "error" listener above. On a fast failure (404, blocked
+       request, ad-blocker) that event can fire and be missed
+       entirely, leaving audioAvailable stuck false but the button
+       never getting its .is-unavailable treatment — a sound toggle
+       that looks normal but silently does nothing when clicked.
+       audio.error is still readable after the fact even if the
+       event was missed, so check it once synchronously here as a
+       catch-up for anything that already failed before we got here. */
+    if (audio.error) {
+      markAudioUnavailable();
+    }
   }
 
   function syncSoundUI() {
@@ -1683,9 +1796,28 @@
     });
   }
 
+  /* FIX: this used to call audio.play() directly, independently of
+     primeAudio() below. If the sound-toggle button was the very
+     first thing a visitor clicked (e.g. the reduced-motion / no-GSAP
+     path, where there's no Enter/Skip gesture), that click fires
+     TWO listeners on the same event: this button's own handler
+     (target phase) and the window-level primeAudio() unlock listener
+     (bubble phase, still the same synchronous dispatch) — both used
+     to call audio.play() independently, racing each other and
+     occasionally logging a spurious "play() request interrupted"
+     rejection. Routed through primeAudio() itself instead, which is
+     already idempotent (see the audioUnlocked guard below) — the
+     second call becomes a no-op rather than a second concurrent
+     play(). */
   async function startSound() {
     if (!audio || !audioAvailable)
       return;
+
+    if (!audioUnlocked) {
+      primeAudio();
+      syncSoundUI();
+      return;
+    }
 
     audio.muted = false;
 
