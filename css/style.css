@@ -158,6 +158,7 @@ body.menu-open{
      into, the same class of mobile-viewport bug the opener itself
      already avoids by using 100svh (see .opener below). Matched
      here for the same reason. */
+  height: 100vh;   /* fallback — browsers without svh support */
   height: 100svh;
 
   /* iOS Safari doesn't reliably honour overflow:hidden on <body> for
@@ -952,6 +953,7 @@ body.lang-ka .mobile-menu a{
 .opener{
   position: relative;
 
+  height: 100vh;   /* fallback — browsers without svh support */
   height: 100svh;
   min-height: 560px;
 
@@ -986,11 +988,23 @@ body.lang-ka .mobile-menu a{
   border-bottom: 1px solid rgba(251,248,242,.4);
   padding-bottom: 5px;
 
-  transition: opacity .6s ease;
+  /* FIX: opacity:0 alone still leaves an element clickable and in the
+     tab order. This button sits in the bottom-right corner of the
+     opener both before it fades in (first second) and after the
+     reveal has finished — a stray tap there was silently skipping the
+     intro, or hitting an invisible control over the brand reveal.
+     visibility + pointer-events match the pattern .title-card-enter
+     already uses; the fade itself is unchanged. */
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity .6s ease, visibility .6s ease;
 }
 
 .opener-skip.is-visible{
   opacity: .6;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .opener-skip:hover{
@@ -1824,6 +1838,7 @@ body.lang-ka .ad-copy h3{
 .invite{
   position: relative;
   width: 100%;
+  min-height: 100vh;   /* fallback — browsers without svh support */
   min-height: 100svh;
 
   overflow: hidden;
@@ -1867,6 +1882,7 @@ body.lang-ka .ad-copy h3{
   z-index: 1;
 
   width: 100%;
+  min-height: 100vh;   /* fallback — browsers without svh support */
   min-height: 100svh;
 }
 
@@ -1876,6 +1892,7 @@ body.lang-ka .ad-copy h3{
 
   width: 100%;
   max-width: min(1120px, 94vw);
+  min-height: 100vh;   /* fallback — browsers without svh support */
   min-height: 100svh;
 
   /* top/bottom margin reserves room for the torn-edge bands (see
@@ -1999,6 +2016,14 @@ body.lang-ka #invite-heading{
   font-size: var(--type-small);
   line-height: 1.65;
   letter-spacing: .008em;
+
+  /* The invitation copy is two paragraphs in all three languages. The
+     break is a real newline inside one string (the markup fallback in
+     index.html and the EN/KA/IT entries in app.js), so it needs to be
+     preserved rather than collapsed to a space. pre-line keeps the
+     newline and still collapses/wraps ordinary spaces normally, so
+     wrapping behaviour is unchanged. */
+  white-space: pre-line;
 }
 
 
@@ -2201,6 +2226,15 @@ body.lang-ka #invite-heading{
   display: flex;
   flex-direction: column;
   gap: 29px;
+}
+
+/* FIX: the browser's built-in [hidden]{display:none} is a user-agent
+   rule, so this class's own display:flex was winning the cascade —
+   app.js sets rsvpForm.hidden = true on a successful RSVP and the form
+   simply stayed on screen underneath the thank-you panel. Same pattern
+   already used by .wish-step[hidden] and .response-success[hidden]. */
+.rsvp-form--editorial[hidden]{
+  display: none !important;
 }
 
 .editorial-field > label,
@@ -2907,7 +2941,88 @@ body.opener-revealed .nav-links a::after{
   background: var(--wine);
 }
 
+/* The teaser frames and the 12.09 numerals carry will-change for the
+   duration of the opening sequence. Once the opener has resolved they
+   are never animated again, but the promoted compositor layers were
+   being held for the whole session — real memory on mobile, for
+   nothing. Released here; the animation itself is untouched. */
+body.opener-revealed .frame,
+body.opener-revealed .coming-soon-date{
+  will-change: auto;
+}
+
 
 /* ============================================================
    END — CASA GELSO
 ============================================================ */
+/* ============================================================
+   INVITATION / RSVP — TYPOGRAPHY REFINEMENT
+   Smaller, minimal type with natural letter spacing.
+============================================================ */
+
+.invite-card,
+.response-experience{
+  letter-spacing: normal;
+}
+
+/* Main invitation small labels */
+.invite-eyebrow,
+.invite-meta dt,
+.invite-meta dd,
+.invite-calendar,
+.response-eyebrow,
+.response-label,
+.editorial-field label,
+.editorial-choice legend,
+.editorial-choice label,
+.wish-kicker,
+.wish-form label,
+.response-error{
+  letter-spacing: .04em;
+}
+
+/* Invitation body */
+.invite-lede{
+  letter-spacing: 0;
+}
+
+/* RSVP questions */
+.response-experience h3,
+.editorial-choice legend,
+.wish-title{
+  letter-spacing: -.01em;
+}
+
+/* Input text */
+.editorial-field input,
+.editorial-field textarea,
+.wish-form textarea{
+  letter-spacing: 0;
+}
+
+/* Yes / No options */
+.editorial-choice label{
+  letter-spacing: .025em;
+}
+
+/* Submit button — IMPORTANT:
+   do not use wide tracking here */
+.response-submit{
+  letter-spacing: .02em;
+}
+
+.response-submit .btn-label{
+  letter-spacing: .02em !important;
+  word-spacing: normal;
+}
+
+/* Success / secondary links */
+.response-success,
+.response-success .text-link{
+  letter-spacing: .01em;
+}
+
+/* Footer link */
+.site-footer-meta a{
+  letter-spacing: .04em;
+}

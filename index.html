@@ -42,9 +42,106 @@
      bandwidth; the logo now gets the priority hint instead, and the
      shoe frame is still preloaded (it's needed soon) just without
      jumping the queue ahead of first paint. -->
-<link rel="preload" as="image" href="assets/logo/monogram-ivory.png" fetchpriority="high">
+<link rel="preload" as="image" href="assets/logo/monogram-wine.png" fetchpriority="high">
 <link rel="preload" as="image" href="assets/teaser/01-shoe.jpg">
 <link rel="stylesheet" href="css/style.css">
+
+<!-- FIX (slow / unstable connections): <body> ships with class
+     "is-locked", which sets overflow:hidden + touch-action:none. Only
+     app.js ever removes it. If app.js (or the GSAP/Lenis CDN scripts
+     that run before it, in order, via defer) is slow, blocked or
+     never arrives, the page stayed permanently scroll-locked on the
+     title card — a dead site, not a degraded one.
+
+     This failsafe waits for app.js to announce itself (it sets
+     window.__casaAppReady on its first line). If that hasn't happened
+     after 9s, it unlocks the body and resolves the opener straight to
+     the brand reveal — exactly the same end-state app.js's own
+     reduced-motion / no-GSAP fallback produces. When everything loads
+     normally it does nothing at all. It never fires while app.js is
+     merely waiting for the user to press "Enter". -->
+<script>
+(function () {
+  "use strict";
+
+  var BOOT_TIMEOUT = 9000;
+
+  function revealFallback() {
+    if (window.__casaAppReady) return;
+
+    var doc = document;
+    var body = doc.body;
+
+    if (!body) return;
+
+    doc.documentElement.className += " no-gsap";
+    body.className = body.className.replace(/\bis-locked\b/g, "");
+
+    if (body.className.indexOf("opener-revealed") === -1) {
+      body.className += " opener-revealed";
+    }
+
+    var opener = doc.querySelector("[data-opener]");
+    if (!opener) return;
+
+    var hideSelectors = [
+      "[data-title-card]",
+      "[data-film]",
+      "[data-coming-soon]",
+      "[data-skip-intro]"
+    ];
+
+    for (var i = 0; i < hideSelectors.length; i++) {
+      var dead = opener.querySelector(hideSelectors[i]);
+      if (dead) dead.style.display = "none";
+    }
+
+    var hero = opener.querySelector("[data-reveal-hero]");
+    if (!hero) return;
+
+    hero.style.opacity = "1";
+    hero.style.visibility = "visible";
+
+    var parts = hero.querySelectorAll(
+      ".reveal-lockup, .reveal-brand-rule, .reveal-season, .reveal-manifesto, .reveal-year, .reveal-languages"
+    );
+
+    for (var j = 0; j < parts.length; j++) {
+      parts[j].style.opacity = "1";
+      parts[j].style.transform = "none";
+      parts[j].style.visibility = "visible";
+    }
+  }
+
+  setTimeout(revealFallback, BOOT_TIMEOUT);
+})();
+</script>
+
+<!-- Same end-state, for visitors with JavaScript disabled entirely:
+     without this the is-locked class kept the page unscrollable and
+     the opener never resolved past the (invisible) monogram. -->
+<noscript>
+<style>
+  body.is-locked{ overflow: visible; height: auto; touch-action: auto; }
+  .title-card,
+  .film,
+  .coming-soon,
+  .opener-skip{ display: none !important; }
+  .reveal-hero{ opacity: 1 !important; visibility: visible !important; }
+  .reveal-lockup,
+  .reveal-season,
+  .reveal-manifesto,
+  .reveal-year,
+  .reveal-languages{ opacity: 1 !important; transform: none !important; }
+  .reveal-brand-rule{ transform: scaleX(1) !important; }
+  .reveal-up,
+  .mask-lines .mask-in{ opacity: 1 !important; transform: none !important; }
+  .ad-curtain-fill{ transform: scaleX(0) !important; }
+  .ad-curtain--vertical .ad-curtain-fill{ transform: scaleY(0) !important; }
+  .ad-curtain-mark{ display: none !important; }
+  .site-nav{ color: var(--wine); mix-blend-mode: normal; }
+</style>
+</noscript>
 
 <!-- Event structured data — lets Google surface this as a rich event
      result (date, time, location) rather than a plain blue link. -->
@@ -95,7 +192,7 @@
 ============================================================ -->
 <header class="site-nav" data-nav>
   <a class="nav-mark" href="#top" aria-label="Casa Gelso — back to top">
-    <img src="assets/logo/monogram-ivory.png" alt="" class="nav-mark-glyph">
+    <img src="assets/logo/monogram-wine.png" alt="" class="nav-mark-glyph">
     <span>Casa Gelso</span>
   </a>
 
@@ -165,7 +262,7 @@
        (browsers refuse unmuted audio without a real user gesture),
        waits for it to be pressed. -->
   <div class="title-card" data-title-card>
-    <img src="assets/logo/monogram-ivory.png" alt="">
+    <img src="assets/logo/monogram-wine.png" alt="">
     <button type="button" class="title-card-enter" data-open-intro>
       <span class="title-card-enter-label">Enter</span>
     </button>
@@ -174,35 +271,35 @@
   <!-- Beats 1–5 — the five campaign frames -->
   <div class="film" data-film aria-hidden="true">
     <figure class="frame" data-frame="1">
-      <img src="assets/teaser/01-shoe.jpg" alt="A strappy heel poised on a pedestal edge — the first frame of the Casa Gelso campaign.">
+      <img src="assets/teaser/01-shoe.jpg" decoding="async" alt="A strappy heel poised on a pedestal edge — the first frame of the Casa Gelso campaign.">
       <figcaption class="frame-title frame-title--1">
         <span class="frame-title-rule"></span>Something is coming
       </figcaption>
     </figure>
 
     <figure class="frame" data-frame="2">
-      <img src="assets/teaser/02-heart-bag.jpg" alt="A hand reaching for a heart-shaped Moschino bag.">
+      <img src="assets/teaser/02-heart-bag.jpg" decoding="async" alt="A hand reaching for a heart-shaped Moschino bag.">
       <figcaption class="frame-title frame-title--2">
         <span class="frame-title-rule"></span>Something to love
       </figcaption>
     </figure>
 
     <figure class="frame" data-frame="3">
-      <img src="assets/teaser/03-black-dress.jpg" alt="A woman in a black halter gown with a heart brooch at the neckline.">
+      <img src="assets/teaser/03-black-dress.jpg" decoding="async" alt="A woman in a black halter gown with a heart brooch at the neckline.">
       <figcaption class="frame-title frame-title--3">
         <span class="frame-title-rule"></span>Something to desire
       </figcaption>
     </figure>
 
     <figure class="frame" data-frame="4">
-      <img src="assets/teaser/04-black-gold-dress.jpg" alt="A woman in a black gown printed with gold hearts, standing beside a vintage microphone.">
+      <img src="assets/teaser/04-black-gold-dress.jpg" decoding="async" alt="A woman in a black gown printed with gold hearts, standing beside a vintage microphone.">
       <figcaption class="frame-title frame-title--4">
         <span class="frame-title-rule"></span>Make it yours
       </figcaption>
     </figure>
 
     <figure class="frame" data-frame="5">
-      <img src="assets/teaser/05-red-suit.jpg" alt="A woman in a tailored red suit with heart-shaped hardware.">
+      <img src="assets/teaser/05-red-suit.jpg" decoding="async" alt="A woman in a tailored red suit with heart-shaped hardware.">
       <figcaption class="frame-title frame-title--5">
         <span class="frame-title-rule"></span>Wear the moment
       </figcaption>
@@ -228,7 +325,7 @@
   <div class="reveal-hero" data-reveal-hero>
     <picture class="reveal-background" aria-hidden="true">
       <source media="(max-width: 800px)" srcset="assets/reveal/cover4.png">
-      <img src="assets/reveal/cover4.png" alt="">
+      <img src="assets/reveal/cover4.png" alt="" decoding="async">
     </picture>
     <div class="reveal-atmosphere" aria-hidden="true"></div>
     <div class="reveal-shadow" aria-hidden="true"></div>
@@ -273,7 +370,7 @@
       <img src="assets/reveal/add1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--a reveal-up">
@@ -286,7 +383,7 @@
       <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy" decoding="async">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--b reveal-up">
@@ -305,7 +402,7 @@
       <img src="assets/reveal/add3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--c reveal-up">
@@ -318,7 +415,7 @@
       <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy" decoding="async">
       <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--d reveal-up">
@@ -330,7 +427,7 @@
       <img src="assets/reveal/add5.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy" decoding="async">
       <span class="ad-curtain" aria-hidden="true">
         <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.png" alt="">
+        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
       </span>
     </figure>
     <div class="ad-copy ad-copy--e reveal-up">
@@ -415,14 +512,19 @@
       </h2>
 
 
+      <!-- Two paragraphs, in every language. The paragraph break is a
+           real newline inside the string (both here and in the three
+           translations in app.js) — .invite-lede carries
+           white-space: pre-line so it renders as a break instead of
+           collapsing to a space. Keep this text flush-left and keep
+           the blank line: with pre-line, source line breaks inside a
+           paragraph would show up as breaks on screen. -->
       <p
         class="invite-lede reveal-up"
         data-i18n="invite.lede"
-      >
-        Join us for the opening of Casa Gelso —
-        an evening dedicated to the pieces,
-        and the people, that make style personal.
-      </p>
+      >Join us for the opening evening of Casa Gelso — an evening that brings together distinctive pieces, considered details, and the people for whom style is part of who they are.
+
+Discover Casa Gelso — a space where every piece is chosen with taste, and every detail is made to give your everyday a character of its own.</p>
 
 
       <!-- DATE / TIME / PLACE -->
@@ -703,54 +805,65 @@
           </div>
 
 
-          <!-- SUCCESS -->
-          <div
-            class="response-success"
-            id="rsvpSuccess"
-            hidden
-            tabindex="-1"
+        </form>
+
+
+        <!-- SUCCESS — FIX: this block used to sit INSIDE #rsvpForm.
+             On a successful RSVP app.js hides the form
+             (rsvpForm.hidden = true) and unhides this panel, but a
+             child of a hidden element is hidden too, so the success
+             state could never appear where the form had been. Moved
+             out to be the form's sibling; it is still inside
+             .response-experience, so it renders in exactly the same
+             place, with the same styles. (See also the matching
+             .rsvp-form--editorial[hidden] rule added to style.css —
+             the form's own display:flex was overriding the browser's
+             [hidden] rule, so hiding it did nothing at all.) -->
+        <div
+          class="response-success"
+          id="rsvpSuccess"
+          hidden
+          tabindex="-1"
+        >
+
+          <img
+            src="assets/logo/monogram-wine.png"
+            alt=""
+            width="56"
+            height="56"
           >
 
-            <img
-              src="assets/logo/monogram-wine.png"
-              alt=""
-              width="56"
-              height="56"
-            >
+          <p
+            class="response-success-eyebrow"
+            data-success-eyebrow
+          >
+            Thank you.
+          </p>
 
-            <p
-              class="response-success-eyebrow"
-              data-success-eyebrow
-            >
-              Thank you.
-            </p>
+          <h3
+            class="response-success-title"
+            data-i18n="success.title"
+          >
+            See you at Casa Gelso.
+          </h3>
 
-            <h3
-              class="response-success-title"
-              data-i18n="success.title"
-            >
-              See you at Casa Gelso.
-            </h3>
+          <p
+            class="response-success-note"
+            data-success-note
+          >
+            We look forward to welcoming you.
+          </p>
 
-            <p
-              class="response-success-note"
-              data-success-note
-            >
-              We look forward to welcoming you.
-            </p>
+          <button
+            class="text-link"
+            type="button"
+            data-rsvp-again
+            data-i18n="success.again"
+          >
+            Submit another response
+          </button>
 
-            <button
-              class="text-link"
-              type="button"
-              data-rsvp-again
-              data-i18n="success.again"
-            >
-              Submit another response
-            </button>
-
-          </div>
-
-        </form>
+        </div>
 
       </div>
 
@@ -788,6 +901,7 @@
 <p class="site-footer-credit">
   Created by <a href="https://invitee.ge/" target="_blank" rel="noopener noreferrer">INVITÉ</a>
 </p>
+</footer>
 
 <!-- defer (not async) on all four: keeps them non-render-blocking
      while preserving strict execution order (gsap → ScrollTrigger →
