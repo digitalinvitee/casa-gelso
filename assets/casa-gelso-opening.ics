@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Casa Gelso//Opening//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:casa-gelso-opening-20260912@casagelso.com
+DTSTAMP:20260905T000000Z
+DTSTART:20260912T130000Z
+DTEND:20260912T160000Z
+SUMMARY:Casa Gelso — Opening
+LOCATION:Kostava St 67\, Tbilisi\, Georgia
+DESCRIPTION:Casa Gelso opening in Tbilisi — accessible refinement\, curated individuality\, quiet confidence.
+END:VEVENT
+END:VCALENDAR

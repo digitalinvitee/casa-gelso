@@ -1,1230 +1,885 @@
 /* ============================================================
    CASA GELSO — DIGITAL CAMPAIGN
-   Contemporary Fashion Editorial System
+   Editorial design system
 
-   Display: Fraunces      /  Noto Serif Georgian (KA)
-   Utility: DM Sans       /  Noto Sans Georgian (KA)
+   Display  Fraunces (opsz)        · Noto Serif Georgian for KA glyphs
+   Text     DM Sans                · Noto Sans Georgian for KA glyphs
+   Georgian faces carry a Georgian-only unicode-range, so Latin text
+   always renders in Fraunces / DM Sans and the Georgian files are
+   only downloaded when Georgian text is on screen.
 
-   Palette:
-   Deep Wine       #4F181F
-   Mulberry        #712F3C
-   Ivory           #F3EEE5
-   Warm Ivory      #EAE1D6
-   Soft Taupe      #B7A99A
-   Charcoal        #2C2927
-
-   --------------------------------------------------------------
    CONTENTS
-   1.  Tokens / design system
-   2.  Reset & base
-   3.  Typography system
-   4.  Global components
-   5.  Navigation
-   6.  Opener — teaser film & coming soon
-   7.  Brand reveal
-   8.  Digital ad
-   9.  Invitation
-   10. Response / RSVP
-   11. Footer
-   12. Utilities
-   13. Responsive
-   14. Reduced motion / no-JS fallback / nav state
+   1.  Fonts & tokens
+   2.  Base, accessibility, utilities
+   3.  Typography & shared components (labels, buttons, links)
+   4.  Navigation & mobile menu
+   5.  Opener — title card, campaign film, coming soon
+   6.  Brand reveal (hero)
+   7.  Digital ad
+   8.  Invitation
+   9.  RSVP
+   10. Footer
+   11. Responsive
+   12. Motion preferences, no-JS / no-GSAP fallbacks
 ============================================================ */
-
-/* Font loading moved to a single <link> in index.html's <head>.
-   This @import used to duplicate that request AND made the browser
-   wait for style.css to download before it could even discover the
-   Fraunces request — a fully serial extra round-trip on the exact
-   font every headline on the page renders in. Removed. */
 
 
 /* ============================================================
-   1. TOKENS
+   1. FONTS & TOKENS
 ============================================================ */
 
+@font-face{
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/fraunces-latin-opsz-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/fraunces-latin-opsz-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("../assets/fonts/dm-sans-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family: "Noto Serif Georgian";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/noto-serif-georgian-georgian-wght-normal.woff2") format("woff2");
+  unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
+}
+@font-face{
+  font-family: "Noto Sans Georgian";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/noto-sans-georgian-georgian-wght-normal.woff2") format("woff2");
+  unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
+}
+
 :root{
-  /* — colour — */
+  /* colour */
   --ivory:      #F3EEE5;
   --ivory-warm: #EAE1D6;
+  --paper:      #F6F1E8;
+  --cream:      #FBF8F2;
+  --hero-paper: #F9EFE6;   /* sampled from the cover illustration's paper */
 
   --wine:       #4F181F;
   --wine-dark:  #33100F;
   --burgundy:   #712F3C;
-
   --charcoal:   #2C2927;
   --taupe:      #B7A99A;
-  --cream:      #FBF8F2;
 
   --ink:        var(--charcoal);
-  /* Was #8B7A6E — measured ~3.6:1 against --ivory, below WCAG AA's
-     4.5:1 for normal text (this color runs the .lede body copy and
-     the ad-copy paragraphs, not just decorative labels). Darkened to
-     ~5.1:1 while staying in the same warm-taupe family. */
-  --muted:      #74604F;
-  --muted-on-wine: rgba(251,248,242,.62);
+  --muted:      #6B5747;               /* 6.2:1 on ivory */
+  --line:       rgba(79, 24, 31, .16);
+  --line-strong:rgba(79, 24, 31, .34);
+  --line-light: rgba(251, 248, 242, .2);
+  --error:      #8C1D2B;
 
-  --line:          rgba(44,41,39,.15);
-  --line-strong:   rgba(44,41,39,.28);
-  --line-on-wine:  rgba(251,248,242,.22);
+  /* families */
+  --display: "Fraunces", "Noto Serif Georgian", "Times New Roman", Georgia, serif;
+  --sans:    "DM Sans", "Noto Sans Georgian", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 
-  /* — type families — */
-  --display:    "Fraunces", "Bodoni Moda", "Times New Roman", Georgia, serif;
-  --sans:       "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  /* type scale */
+  --fs-display: clamp(3rem, 8vw, 8.25rem);
+  --fs-h1:      clamp(2.5rem, 5.4vw, 5.75rem);
+  --fs-h2:      clamp(1.75rem, 3vw, 2.75rem);
+  --fs-h3:      clamp(1.625rem, 2.6vw, 2.625rem);
+  --fs-lede:    clamp(1rem, .95rem + .2vw, 1.125rem);
+  --fs-body:    .9375rem;   /* 15px */
+  --fs-small:   .875rem;    /* 14px */
+  --fs-label:   .75rem;     /* 12px — uppercase labels with content */
+  --fs-micro:   .6875rem;   /* 11px — the smallest text on the site */
 
-  --geo-display:"Noto Serif Georgian", "Bodoni Moda", serif;
-  --geo-sans:   "Noto Sans Georgian", "DM Sans", sans-serif;
+  --track-label: .22em;
+  --track-wide:  .32em;
 
-  /* — type scale —
-     One editorial (display) system, one utility (label/UI) system.
-     clamp() carries most of the responsive work; the mobile section
-     only overrides where a flatter vw curve is genuinely needed. */
-  --type-display: clamp(3.7rem, 8.4vw, 9.8rem);    /* hero / campaign statements */
-  --type-h1:      clamp(3rem, 6.4vw, 7.4rem);      /* major section + invitation headline */
-  --type-h2:      clamp(1.875rem, 3.6vw, 3rem);    /* sub-headings (footer mark) */
-  --type-h3:      clamp(1.6rem, 2.8vw, 2.75rem);   /* editorial captions: frame titles, ad copy */
-  --type-body:    .875rem;                          /* running copy (lede) */
-  --type-small:   .8125rem;                         /* secondary copy (invite lede, success note) */
-  --type-label:   .78125rem;                        /* metadata / field values — bumped from .6875rem (11px→12.5px) for AA-comfortable reading on real content: dates, form input text */
-  --type-micro:   .5625rem;                         /* uppercase tracked labels, nav, buttons */
+  /* space */
+  --gutter: clamp(20px, 4.4vw, 72px);
+  --nav-h: 76px;
+  --section-y: clamp(96px, 15vh, 176px);
 
-  --tracking-tight:  -.045em;   /* display headings */
-  --tracking-normal: 0;
-  --tracking-wide:   .12em;     /* label-weight running text */
-  --tracking-label:  .24em;     /* uppercase micro labels (default) */
-  --tracking-label-wide: .32em; /* wider variant used sparingly for emphasis */
-
-  /* — spacing — */
-  --space-3xs: 4px;
-  --space-2xs: 8px;
-  --space-xs:  12px;
-  --space-sm:  16px;
-  --space-md:  24px;
-  --space-lg:  32px;
-  --space-xl:  48px;
-  --space-2xl: 64px;
-
-  --gutter: clamp(20px, 4.4vw, 76px);
-  --nav-h:  84px;
-
-  /* — motion — */
-  --ease:      cubic-bezier(.16,1,.3,1);
-  --ease-soft: cubic-bezier(.22,.61,.36,1);
+  /* motion */
+  --ease:     cubic-bezier(.16, 1, .3, 1);
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
 }
 
 
 /* ============================================================
-   2. RESET & BASE
+   2. BASE, ACCESSIBILITY, UTILITIES
 ============================================================ */
 
 *,
 *::before,
-*::after{
-  box-sizing: border-box;
-}
+*::after{ box-sizing: border-box; }
 
 html{
-  scroll-behavior: auto;
-}
-
-/* Anchor targets land under the fixed nav bar without this — clicking
-   "Digital Ad" / "Invitation" (or any deep link to #digital-ad /
-   #invitation) tucked the section heading partly behind --nav-h. */
-main section[id]{
-  scroll-margin-top: calc(var(--nav-h) + env(safe-area-inset-top));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--nav-h);
 }
 
 body{
   margin: 0;
   background: var(--ivory);
   color: var(--ink);
-
   font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.5;
-
-  overflow-x: hidden;
-
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body.is-locked,
-body.menu-open{
+/* Lenis */
+html.lenis, html.lenis body{ height: auto; }
+.lenis.lenis-smooth{ scroll-behavior: auto !important; }
+.lenis.lenis-stopped{ overflow: clip; }
+
+body.is-locked{
   overflow: hidden;
-  /* FIX: 100vh is the "largest possible" viewport on mobile Safari
-     (as if the address bar were hidden) — taller than what's ever
-     actually visible while the bar is showing. That extra height on
-     a scroll-locked body was reserving space nothing could scroll
-     into, the same class of mobile-viewport bug the opener itself
-     already avoids by using 100svh (see .opener below). Matched
-     here for the same reason. */
-  height: 100vh;   /* fallback — browsers without svh support */
+  height: 100vh;
   height: 100svh;
-
-  /* iOS Safari doesn't reliably honour overflow:hidden on <body> for
-     touch-driven scrolling (only mouse-wheel scroll gets blocked by
-     it) — a swipe can still scroll the page underneath, which is
-     exactly how the locked opener can appear to "skip ahead" on an
-     iPhone without the Enter/Skip gesture ever actually firing.
-     touch-action:none stops the browser's own pan/scroll handling
-     for touches on the body while still letting tap/click reach
-     buttons normally. */
-  touch-action: none;
 }
 
-body.lang-ka{
-  font-family: var(--geo-sans);
-}
+/* Menu lock on the root keeps the current scroll position intact. */
+html.menu-open{ overflow: hidden; }
 
-a{
-  color: inherit;
-  text-decoration: none;
-}
+/* Only during the opener: stops iOS from panning the locked page. */
+body.is-locked{ touch-action: none; }
 
-button,
-input,
-textarea,
-select{
+a{ color: inherit; text-decoration: none; }
+
+button, input, textarea, select{
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
 }
 
 button{
   cursor: pointer;
   background: none;
   border: 0;
-}
-
-fieldset{
-  min-width: 0;
-  margin: 0;
   padding: 0;
-  border: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-img{
-  display: block;
-  max-width: 100%;
-}
+img, picture{ display: block; max-width: 100%; }
 
-ul,
-dl,
-dd,
-h1,
-h2,
-h3,
-p,
-figure{
-  margin: 0;
-  padding: 0;
-}
+h1, h2, h3, p, figure, dl, dd, fieldset{ margin: 0; padding: 0; }
+fieldset{ border: 0; min-width: 0; }
 
-::selection{
-  background: var(--wine);
-  color: var(--cream);
-}
-
-
-/* ------------------------------------------------------------
-   Accessibility
------------------------------------------------------------- */
+::selection{ background: var(--wine); color: var(--cream); }
 
 :focus-visible{
-  outline: 1.5px solid currentColor;
+  outline: 2px solid currentColor;
   outline-offset: 4px;
-  border-radius: 1px;
 }
 
-.opener :focus-visible,
-.reveal-hero :focus-visible{
-  outline-color: var(--cream);
+main:focus,
+[tabindex="-1"]:focus{ outline: none; }
+
+.sr-only{
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip-link{
   position: fixed;
   z-index: 10000;
-
-  top: -60px;
-  /* FIX: viewport-fit=cover (see index.html) opts into drawing under
-     the notch/rounded corners — a plain 12px left offset could sit
-     partly under a landscape notch on an iPhone. max() keeps the
-     usual 12px everywhere the inset is 0 (i.e. everywhere without a
-     cutout) and only grows it where an inset actually exists. */
+  top: 12px;
   left: max(12px, env(safe-area-inset-left));
-
+  padding: 12px 18px;
   background: var(--wine);
   color: var(--cream);
-
-  padding: 12px 18px;
-
-  font-family: var(--sans);
-  font-size: 12px;
-  letter-spacing: .06em;
-
-  transition: top .25s var(--ease);
+  font-size: var(--fs-small);
+  transform: translateY(-160%);
+  transition: transform .25s var(--ease);
 }
+.skip-link:focus{ transform: none; }
 
-.skip-link:focus{
-  top: 12px;
-}
-
-
-/* ------------------------------------------------------------
-   Film grain — restrained editorial texture, no decorative overload
------------------------------------------------------------- */
-
+/* Restrained paper grain. A plain low-opacity layer (no blend mode),
+   so it never forces the page to re-composite while scrolling. */
 .film-grain{
   position: fixed;
   inset: 0;
-  z-index: 9999;
-
+  z-index: 9000;
   pointer-events: none;
-
-  opacity: .035;
-  mix-blend-mode: multiply;
-
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 
 /* ============================================================
-   3. TYPOGRAPHY
+   3. TYPOGRAPHY & SHARED COMPONENTS
 ============================================================ */
 
-/* ------------------------------------------------------------
-   Micro labels — nav, eyebrows, buttons, metadata, captions.
-   Every uppercase tracked label in the site shares this recipe:
-   same family, same size, same weight, same capitalisation logic.
-   Only letter-spacing and colour vary by context.
------------------------------------------------------------- */
-
+/* Uppercase tracked labels — one recipe across the whole site. */
 .eyebrow,
 .chapter-mark,
-.text-link,
 .nav-mark span,
 .nav-links a,
 .language-switcher,
 .sound-toggle,
+.opener-skip,
+.title-card-enter,
 .coming-soon-eyebrow,
 .coming-soon-title,
 .coming-soon-place,
 .reveal-season,
 .reveal-manifesto,
 .reveal-year,
-.reveal-languages,
+.reveal-hero-scroll,
 .ad-copy-index,
-.invite-meta dd,
-.invite-cta,
+.btn,
+.text-link,
+.invite-meta dt,
+.invite-calendar-label,
+.field > label,
+.field > legend,
+.wish-kicker,
+.response-success-eyebrow,
 .mobile-menu-foot,
-.site-footer-links a,
 .site-footer-meta,
 .site-footer-fine,
-.editorial-field > label,
-.editorial-field > legend,
-.editorial-options span,
-.wish-kicker,
-.response-success-eyebrow{
+.site-footer-credit{
   font-family: var(--sans);
+  font-size: var(--fs-micro);
   font-weight: 500;
-  font-size: var(--type-micro);
-  line-height: 1;
+  line-height: 1.2;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
-body.lang-ka .language-switcher,
-body.lang-ka .sound-toggle,
-body.lang-ka .site-nav,
-body.lang-ka .mobile-menu{
-  font-family: var(--geo-sans);
+/* Mkhedruli has no case, and wide tracking breaks up its letterforms. */
+.eyebrow:lang(ka),
+.chapter-mark:lang(ka),
+.btn:lang(ka),
+.text-link:lang(ka),
+.invite-meta dt:lang(ka),
+.invite-calendar-label:lang(ka),
+.field > label:lang(ka),
+.field > legend:lang(ka),
+.wish-kicker:lang(ka),
+.response-success-eyebrow:lang(ka),
+.site-footer-meta:lang(ka),
+.site-footer-fine:lang(ka),
+.nav-links a:lang(ka),
+.sound-toggle:lang(ka),
+.opener-skip:lang(ka),
+.title-card-enter:lang(ka),
+.reveal-hero-scroll:lang(ka),
+.mobile-menu-foot:lang(ka){
+  letter-spacing: .05em;
 }
 
 .eyebrow{
-  letter-spacing: var(--tracking-label-wide);
   color: var(--burgundy);
+  letter-spacing: var(--track-wide);
 }
-
-.invite .eyebrow{
-  color: var(--wine);
-  opacity: .82;
-}
+.eyebrow:lang(ka){ letter-spacing: .06em; }
 
 .lede{
-  font-family: var(--sans);
-  font-weight: 300;
-
-  font-size: var(--type-body);
-  line-height: 1.75;
-
-  letter-spacing: .015em;
-
+  font-size: var(--fs-lede);
+  font-weight: 350;
+  line-height: 1.7;
   color: var(--muted);
-
-  max-width: 46ch;
+  max-width: 44ch;
+  text-wrap: pretty;
 }
-
-
-/* ------------------------------------------------------------
-   Display headings — one editorial voice at three sizes.
-   Same family, same optical sizing, same tracking logic.
-   The italic mask-in treatment is the one intentional accent —
-   used for the emotional beat of a heading, never randomly.
------------------------------------------------------------- */
 
 .display-xl,
 .display-lg,
-.display-md{
+.display-md,
+.invite-heading{
   font-family: var(--display);
-  font-weight: 400;
-  font-style: normal;
-
-  color: var(--wine);
-
+  font-weight: 380;
   font-optical-sizing: auto;
-  font-kerning: normal;
-  text-rendering: geometricPrecision;
-  font-variant-ligatures: common-ligatures;
+  color: var(--wine);
+  text-wrap: balance;
 }
 
-.display-xl{
-  font-size: var(--type-display);
-  line-height: .86;
-  letter-spacing: -.055em;
+.display-xl{ font-size: var(--fs-display); line-height: .92; letter-spacing: -.035em; }
+.display-lg{ font-size: var(--fs-h1);      line-height: .96; letter-spacing: -.03em; }
+.display-md{ font-size: var(--fs-h2);      line-height: 1;   letter-spacing: -.02em; }
+
+.display-xl:lang(ka),
+.display-lg:lang(ka),
+.display-md:lang(ka),
+.invite-heading:lang(ka){
+  line-height: 1.18;
+  letter-spacing: 0;
 }
 
-.display-lg{
-  font-size: var(--type-h1);
-  line-height: .88;
-  letter-spacing: var(--tracking-tight);
-}
-
-.display-md{
-  font-size: var(--type-h2);
-  line-height: .92;
-  letter-spacing: -.035em;
-}
-
-/* line-height: .86/.88/.92 on the Latin rules above were tuned for
-   Fraunces set in caps (text-transform:uppercase strips descenders
-   from Latin, so a sub-1 line-box is safe). Mkhedruli has no
-   upper/lowercase split, so Georgian headlines keep real descenders
-   (ხ ფ ყ ჯ ღ წ ჭ) — the tight Latin value was clipping their lower
-   strokes, which is compounded by the .mask-lines overflow:hidden
-   wrapper below. Relaxed to a value with room for them. */
-body.lang-ka .display-xl,
-body.lang-ka .display-lg,
-body.lang-ka .display-md{
-  font-family: var(--geo-display);
-  letter-spacing: -.02em;
-  line-height: 1.05;
-}
-
-
-/* ------------------------------------------------------------
-   Text masks — the line-reveal system shared by every heading
------------------------------------------------------------- */
-
+/* Line-mask reveal shared by headings */
 .mask-lines .mask{
   display: block;
   overflow: hidden;
-  padding-bottom: .08em;
+  padding-bottom: .1em;
+  margin-bottom: -.1em;
 }
-
-.mask-lines .mask-in{
+.js .mask-lines .mask-in{
   display: block;
-  transform: translateY(112%);
+  transform: translateY(110%);
 }
+.mask-lines .mask:lang(ka){ padding-bottom: .24em; margin-bottom: -.24em; }
 
-.mask-in--italic{
-  font-style: italic;
-  color: var(--burgundy);
-}
-
-/* Noto Serif Georgian ships one weight (400) and no real italic on
-   Google Fonts, so font-style:italic here was triggering the
-   browser's synthetic/oblique slant on Georgian glyphs — that faux
-   slant is the "gadaxrili" look. Set upright, and use a hairline
-   text-stroke to give the heading a touch more optical weight in
-   place of a heavier cut that doesn't exist for this family. */
-body.lang-ka .mask-in--italic{
-  font-style: normal;
-  -webkit-text-stroke: .4px currentColor;
-}
-
-/* .mask{overflow:hidden; padding-bottom:.08em} above was sized for
-   Latin display type, whose descenders are shallow (or absent,
-   under text-transform:uppercase). Georgian headlines sit inside
-   this same mask for the scroll-reveal, and their real descenders
-   were getting sheared off by the overflow — this is the "lower
-   part of the letters looks hidden" cut visible on several
-   headings in the Georgian version. Extra bottom padding here only
-   applies in lang-ka, so the Latin reveal is untouched. */
-body.lang-ka .mask-lines .mask{
-  padding-bottom: .26em;
-}
-
-.reveal-up{
+.js .reveal-up{
   opacity: 0;
-  transform: translateY(26px);
+  transform: translateY(24px);
 }
 
+/* Buttons — square, editorial, one height everywhere. */
+.btn{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 30px;
+  border: 1px solid var(--wine);
+  border-radius: 0;
+  color: var(--wine);
+  background: transparent;
+  font-size: var(--fs-label);
+  letter-spacing: .2em;
+  text-align: center;
+  transition: background-color .35s var(--ease-out), color .35s var(--ease-out), border-color .35s var(--ease-out);
+}
 
-/* ------------------------------------------------------------
-   Text links
------------------------------------------------------------- */
+.btn--solid{
+  background: var(--wine);
+  color: var(--cream);
+}
+.btn--solid:hover{ background: var(--burgundy); border-color: var(--burgundy); }
+
+.btn--outline:hover{ background: var(--wine); color: var(--cream); }
+
+.btn:active{ transform: translateY(1px); }
+
+.btn:disabled{ cursor: progress; }
 
 .text-link{
   display: inline-flex;
   align-items: center;
   gap: 10px;
-
-  letter-spacing: var(--tracking-label);
-
+  min-height: 44px;
   color: var(--wine);
-
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 7px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: color .3s;
 }
-
-.text-link span{
-  display: inline-block;
-  transition: transform .4s var(--ease);
-}
-
-.text-link:hover span{
-  transform: translate(4px, -4px);
-}
-
-
-/* ------------------------------------------------------------
-   Chapter marks
------------------------------------------------------------- */
+.text-link:hover{ color: var(--burgundy); }
 
 .chapter-mark{
-  position: absolute;
-  top: 6vh;
-  left: var(--gutter);
-  z-index: 1;
-
-  letter-spacing: var(--tracking-label);
-
   color: var(--burgundy);
-  opacity: .5;
-}
-
-.chapter-mark--light{
-  color: var(--cream);
-  opacity: .68;
-}
-
-
-/* ------------------------------------------------------------
-   Section intro / outro
------------------------------------------------------------- */
-
-.section-intro{
-  max-width: 1000px;
-  margin: 0 auto 14vh;
-  padding: 0 var(--gutter);
-  text-align: center;
-}
-
-.section-intro .lede{
-  max-width: 50ch;
-  margin: 0 auto;
-}
-
-.section-outro{
-  max-width: 900px;
-  margin: 10vh auto 0;
-  padding: 0 var(--gutter);
-  text-align: center;
-}
-
-.section-outro .lede{
-  margin: 0 auto;
+  letter-spacing: var(--track-wide);
 }
 
 
 /* ============================================================
-   4. GLOBAL COMPONENTS
-   (Reserved: no shared CTA button component is in active use on
-   this build — the invitation's own .response-submit covers the
-   one live call-to-action. See section 10.)
-============================================================ */
-
-
-/* ============================================================
-   5. NAVIGATION
+   4. NAVIGATION
 ============================================================ */
 
 .site-nav{
   position: fixed;
   z-index: 600;
-
   top: 0;
   left: 0;
   right: 0;
 
-  /* FIX: fixed to the very top edge with viewport-fit=cover active
-     (see index.html) — in landscape on a notched phone this row
-     could otherwise sit partly under the notch/status-bar cutout.
-     The extra top space is added to height + padding-top together
-     (rather than just padding-top eating into the fixed --nav-h)
-     so the flex content still gets its full, un-cramped --nav-h —
-     the row simply grows downward from a lower top edge. env()
-     resolves to 0 on any device without a cutout, so this is a
-     no-op everywhere except notched phones in landscape. */
-  height: calc(var(--nav-h) + env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
-
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
+  gap: 28px;
 
-  padding-right: max(var(--gutter), env(safe-area-inset-right));
-  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  height: calc(var(--nav-h) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
 
   color: var(--cream);
+  mix-blend-mode: difference;   /* legible over every opener beat */
 
-  mix-blend-mode: difference;
-
-  pointer-events: none;
+  transition: background-color .45s var(--ease-out), height .45s var(--ease-out), box-shadow .45s var(--ease-out), color .45s;
 }
 
-.site-nav > *{
-  pointer-events: auto;
+body.opener-revealed .site-nav{
+  color: var(--wine);
+  mix-blend-mode: normal;
+}
+
+/* Solid bar once the hero has scrolled away — keeps the nav readable
+   over photography and over the wine invitation section. */
+.site-nav.is-solid{
+  --nav-h: 64px;
+  background: rgba(243, 238, 229, .94);
+  box-shadow: 0 1px 0 var(--line);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)){
+  .site-nav.is-solid{
+    background: rgba(243, 238, 229, .82);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+  }
 }
 
 .nav-mark{
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-height: 44px;
+  margin-right: auto;
 }
-
-.nav-mark-glyph{
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.nav-mark span{
-  letter-spacing: var(--tracking-label-wide);
-}
-
-
-/* ------------------------------------------------------------
-   Desktop links
------------------------------------------------------------- */
+.nav-mark-glyph{ width: 24px; height: 24px; object-fit: contain; }
+body:not(.opener-revealed) .nav-mark-glyph{ filter: brightness(0) invert(1); }
+.nav-mark span{ letter-spacing: var(--track-wide); }
 
 .nav-links{
   display: flex;
-  gap: 34px;
+  align-items: center;
+  gap: clamp(20px, 2.6vw, 40px);
 }
 
 .nav-links a{
   position: relative;
-
-  letter-spacing: var(--tracking-label);
-
-  opacity: .62;
-
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  opacity: .72;
   transition: opacity .3s;
 }
-
 .nav-links a::after{
   content: "";
-
   position: absolute;
   left: 0;
   right: 100%;
-  bottom: -7px;
-
+  bottom: 9px;
   height: 1px;
   background: currentColor;
-
   transition: right .45s var(--ease);
 }
-
 .nav-links a:hover,
-.nav-links a.active{
-  opacity: 1;
-}
-
+.nav-links a.active{ opacity: 1; }
 .nav-links a:hover::after,
-.nav-links a.active::after{
-  right: 0;
+.nav-links a.active::after{ right: 0; }
+
+.nav-links .nav-cta{
+  opacity: 1;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid currentColor;
+  transition: background-color .3s, color .3s;
 }
-
-
-/* ------------------------------------------------------------
-   Site controls — language switcher + sound toggle
------------------------------------------------------------- */
+.nav-links .nav-cta::after{ display: none; }
+body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: var(--cream); }
 
 .site-controls{
   display: flex;
   align-items: center;
-  gap: clamp(18px, 2.4vw, 34px);
-  margin-left: auto;
+  gap: clamp(18px, 2.2vw, 32px);
+  padding-left: clamp(18px, 2.2vw, 32px);
+  border-left: 1px solid currentColor;
+  border-left-color: color-mix(in srgb, currentColor 25%, transparent);
 }
 
 .language-switcher{
   display: flex;
   align-items: center;
-  gap: 10px;
-  letter-spacing: var(--tracking-wide);
-}
-
-/* Was a plain "/" character between each language — replaced with the
-   same thin hairline used throughout the rest of the site (frame
-   captions, the invite rule, the nav-toggle bars) instead of a
-   punctuation mark doing double duty as a divider. */
-.lang-sep{
-  display: inline-block;
-  width: 1px;
-  height: 9px;
-  background: currentColor;
-  opacity: .3;
+  gap: 4px;
+  letter-spacing: .14em;
 }
 
 .language-switcher button{
   position: relative;
-  padding: 7px 0;
-  color: currentColor;
-  opacity: .48;
-  letter-spacing: var(--tracking-wide);
-  transition: opacity .3s ease, transform .3s ease;
+  min-width: 40px;
+  min-height: 44px;
+  padding: 0 4px;
+  opacity: .74;   /* inactive state still ≥ 4.5:1 */
+  transition: opacity .3s;
 }
-
-/* Same underline-reveal the primary nav links use (see .nav-links a)
-   — the active language reads clearly without needing a heavier
-   background pill or bigger type, and it reuses a pattern the page
-   already teaches the eye rather than inventing a new one. */
 .language-switcher button::after{
   content: "";
   position: absolute;
-  left: 0;
-  right: 100%;
-  bottom: 0;
+  left: 11px;
+  right: 11px;
+  bottom: 10px;
   height: 1px;
   background: currentColor;
-  transition: right .35s var(--ease);
+  transform: scaleX(0);
+  transition: transform .35s var(--ease);
 }
-
 .language-switcher button[aria-pressed="true"],
-.language-switcher button:hover{
-  opacity: 1;
-}
-
-.language-switcher button[aria-pressed="true"]::after,
-.language-switcher button:hover::after{
-  right: 0;
-}
-
-.language-switcher button:hover{
-  transform: translateY(-1px);
-}
+.language-switcher button:hover{ opacity: 1; }
+.language-switcher button[aria-pressed="true"]::after{ transform: scaleX(1); }
 
 .sound-toggle{
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  color: currentColor;
-  letter-spacing: var(--tracking-wide);
-  padding: 8px 0;
+  gap: 10px;
+  min-height: 40px;
+  letter-spacing: .16em;
 }
+.sound-toggle[hidden]{ display: none; }
 
 .sound-bars{
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
-  height: 11px;
   width: 12px;
+  height: 11px;
 }
-
 .sound-bars i{
   display: block;
   width: 2px;
-  height: 5px;
+  height: 3px;
   background: currentColor;
-  transform-origin: bottom;
   transition: height .25s ease;
 }
+.sound-toggle[aria-pressed="true"] .sound-bars i{ animation: soundBar 1.1s ease-in-out infinite alternate; }
+.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(2){ animation-delay: -.4s; }
+.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(3){ animation-delay: -.8s; }
 
-.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(1){ height: 8px; }
-.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(2){ height: 11px; }
-.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(3){ height: 7px; }
-
-.sound-toggle.is-unavailable{
-  opacity: .45;
+@keyframes soundBar{
+  from{ height: 3px; }
+  to{   height: 11px; }
 }
 
-.sound-toggle.is-unavailable .sound-label::after{
-  content: " · ADD AUDIO";
-}
-
-.mobile-controls{
-  display: none;
-}
-
-
-/* ------------------------------------------------------------
-   Mobile toggle
------------------------------------------------------------- */
+.nav-lang-mobile,
+.nav-toggle{ display: none; }
 
 .nav-toggle{
-  display: none;
   align-items: center;
   justify-content: center;
-
-  /* FIX: bumped from 34px to the ~44px minimum recommended touch
-     target (WCAG 2.5.5 / platform HIGs) — the bars icon itself is
-     unchanged (centered via flex), this only grows the invisible
-     tappable area around it. */
   width: 44px;
   height: 44px;
+  margin-right: -10px;
 }
-
-/* Three hairlines — matches the thin-rule visual language used
-   everywhere else on the site (.invite-rule, .frame-title-rule)
-   rather than introducing a new icon style. */
-.nav-toggle-bars{
-  position: relative;
-
+.nav-toggle-bars,
+.nav-toggle-bars::before{
   display: block;
-  width: 20px;
+  width: 22px;
   height: 1px;
-
   background: currentColor;
 }
-
-.nav-toggle-bars::before,
-.nav-toggle-bars::after{
+.nav-toggle-bars{ position: relative; transform: translateY(-3px); }
+.nav-toggle-bars::before{
   content: "";
-
   position: absolute;
   left: 0;
-
-  width: 100%;
-  height: 1px;
-
-  background: currentColor;
-}
-
-.nav-toggle-bars::before{ top: -6px; }
-.nav-toggle-bars::after{ top: 6px; }
-
-/* Duplicate language-switcher shown only in the mobile header (see
-   ≤800px block) so switching language doesn't require opening the
-   menu first — the .site-controls copy stays desktop-only, and the
-   .mobile-menu copy stays as the in-menu fallback. Grouped next to
-   the menu button in the top-right corner via margin-left:auto,
-   rather than left to float in the middle of the bar. */
-.nav-lang-mobile{
-  display: none;
+  top: 7px;
 }
 
 
-/* ============================================================
-   Mobile menu
-============================================================ */
+/* Mobile menu ------------------------------------------------- */
 
 .mobile-menu{
   position: fixed;
   inset: 0;
   z-index: 900;
 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 48px;
+  padding: calc(var(--nav-h) + env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) calc(88px + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+
   background: var(--wine-dark);
   color: var(--cream);
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  /* Safe-area aware (see .site-nav above) — matters here in
-     landscape on a notched phone, where the side inset can be
-     substantial. */
-  padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
-
   opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-
-  transition: opacity .5s var(--ease), visibility .5s;
+  transition: opacity .45s var(--ease-out);
 }
-
-.mobile-menu.is-open{
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
+.mobile-menu[hidden]{ display: none; }
+.mobile-menu.is-open{ opacity: 1; }
 
 .mobile-menu-close{
   position: absolute;
-  z-index: 1;
-  top: max(21px, calc(env(safe-area-inset-top) + 10px));
-  right: max(var(--gutter), env(safe-area-inset-right));
-
-  /* FIX: same 44px touch-target bump as .nav-toggle above — the ×
-     glyph stays the same visual size, centered via flex. */
+  top: calc(env(safe-area-inset-top) + 10px);
+  right: max(calc(var(--gutter) - 10px), env(safe-area-inset-right));
   width: 44px;
   height: 44px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  display: grid;
+  place-items: center;
   color: var(--cream);
-  font-family: var(--sans);
-  font-size: 1.75rem;
-  font-weight: 300;
-  line-height: 1;
-
-  opacity: .8;
-  transition: opacity .3s, transform .3s;
 }
-
-.mobile-menu-close:hover{
-  opacity: 1;
+.mobile-menu-close span,
+.mobile-menu-close span::before{
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.mobile-menu-close span::before{
+  content: "";
   transform: rotate(90deg);
 }
 
-.mobile-menu nav{
+.mobile-menu-nav{
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.mobile-menu a{
+.mobile-menu-nav a{
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-light);
+
   font-family: var(--display);
-  font-weight: 400;
-  font-style: normal;
-
-  font-size: clamp(44px, 12vw, 72px);
-  line-height: .88;
-  letter-spacing: var(--tracking-tight);
-
-  padding: 8px 0;
+  font-weight: 360;
+  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
 
   opacity: 0;
-  transform: translateY(16px);
-
+  transform: translateY(14px);
   transition: opacity .5s var(--ease), transform .5s var(--ease);
-  transition-delay: calc(var(--i) * .06s);
+  transition-delay: calc(var(--i) * .06s + .08s);
+}
+.mobile-menu-nav a:first-child{ border-top: 1px solid var(--line-light); }
+.mobile-menu-nav a:lang(ka){ font-size: clamp(1.75rem, 7.5vw, 2.5rem); line-height: 1.3; letter-spacing: 0; }
+
+.mobile-menu-index{
+  font-family: var(--sans);
+  font-size: var(--fs-micro);
+  letter-spacing: .2em;
+  opacity: .55;
 }
 
-/* Nothing swapped the font here for Georgian, so lang-ka menu items
-   were falling through var(--display) (Fraunces, no Georgian
-   glyphs) to whatever serif the browser substitutes per-glyph —
-   an unpredictable font whose descent this .88 line-height wasn't
-   tuned for, clipping the lower strokes of letters like ხ/ფ/ყ/ჯ.
-   Same fix pattern as .display-xl/lg/md: real Georgian face, and
-   room in the line box for its descenders. */
-body.lang-ka .mobile-menu a{
-  font-family: var(--geo-display);
-  line-height: 1.05;
-}
+.mobile-menu.is-open .mobile-menu-nav a{ opacity: 1; transform: none; }
 
-.mobile-menu.is-open a{
-  opacity: 1;
-  transform: none;
+.mobile-controls{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 .mobile-menu-foot{
   position: absolute;
   left: max(var(--gutter), env(safe-area-inset-left));
   right: max(var(--gutter), env(safe-area-inset-right));
-  bottom: max(34px, calc(env(safe-area-inset-bottom) + 20px));
-
+  bottom: calc(env(safe-area-inset-bottom) + 32px);
   display: flex;
   justify-content: space-between;
-
-  font-size: .5rem;
-  letter-spacing: var(--tracking-label-wide);
-  opacity: .55;
+  opacity: .6;
 }
 
 
 /* ============================================================
-   6. OPENER — teaser film & coming soon
+   5. OPENER
 ============================================================ */
 
 .opener{
   position: relative;
-
-  height: 100vh;   /* fallback — browsers without svh support */
+  height: 100vh;
   height: 100svh;
-  min-height: 560px;
-
+  min-height: 320px;   /* never taller than a landscape phone: the intro is scroll-locked */
   overflow: hidden;
-
-  background: #0B0505;
+  background: var(--wine-dark);
   color: var(--cream);
+  --opener-ink: var(--cream);
 }
-
-
-/* ------------------------------------------------------------
-   Skip intro
------------------------------------------------------------- */
+.opener[data-tone="light"]{ --opener-ink: var(--wine); }
 
 .opener-skip{
   position: absolute;
   z-index: 50;
-
   right: max(var(--gutter), env(safe-area-inset-right));
-  bottom: max(28px, calc(env(safe-area-inset-bottom) + 12px));
-
-  font-family: var(--sans);
-  font-size: .5rem;
-  line-height: 1;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-
-  color: var(--cream);
-
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 10px));
+  min-height: 44px;
+  padding: 0 2px;
+  color: var(--opener-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
   opacity: 0;
-
-  border-bottom: 1px solid rgba(251,248,242,.4);
-  padding-bottom: 5px;
-
-  /* FIX: opacity:0 alone still leaves an element clickable and in the
-     tab order. This button sits in the bottom-right corner of the
-     opener both before it fades in (first second) and after the
-     reveal has finished — a stray tap there was silently skipping the
-     intro, or hitting an invisible control over the brand reveal.
-     visibility + pointer-events match the pattern .title-card-enter
-     already uses; the fade itself is unchanged. */
   visibility: hidden;
-  pointer-events: none;
-
-  transition: opacity .6s ease, visibility .6s ease;
+  transition: opacity .6s ease, visibility .6s ease, color .6s ease;
 }
+.opener-skip.is-visible{ opacity: .78; visibility: visible; }
+.opener-skip.is-visible:hover,
+.opener-skip.is-visible:focus-visible{ opacity: 1; }
 
-.opener-skip.is-visible{
-  opacity: .6;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.opener-skip:hover{
-  opacity: 1;
-}
-
-
-/* ------------------------------------------------------------
-   Title card (monogram beat)
------------------------------------------------------------- */
+/* Title card ------------------------------------------------- */
 
 .title-card{
   position: absolute;
   inset: 0;
   z-index: 40;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(20px, 3.4vh, 34px);
-
-  background: #0B0505;
+  gap: clamp(28px, 5vh, 48px);
+  background: var(--wine-dark);
 }
 
 .title-card img{
-  width: min(11vw, 120px);
-  opacity: 0;
+  width: clamp(72px, 8vw, 104px);
+  height: auto;
 }
-
-/* ------------------------------------------------------------
-   Enter — the actual click/tap that starts the sequence. Revealed
-   once the monogram has faded in (see the OPEN GATE block in
-   app.js). Pressing it is the real user gesture browsers require
-   before audio with sound is allowed to play, so the rest of the
-   opener — and the music, once it reaches the brand reveal — is
-   gated behind it instead of trying (and failing) to autoplay.
------------------------------------------------------------- */
+.js .title-card img{ opacity: 0; }
 
 .title-card-enter{
+  min-width: 120px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid rgba(251, 248, 242, .45);
+  color: var(--cream);
+  font-size: var(--fs-label);
+  letter-spacing: .36em;
   opacity: 0;
   visibility: hidden;
-
-  color: var(--cream);
-
-  font-family: var(--sans);
-  font-size: .5625rem;
-  letter-spacing: .32em;
-  text-transform: uppercase;
-
-  border-bottom: 1px solid rgba(251,248,242,.4);
-  padding-bottom: 6px;
-
-  transition: opacity .6s ease;
+  transition: opacity .7s ease, background-color .35s, color .35s, border-color .35s;
 }
+.title-card-enter.is-visible{ opacity: 1; visibility: visible; }
+.title-card-enter:hover,
+.title-card-enter:focus-visible{ background: var(--cream); color: var(--wine-dark); border-color: var(--cream); }
 
-.title-card-enter.is-visible{
-  opacity: .68;
-  visibility: visible;
-}
-
-.title-card-enter.is-visible:hover,
-.title-card-enter.is-visible:focus-visible{
-  opacity: 1;
-}
-
-
-/* ============================================================
-   Film — the five campaign frames
-============================================================ */
+/* Campaign film ---------------------------------------------- */
 
 .film{
   position: absolute;
   inset: 0;
   z-index: 10;
-
-  background: #0B0505;
+  background: var(--paper);
 }
 
 .frame{
   position: absolute;
   inset: 0;
-
-  opacity: 0;
-
-  will-change: transform, opacity;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  background: var(--paper);
+  color: var(--wine);
 }
+.js .frame{ opacity: 0; visibility: hidden; }
 
-.frame img{
-  width: 100%;
+/* The illustrations are full-length figures on paper. They are shown
+   whole (never cover-cropped) on a ground matched to their own paper
+   tone, with a soft feathered edge so the sheet melts into the frame. */
+.frame-media{
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
   height: 100%;
-
-  object-fit: cover;
-  object-position: 50% 30%;
-
-  filter: saturate(.82) contrast(1.05);
+  padding: calc(var(--nav-h) + 4px) 0 clamp(28px, 6vh, 64px);
 }
+.frame--media-right .frame-media{ grid-column: 2; }
+.frame--media-left .frame-media{ grid-column: 1; }
 
-.frame[data-frame="1"] img{ object-position: 62% 74%; }
-.frame[data-frame="2"] img{ object-position: 50% 40%; }
-.frame[data-frame="3"] img{ object-position: 50% 24%; }
-.frame[data-frame="4"] img{ object-position: 50% 20%; }
-.frame[data-frame="5"] img{ object-position: 50% 18%; }
-
-.frame::after{
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.22) 0%,
-      rgba(0,0,0,0) 32%,
-      rgba(0,0,0,0) 60%,
-      rgba(0,0,0,.5) 100%
-    );
+.frame-media img{
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+  mask-composite: intersect;
 }
-
-
-/* ------------------------------------------------------------
-   Frame titles — editorial captions
------------------------------------------------------------- */
 
 .frame-title{
-  position: absolute;
-  z-index: 3;
-
-  max-width: min(340px, 30vw);
+  grid-row: 1;
+  align-self: center;
+  max-width: 11ch;
+  padding: 0 var(--gutter);
 
   font-family: var(--display);
-  font-style: normal;
-  font-weight: 400;
-
-  font-size: var(--type-h3);
-  line-height: .9;
-  letter-spacing: -.04em;
-
-  color: var(--ivory);
-
-  opacity: 0;
-
-  font-kerning: normal;
-  text-rendering: geometricPrecision;
+  font-weight: 360;
+  font-size: clamp(2.25rem, 4.6vw, 4.75rem);
+  line-height: .98;
+  letter-spacing: -.03em;
+  color: var(--wine);
+  text-wrap: balance;
 }
-
-/* Same Georgian-descender fix as .display-xl/lg/md: swap to the
-   Georgian-capable face and give the line box room, instead of the
-   Fraunces line-height (.9) clipping the lower strokes of letters
-   that fall back to an unpredictable serif for Georgian glyphs. */
-body.lang-ka .frame-title{
-  font-family: var(--geo-display);
-  line-height: 1.1;
-}
-
-.frame-title::before{
-  content: "";
-
-  position: absolute;
-  z-index: -1;
-  inset: -20px -28px -12px -28px;
-
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(5,2,2,.4) 0%,
-      rgba(5,2,2,.2) 48%,
-      rgba(5,2,2,0) 76%
-    );
-
-  filter: blur(3px);
-  pointer-events: none;
-}
+.frame--media-right .frame-title{ grid-column: 1; justify-self: end; text-align: right; }
+.frame--media-left .frame-title{ grid-column: 2; justify-self: start; }
 
 .frame-title-rule{
   display: block;
-  width: 34px;
+  width: 44px;
   height: 1px;
+  margin-bottom: 22px;
   background: currentColor;
-  opacity: .7;
-  margin-bottom: 13px;
+  opacity: .6;
+  transform-origin: left center;
+}
+.frame--media-right .frame-title-rule{ margin-left: auto; transform-origin: right center; }
+
+.frame-title-line{ display: block; }
+
+/* Film progress — five segments, quietly filling as frames play. */
+.film-progress{
+  position: absolute;
+  z-index: 45;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  bottom: max(40px, calc(env(safe-area-inset-bottom) + 30px));
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.film-progress span{
+  position: relative;
+  width: clamp(22px, 2.4vw, 34px);
+  height: 1px;
+  background: rgba(79, 24, 31, .2);
+  overflow: hidden;
+}
+.film-progress i{
+  position: absolute;
+  inset: 0;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
 }
 
-.frame-title--1{ top: 13%;    right: var(--gutter); text-align: right; }
-.frame-title--1 .frame-title-rule{ margin-left: auto; }
-
-.frame-title--2{ top: 17%;    left: var(--gutter);  text-align: left; }
-
-.frame-title--3{ bottom: 15%; right: var(--gutter); text-align: right; }
-.frame-title--3 .frame-title-rule{ margin-left: auto; }
-
-.frame-title--4{ bottom: 13%; left: var(--gutter);  text-align: left; }
-
-.frame-title--5{
-  top: 46%;
-  left: var(--gutter);
-  text-align: left;
-  max-width: min(230px, 24vw);
-}
-
-
-/* ============================================================
-   Coming soon — analog broken-TV signal beat
-============================================================ */
+/* Coming soon ------------------------------------------------- */
 
 .coming-soon{
   position: absolute;
   inset: 0;
   z-index: 30;
-
   display: grid;
   place-items: center;
-
   overflow: hidden;
   text-align: center;
-
   background: var(--ivory);
   color: var(--wine);
-
   opacity: 0;
   visibility: hidden;
 }
@@ -1232,57 +887,37 @@ body.lang-ka .frame-title{
 .coming-soon-content{
   position: relative;
   z-index: 8;
-
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  transform: translateZ(0);
 }
 
 .coming-soon-eyebrow{
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  letter-spacing: .4em;
-  color: var(--wine);
-  opacity: .62;
+  margin-bottom: clamp(18px, 2.6vh, 28px);
+  letter-spacing: .42em;
+  opacity: .7;
 }
 
 .coming-soon-date{
   font-family: var(--display);
-  font-weight: 400;
-  font-style: normal;
-
-  font-size: clamp(5.4rem, 14vw, 13rem);
-  line-height: .78;
-  letter-spacing: -.065em;
-
-  color: var(--wine);
-
+  font-weight: 340;
+  font-size: clamp(5.5rem, 15vw, 13rem);
+  line-height: .82;
+  letter-spacing: -.05em;
   font-variant-numeric: lining-nums;
-  font-kerning: normal;
-  text-rendering: geometricPrecision;
-
-  will-change: transform, filter, opacity;
 }
 
 .coming-soon-title{
-  margin-top: clamp(22px, 3vh, 34px);
+  margin-top: clamp(24px, 3.4vh, 36px);
+  font-size: var(--fs-label);
   letter-spacing: .48em;
-  color: var(--wine);
 }
 
 .coming-soon-place{
-  margin-top: 16px;
-  font-weight: 400;
+  margin-top: 14px;
   letter-spacing: .4em;
-  color: var(--wine);
-  opacity: .48;
+  opacity: .6;
 }
-
-
-/* ============================================================
-   Analog signal artefacts
-============================================================ */
 
 .signal-noise,
 .signal-scanlines,
@@ -1290,65 +925,30 @@ body.lang-ka .frame-title{
   position: absolute;
   inset: 0;
   pointer-events: none;
+  opacity: 0;
 }
-
 .signal-noise{
   z-index: 5;
-  opacity: 0;
   mix-blend-mode: multiply;
-
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
 }
-
 .signal-scanlines{
   z-index: 6;
-  opacity: 0;
-
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(79,24,31,0) 0px,
-      rgba(79,24,31,0) 3px,
-      rgba(79,24,31,.11) 4px,
-      rgba(79,24,31,0) 6px
-    );
+  background: repeating-linear-gradient(0deg, rgba(79,24,31,0) 0, rgba(79,24,31,0) 3px, rgba(79,24,31,.11) 4px, rgba(79,24,31,0) 6px);
 }
-
 .signal-slice{
   z-index: 7;
-  opacity: 0;
-
   background: var(--wine);
   mix-blend-mode: multiply;
-  transform-origin: center;
 }
-
 .signal-slice--a{ height: 7%; top: 27%; bottom: auto; }
 .signal-slice--b{ height: 4%; top: 66%; bottom: auto; }
-
-
-/* ------------------------------------------------------------
-   Signal animation states (driven by JS toggling className)
------------------------------------------------------------- */
 
 .coming-soon.is-signal .coming-soon-content{ animation: tvContentBreak 1.15s steps(1, end) both; }
 .coming-soon.is-signal .signal-noise{       animation: tvNoise 1.15s steps(8, end) both; }
 .coming-soon.is-signal .signal-scanlines{   animation: tvScan 1.15s linear both; }
 .coming-soon.is-signal .signal-slice--a{    animation: tvSliceA 1.15s steps(7, end) both; }
 .coming-soon.is-signal .signal-slice--b{    animation: tvSliceB 1.15s steps(6, end) both; }
-
-.coming-soon.is-clean .signal-noise,
-.coming-soon.is-clean .signal-scanlines,
-.coming-soon.is-clean .signal-slice{
-  opacity: 0;
-  animation: none;
-}
-
-
-/* ------------------------------------------------------------
-   TV keyframes
------------------------------------------------------------- */
 
 @keyframes tvContentBreak{
   0%{   transform: translate3d(0,0,0); filter: none; opacity: 0; }
@@ -1361,1668 +961,1013 @@ body.lang-ka .frame-title{
   68%{  transform: translate3d(-1px,0,0); filter: none; }
   100%{ transform: none; filter: none; opacity: 1; }
 }
-
 @keyframes tvNoise{
-  0%{   opacity: .05; }
-  10%{  opacity: .75; transform: translateX(-2%); }
-  22%{  opacity: .32; transform: translateX(3%); }
-  36%{  opacity: .88; transform: translateX(-4%); }
-  52%{  opacity: .22; transform: translateX(2%); }
-  70%{  opacity: .56; transform: translateX(-1%); }
-  88%{  opacity: .12; transform: none; }
-  100%{ opacity: 0; }
+  0%{ opacity: .05; } 10%{ opacity: .75; transform: translateX(-2%); } 22%{ opacity: .32; transform: translateX(3%); }
+  36%{ opacity: .88; transform: translateX(-4%); } 52%{ opacity: .22; transform: translateX(2%); }
+  70%{ opacity: .56; transform: translateX(-1%); } 88%{ opacity: .12; transform: none; } 100%{ opacity: 0; }
 }
-
 @keyframes tvScan{
-  0%{   opacity: .05; transform: scaleY(1); }
-  25%{  opacity: .65; transform: scaleY(1.02); }
-  50%{  opacity: .38; transform: scaleY(.98); }
-  72%{  opacity: .22; }
-  100%{ opacity: 0; }
+  0%{ opacity: .05; transform: scaleY(1); } 25%{ opacity: .65; transform: scaleY(1.02); }
+  50%{ opacity: .38; transform: scaleY(.98); } 72%{ opacity: .22; } 100%{ opacity: 0; }
 }
-
 @keyframes tvSliceA{
-  0%{   opacity: 0;   transform: translateX(0) scaleX(1); }
-  18%{  opacity: .24; transform: translateX(-7%) scaleX(1.18); }
-  33%{  opacity: .5;  transform: translateX(9%) scaleX(.78); }
-  48%{  opacity: .2;  transform: translateX(-4%) scaleX(1.08); }
-  68%{  opacity: .36; transform: translateX(5%) scaleX(.92); }
-  100%{ opacity: 0;   transform: none; }
+  0%{ opacity: 0; transform: none; } 18%{ opacity: .24; transform: translateX(-7%) scaleX(1.18); }
+  33%{ opacity: .5; transform: translateX(9%) scaleX(.78); } 48%{ opacity: .2; transform: translateX(-4%) scaleX(1.08); }
+  68%{ opacity: .36; transform: translateX(5%) scaleX(.92); } 100%{ opacity: 0; transform: none; }
 }
-
 @keyframes tvSliceB{
-  0%{   opacity: 0;   transform: translateX(0); }
-  24%{  opacity: .34; transform: translateX(8%) skewX(-4deg); }
-  42%{  opacity: .18; transform: translateX(-11%) skewX(2deg); }
-  62%{  opacity: .28; transform: translateX(5%); }
-  100%{ opacity: 0;   transform: none; }
+  0%{ opacity: 0; transform: none; } 24%{ opacity: .34; transform: translateX(8%) skewX(-4deg); }
+  42%{ opacity: .18; transform: translateX(-11%) skewX(2deg); } 62%{ opacity: .28; transform: translateX(5%); }
+  100%{ opacity: 0; transform: none; }
 }
 
 
 /* ============================================================
-   7. BRAND REVEAL
+   6. BRAND REVEAL (HERO)
 ============================================================ */
 
 .reveal-hero{
   position: absolute;
   inset: 0;
   z-index: 20;
-
-  overflow: hidden;
-
-  background: var(--ivory);
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-rows: minmax(0, 1fr);
+  background: var(--hero-paper);
   color: var(--wine);
-
-  opacity: 0;
-  visibility: hidden;
 }
+.js .reveal-hero{ opacity: 0; visibility: hidden; }
 
-.reveal-background{
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-
-  display: block;
-  overflow: hidden;
-}
-
-.reveal-background img{
-  width: 100%;
+/* Shown whole and anchored to the floor of the frame; the paper of
+   the illustration is the same tone as the hero, so its edges vanish. */
+.reveal-art{
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 0;
   height: 100%;
-  display: block;
-
-  object-fit: cover;
-  object-position: center;
-
-  transform: scale(1.015);
+  padding-top: calc(var(--nav-h) + 8px);
 }
-
-
-/* ------------------------------------------------------------
-   Atmosphere
------------------------------------------------------------- */
-
-.reveal-atmosphere{
-  position: absolute;
-  inset: -10%;
-
-  pointer-events: none;
-
-  background:
-    radial-gradient(
-      circle at 45% 70%,
-      rgba(113,47,60,.11) 0 2.5%,
-      rgba(113,47,60,.035) 4.5%,
-      transparent 10%
-    ),
-    radial-gradient(
-      circle at 34% 18%,
-      rgba(44,41,39,.07),
-      transparent 25%
-    ),
-    linear-gradient(
-      100deg,
-      rgba(44,41,39,.14),
-      transparent 18%,
-      transparent 100%
-    );
-
-  filter: blur(22px);
-  transform: scale(1.04);
-  opacity: .32;
+.reveal-art img{
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
-
-.reveal-shadow{
-  position: absolute;
-  left: -4vw;
-  top: -8%;
-
-  width: 18vw;
-  min-width: 110px;
-  height: 116%;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(44,41,39,.22),
-      rgba(44,41,39,.08) 42%,
-      transparent
-    );
-
-  filter: blur(24px);
-  opacity: .7;
-}
-
-
-/* ------------------------------------------------------------
-   Languages slot (kept as an animation anchor — content lives in
-   the nav's .language-switcher instead; see section 5)
------------------------------------------------------------- */
-
-.reveal-languages{
-  position: absolute;
-  z-index: 8;
-
-  top: 24px;
-  right: var(--gutter);
-
-  letter-spacing: .18em;
-  color: var(--wine);
-
-  opacity: 0;
-}
-
-
-/* ------------------------------------------------------------
-   Hero brand lockup
------------------------------------------------------------- */
 
 .reveal-hero-brand{
-  position: absolute;
-  z-index: 7;
-
-  left: var(--gutter);
-  bottom: clamp(56px, 12vh, 108px);
-
-  width: min(520px, 76vw);
-
-  color: var(--wine);
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  padding: 0 0 clamp(96px, 16vh, 168px) max(var(--gutter), env(safe-area-inset-left));
+  max-width: 520px;
 }
 
 .reveal-lockup{
-  display: block;
-
-  width: clamp(190px, 22vw, 350px);
+  width: clamp(180px, min(24vw, 40vh), 400px);
   height: auto;
-
-  object-fit: contain;
-  object-position: left bottom;
-
-  opacity: 0;
-  transform-origin: left bottom;
 }
 
 .reveal-brand-rule{
-  width: min(435px, 68vw);
+  width: 100%;
+  max-width: 400px;
   height: 1px;
-
-  margin-top: clamp(12px, 2vh, 20px);
-  margin-bottom: 12px;
-
-  background: rgba(79,24,31,.32);
-
-  transform: scaleX(0);
+  margin: clamp(18px, 3vh, 28px) 0 18px;
+  background: rgba(79, 24, 31, .3);
   transform-origin: left center;
 }
 
 .reveal-season,
 .reveal-manifesto,
-.reveal-year{
-  margin: 0;
-  font-style: normal;
+.reveal-year{ color: var(--wine); }
+.reveal-season{ letter-spacing: .3em; margin-bottom: 10px; }
+.reveal-manifesto{ letter-spacing: .2em; margin-bottom: 10px; line-height: 1.6; }
+.reveal-manifesto span{ white-space: nowrap; }
+.reveal-year{ letter-spacing: .3em; opacity: .7; }
+
+.reveal-hero-scroll{
+  position: absolute;
+  z-index: 5;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  bottom: max(28px, calc(env(safe-area-inset-bottom) + 18px));
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
   color: var(--wine);
-  opacity: 0;
 }
-
-.reveal-season{
-  letter-spacing: .28em;
-  margin-bottom: 9px;
+.reveal-hero-scroll-line{
+  position: relative;
+  width: 56px;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(79, 24, 31, .2);
 }
-
-.reveal-manifesto{
-  letter-spacing: .22em;
-  margin-bottom: 10px;
+.reveal-hero-scroll-line::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--wine);
+  animation: scrollCue 2.4s var(--ease) infinite;
 }
-
-.reveal-year{
-  letter-spacing: .28em;
-  opacity: .72;
+@keyframes scrollCue{
+  0%{   transform: translateX(-100%); }
+  55%{  transform: translateX(0); }
+  100%{ transform: translateX(101%); }
 }
 
 
 /* ============================================================
-   8. DIGITAL AD
+   7. DIGITAL AD
 ============================================================ */
 
 .ad{
   position: relative;
+  padding: var(--section-y) 0;
   background: var(--ivory);
-  padding: 20vh 0 18vh;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
-.ad-canvas{
-  position: relative;
-  max-width: 1400px;
-  min-height: 3020px;
+.section-intro{
+  max-width: 1000px;
+  margin: 0 auto clamp(80px, 13vh, 160px);
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+.section-intro .eyebrow{ margin-bottom: clamp(20px, 3vh, 32px); }
+.section-intro .lede{ margin: clamp(22px, 3.4vh, 36px) auto 0; }
+
+.ad-chapters{
+  display: flex;
+  flex-direction: column;
+  gap: clamp(88px, 15vh, 180px);
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
+.ad-chapter{
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(16px, 2.2vw, 36px);
+  align-items: center;
+}
 
-/* ------------------------------------------------------------
-   Ad copy
------------------------------------------------------------- */
+/* Each photograph has its own frame ratio and focal point, chosen for
+   that image — none is forced into a shared crop. */
+.ad-figure{
+  position: relative;
+  grid-row: 1;
+  overflow: hidden;
+  background: var(--ivory-warm);
+  aspect-ratio: var(--ratio, 4 / 5);
+}
+
+.ad-figure picture{
+  width: 100%;
+  height: 100%;
+}
+
+.ad-photo{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--focus, 50% 50%);
+  transform: scale(1.08);
+}
 
 .ad-copy{
-  position: absolute;
-  z-index: 5;
-  max-width: 320px;
-}
-
-.ad-copy h3{
-  font-family: var(--display);
-  font-weight: 400;
-  font-style: normal;
-
-  font-size: clamp(1.35rem, 2.2vw, 2.15rem);
-  line-height: .9;
-  letter-spacing: -.045em;
-
-  color: var(--wine);
-
-  margin: 14px 0 14px;
-
-  font-kerning: normal;
-  text-rendering: geometricPrecision;
-}
-
-/* Same Georgian-descender fix as .display-xl/lg/md and .frame-title
-   — real Georgian face plus a line box sized for its descenders,
-   instead of the Fraunces-tuned .9 line-height clipping them. */
-body.lang-ka .ad-copy h3{
-  font-family: var(--geo-display);
-  line-height: 1.1;
-}
-
-.ad-copy p{
-  font-family: var(--sans);
-  font-weight: 300;
-
-  /* Was .625rem (10px) — real running copy, not a decorative label;
-     bumped for comfortable reading. */
-  font-size: .75rem;
-  line-height: 1.75;
-  letter-spacing: .01em;
-
-  color: var(--muted);
-  max-width: 260px;
+  grid-row: 1;
+  max-width: 30ch;
 }
 
 .ad-copy-index{
-  letter-spacing: var(--tracking-label-wide);
+  display: flex;
+  align-items: center;
+  gap: 14px;
   color: var(--burgundy);
+  letter-spacing: var(--track-wide);
 }
-
-
-/* ------------------------------------------------------------
-   Ad images
------------------------------------------------------------- */
-
-.ad-figure{
-  position: absolute;
-  margin: 0;
-  overflow: hidden;
-  background: var(--ivory-warm);
-}
-
-/* FIX: was ".ad-figure img", a descendant selector — harmless while
-   .ad-curtain was an empty span, but it would now also catch the
-   logo mark nested inside .ad-curtain-mark below and stretch/blend
-   it exactly like the photo. Scoped to the direct child (the actual
-   photo) so the curtain's own image is unaffected. */
-.ad-figure > img{
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-  mix-blend-mode: multiply;
-
-  transform: scale(1.1);
-  will-change: transform;
-}
-
-.ad-figure::after{
+.ad-copy-index::after{
   content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  background:
-    linear-gradient(135deg, transparent 50%, rgba(79,24,31,.12));
+  width: 36px;
+  height: 1px;
+  background: currentColor;
+  opacity: .5;
 }
 
-/* ------------------------------------------------------------
-   Ad curtain — covers the photo, then wipes away on scroll (see
-   the .ad-figure loop in app.js). Three of the five (a/c/e, the
-   photos positioned on the right) wipe horizontally and carry the
-   monogram; the other two (b/d, positioned on the left) wipe
-   vertically bottom-to-top and carry the wordmark instead — split
-   deliberately rather than all five doing the same thing.
+.ad-copy h3{
+  margin: 22px 0 0;
+  font-family: var(--display);
+  font-weight: 360;
+  font-size: var(--fs-h3);
+  line-height: 1.02;
+  letter-spacing: -.025em;
+  color: var(--wine);
+  text-wrap: balance;
+}
 
-   Structure: .ad-curtain is just a centering box; .ad-curtain-fill
-   is the solid colour panel that actually gets scaled by GSAP. Mark
-   and fill are separate elements so the mark can fade out on its
-   own instead of visibly stretching/squashing as the fill's scale
-   animates toward 0.
------------------------------------------------------------- */
+.ad-copy p{
+  margin-top: 20px;
+  max-width: 34ch;
+  font-size: var(--fs-body);
+  font-weight: 350;
+  line-height: 1.75;
+  color: var(--muted);
+}
 
+/* Desktop composition: alternating, with varied scale and offsets */
+.ad-chapter--a .ad-figure{ grid-column: 7 / span 5; --ratio: 4 / 5;  --focus: 58% 66%; }
+.ad-chapter--a .ad-copy{   grid-column: 2 / span 4; }
+
+.ad-chapter--b .ad-figure{ grid-column: 1 / span 6; --ratio: 2 / 3;  --focus: 50% 50%; }
+.ad-chapter--b .ad-copy{   grid-column: 8 / span 4; align-self: end; margin-bottom: 12%; }
+
+.ad-chapter--c .ad-figure{ grid-column: 8 / span 4; --ratio: 4 / 5;  --focus: 46% 60%; }
+.ad-chapter--c .ad-copy{   grid-column: 2 / span 5; }
+
+.ad-chapter--d .ad-figure{ grid-column: 2 / span 5; --ratio: 1200 / 1507; --focus: 50% 0%; }
+.ad-chapter--d .ad-copy{   grid-column: 8 / span 4; align-self: start; margin-top: 18%; }
+
+.ad-chapter--e .ad-figure{ grid-column: 7 / span 5; --ratio: 3 / 4;  --focus: 50% 50%; }
+.ad-chapter--e .ad-copy{   grid-column: 2 / span 4; align-self: end; margin-bottom: 8%; }
+
+/* Curtain — covers the photo, then wipes away as it enters view. */
 .ad-curtain{
   position: absolute;
   inset: 0;
   z-index: 3;
-
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
-
 .ad-curtain-fill{
   position: absolute;
   inset: 0;
-
   background: var(--wine);
-  transform-origin: left center;
+  transform-origin: right center;
 }
-
-.ad-curtain--vertical .ad-curtain-fill{
-  transform-origin: center top;
-}
-
+.ad-curtain--vertical .ad-curtain-fill{ transform-origin: center top; }
 .ad-curtain-mark{
   position: relative;
   z-index: 1;
-
-  width: clamp(30px, 4.5vw, 46px);
+  width: clamp(32px, 3.4vw, 46px);
   height: auto;
-
-  opacity: .92;
+  opacity: .9;
 }
+html:not(.js) .ad-curtain{ display: none; }
 
-.ad-curtain-word{
-  position: relative;
-  z-index: 1;
-
-  font-family: var(--display);
-  font-style: italic;
-  font-weight: 400;
-
-  font-size: clamp(1.15rem, 2.4vw, 1.75rem);
-  letter-spacing: -.01em;
-
-  color: var(--ivory);
-  opacity: .92;
-
-  font-kerning: normal;
-  text-rendering: geometricPrecision;
-}
-
-
-/* ------------------------------------------------------------
-   Ad positioning — desktop
-   Bespoke editorial composition — preserved exactly.
------------------------------------------------------------- */
-
-.ad-figure--a{ width: 29%; height: 540px; right: 6%; top: 0; }
-.ad-copy--a{   left: 4%;   top: 150px; }
-
-.ad-figure--b{ width: 33%; height: 590px; left: 2%; top: 520px; }
-.ad-copy--b{   right: 6%;  top: 700px; text-align: right; }
-.ad-copy--b p{ margin-left: auto; }
-
-
-/* ------------------------------------------------------------
-   Marquee
------------------------------------------------------------- */
-
+/* Marquee */
 .ad-marquee{
-  position: absolute;
-  left: -5%;
-  right: -5%;
-  top: 1080px;
-  z-index: 7;
-
+  margin: 0 calc(50% - 50vw);
+  padding: clamp(18px, 2.6vh, 28px) 0;
   overflow: hidden;
   white-space: nowrap;
-
   border-block: 1px solid var(--line);
-  background: rgba(243,238,229,.9);
-
-  padding: 20px 0;
 }
-
 .ad-marquee-track{
   display: inline-flex;
   align-items: center;
-  gap: 32px;
-
-  letter-spacing: var(--tracking-label-wide);
-  color: var(--ink);
-
-  animation: marquee 30s linear infinite;
+  gap: clamp(24px, 3vw, 44px);
+  padding-right: clamp(24px, 3vw, 44px);
+  font-family: var(--display);
+  font-weight: 340;
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+  letter-spacing: -.01em;
+  color: var(--wine);
+  animation: marquee 48s linear infinite;
+  will-change: transform;
 }
-
 .ad-marquee-track i{
   font-style: normal;
+  font-size: .6em;
   color: var(--burgundy);
+  opacity: .6;
 }
+@keyframes marquee{ to{ transform: translateX(-50%); } }
 
-@keyframes marquee{
-  to{ transform: translateX(-50%); }
+.section-outro{
+  max-width: 900px;
+  margin: clamp(112px, 18vh, 200px) auto 0;
+  padding: 0 var(--gutter);
+  text-align: center;
 }
-
-
-/* ------------------------------------------------------------
-   Remaining ad chapters
------------------------------------------------------------- */
-
-.ad-figure--c{ width: 23%; height: 550px; right: 13%; top: 1330px; }
-.ad-copy--c{   left: 8%;   top: 1500px; }
-
-.ad-figure--d{ width: 30%; height: 620px; left: 8%; top: 1860px; }
-.ad-copy--d{   right: 5%;  top: 2060px; text-align: right; }
-
-.ad-figure--e{ width: 24%; height: 500px; right: 11%; top: 2460px; }
-.ad-copy--e{   left: 6%;   top: 2610px; }
+.section-outro .eyebrow{ margin-bottom: clamp(20px, 3vh, 30px); }
+.section-outro .lede{ margin: 22px auto 40px; }
 
 
 /* ============================================================
-   9. INVITATION
-   The invitation is a single full-width editorial page — the
-   earlier image/text split has been retired in favour of one
-   continuous composition, so the section is a single column.
+   8. INVITATION
 ============================================================ */
 
 .invite{
   position: relative;
-  width: 100%;
-  min-height: 100vh;   /* fallback — browsers without svh support */
-  min-height: 100svh;
-
-  overflow: hidden;
-
-  /* The invitation + RSVP now sit on a wine backdrop, as one sheet
-     of paper laid on the table — see .invite-card below. */
+  padding: clamp(88px, 13vh, 150px) var(--gutter) clamp(72px, 11vh, 128px);
   background: var(--wine);
   color: var(--wine);
 }
 
-/* FIX: .invite-footline was superseded by the full-bleed
-   single-column layout above (see .invite-media) and permanently
-   display:none — removed from the markup too (see index.html),
-   since a dead, never-rendered element was still extra DOM weight
-   for no benefit. */
+.invite > .chapter-mark{
+  max-width: 1180px;
+  margin: 0 auto clamp(24px, 4vh, 40px);
+  color: var(--cream);
+  opacity: .72;
+}
 
-.invite::after{
-  content: "Thank you. We look forward to welcoming you.";
-
+.invite-aside{
   position: absolute;
   top: 50%;
-  right: max(18px, calc((100% - min(1120px, 94vw)) / 2 + 8px));
-  z-index: 5;
-
-  transform: translateY(-50%) rotate(90deg);
-  transform-origin: center;
+  right: max(14px, calc((100% - 1180px) / 4));
+  transform: translate(50%, -50%) rotate(90deg);
   white-space: nowrap;
-
   color: var(--cream);
-  opacity: .5;
-  font-weight: 600;
-  letter-spacing: .29em;
-}
-
-/* .invite-media removed from the markup — see the comment in
-   index.html. It was a permanently display:none image, downloaded
-   on every visit for nothing. */
-
-.invite-panel{
-  position: relative;
-  z-index: 1;
-
-  width: 100%;
-  min-height: 100vh;   /* fallback — browsers without svh support */
-  min-height: 100svh;
-}
-
-.invite-card{
-  position: relative;
-  z-index: 1;
-
-  width: 100%;
-  max-width: min(1120px, 94vw);
-  min-height: 100vh;   /* fallback — browsers without svh support */
-  min-height: 100svh;
-
-  /* top/bottom margin reserves room for the torn-edge bands (see
-     ::before/::after below) so .invite's overflow:hidden doesn't
-     clip them — keep this equal to their height at every breakpoint */
-  margin: 96px auto;
-
-  padding: 96px clamp(70px, 7vw, 110px) 128px;
-
-  text-align: left;
-  color: var(--wine);
-
-  /* The paper itself: a torn/deckled sheet — same wine and ivory
-     tones as the rest of the palette, just given real fibre. */
-  /* A translucent ivory-warm wash over the grain keeps the fibre
-     subtle — a full-strength blend read as an obvious tiled pattern. */
-  background-color: var(--ivory-warm);
-  background-image:
-    linear-gradient(rgba(234,225,214,.86), rgba(234,225,214,.86)),
-    url("../assets/textures/paper-tile.jpg");
-  background-repeat: no-repeat, repeat;
-  background-size: cover, 420px 420px;
-
-  box-shadow: 0 50px 110px rgba(15,4,6,.4);
-}
-
-.invite-card::before,
-.invite-card::after{
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 2;
-
-  height: 96px;
-
-  background-repeat: repeat-x;
-  background-size: auto 100%;
-
+  opacity: .42;
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: .3em;
+  text-transform: uppercase;
   pointer-events: none;
 }
 
+/* The sheet: one invitation card, with an engraved inner border. */
+.invite-card{
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  column-gap: clamp(48px, 6vw, 104px);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(64px, 7vw, 104px) clamp(36px, 6vw, 96px);
+
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .31 0 0 0 0 .09 0 0 0 0 .12 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  box-shadow: 0 40px 100px rgba(20, 4, 7, .35);
+}
 .invite-card::before{
-  top: 0;
-  transform: translateY(-100%);
-  background-image: url("../assets/textures/paper-edge-top.jpg");
+  content: "";
+  position: absolute;
+  inset: clamp(10px, 1.2vw, 16px);
+  border: 1px solid var(--line-strong);
+  pointer-events: none;
 }
 
-.invite-card::after{
-  bottom: 0;
-  transform: translateY(100%);
-  background-image: url("../assets/textures/paper-edge-bottom.jpg");
-}
-
-.invite .chapter-mark{
-  /* Anchored to the paper card's own left edge (same centering math
-     as .invite-card) plus a small inset, so it always floats in the
-     wine margin above the paper instead of drifting onto it. */
-  top: 28px;
-  left: max(18px, calc((100% - min(1120px, 94vw)) / 2 + 8px));
-  z-index: 5;
-}
+.invite-main{ min-width: 0; }
 
 .invite-card-mark{
-  position: absolute;
-  top: 58px;
-  right: clamp(45px, 5vw, 85px);
-  z-index: 5;
-
-  width: 72px;
-  height: 72px;
-
+  width: 64px;
+  height: 64px;
   object-fit: contain;
+  margin-bottom: clamp(36px, 6vh, 56px);
 }
 
-#invite-heading{
-  width: min(650px, 70vw);
-  margin: 105px 0 64px;
+.invite .eyebrow{ color: var(--burgundy); }
 
-  color: var(--wine);
-
-  font-family: var(--display);
-  font-weight: 400;
-
-  font-size: clamp(2.6rem, 6.4vw, var(--type-h1));
-  line-height: .82;
-  letter-spacing: var(--tracking-tight);
-
-  /* No effect on the Georgian version below — Mkhedruli (the
-     Georgian script) has no upper/lowercase distinction, so
-     text-transform can't do anything to it. Left in place for the
-     English/Italian (Latin-script) headline it's actually styling. */
-  text-transform: uppercase;
+.invite-heading{
+  margin: clamp(18px, 2.6vh, 26px) 0 clamp(28px, 4.4vh, 44px);
+  font-size: clamp(2.75rem, 5.2vw, 5.25rem);
+  line-height: .98;
+  letter-spacing: -.03em;
 }
-
-/* Reduced from the Latin sizing above — Georgian glyphs read
-   visually denser at the same font-size, and without the uppercase
-   punch (see the note above) the full display size felt heavier
-   than intended. Own letter-spacing here (rather than the general
-   body.lang-ka .display-lg rule) because #invite-heading's ID
-   specificity would otherwise win over that rule and keep the
-   Latin-tuned -.045em tracking. */
-body.lang-ka #invite-heading{
-  width: min(560px, 78vw);
-  font-size: clamp(1.9rem, 4.2vw, 3.6rem);
-  letter-spacing: -.01em;
+.invite-heading .mask-in{
+  color: var(--burgundy);
 }
+/* The italic face (80 KB) is only requested as the invitation nears the
+   viewport (app.js adds .italic-ready); the heading is still masked and
+   hidden until then, so the swap is never seen. */
+html:not(.js) .invite-heading .mask-in,
+.italic-ready .invite-heading .mask-in{ font-style: italic; }
+/* Noto Serif Georgian has no italic: never synthesise a fake slant. */
+.invite-heading .mask-in:lang(ka){ font-style: normal; }
+.invite-heading:lang(ka){ font-size: clamp(2rem, 3.6vw, 3.25rem); }
 
-/* Sans (matching the site's general .lede), not the display serif —
-   the invitation's one display moment is the heading above; every
-   other line in this section, body copy included, shares the same
-   DM Sans voice. */
 .invite-lede{
-  width: min(430px, 45vw);
-  margin: 0 0 46px;
-
-  color: var(--wine);
-
-  font-family: var(--sans);
-  font-weight: 300;
-  font-size: var(--type-small);
-  line-height: 1.65;
-  letter-spacing: .008em;
-
-  /* The invitation copy is two paragraphs in all three languages. The
-     break is a real newline inside one string (the markup fallback in
-     index.html and the EN/KA/IT entries in app.js), so it needs to be
-     preserved rather than collapsed to a space. pre-line keeps the
-     newline and still collapses/wraps ordinary spaces normally, so
-     wrapping behaviour is unchanged. */
-  white-space: pre-line;
+  max-width: 46ch;
+  margin-bottom: clamp(36px, 5.6vh, 52px);
+  font-size: var(--fs-body);
+  font-weight: 350;
+  line-height: 1.75;
+  color: var(--ink);
+  white-space: pre-line;   /* the copy holds a real paragraph break */
+  text-wrap: pretty;
 }
-
-
-/* ------------------------------------------------------------
-   Date / time / place
------------------------------------------------------------- */
 
 .invite-meta{
   display: flex;
-  flex-direction: column;
-  gap: 17px;
-  margin: 0;
+  flex-wrap: wrap;
+  gap: 20px clamp(28px, 3.6vw, 48px);
+  padding: 24px 0;
+  border-block: 1px solid var(--line);
 }
-
-.invite-meta div{
-  margin: 0;
-}
-
 .invite-meta dt{
-  /* Labels are implied by context (date reads as a date); keep
-     them in the markup for assistive tech, hide visually. */
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  margin-bottom: 8px;
+  color: var(--burgundy);
 }
-
 .invite-meta dd{
-  margin: 0;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.3;
   color: var(--wine);
-  letter-spacing: .2em;
-  /* This carries the actual date/time/place — real content, not a
-     decorative caption — so it overrides the shared micro-label
-     block's 9px default rather than inheriting it. */
-  font-size: var(--type-label);
 }
 
-/* ------------------------------------------------------------
-   Invite CTAs — Location (opens Google Maps) and Add to calendar.
-   Both are metadata-weight links: same family/size/tracking as the
-   date/time/place text above them (no separate "button" treatment,
-   no permanent underline) so the block reads as one continuous
-   line of facts. A small branded tooltip on hover/focus carries the
-   affordance instead of a static rule under the text. */
-.invite-cta{
-  display: inline-block;
+.invite-link{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   color: var(--wine);
-  font-size: var(--type-label);
-  letter-spacing: .2em;
-  opacity: .82;
-  transition: opacity .3s;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 5px;
+  transition: text-decoration-color .3s, color .3s;
+}
+.invite-link:hover{ color: var(--burgundy); text-decoration-color: currentColor; }
+/* 44px touch target without changing the line's layout */
+.invite-meta .invite-link{
+  padding: 11px 0;
+  margin: -11px 0;
 }
 
-.invite-cta:hover,
-.invite-cta:focus-visible{
-  opacity: 1;
+.invite-link-arrow{
+  font-family: var(--sans);
+  font-size: .8em;
+  text-decoration: none;
 }
 
-/* ------------------------------------------------------------
-   Calendar link
------------------------------------------------------------- */
-
+.invite-calendar{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  padding-top: 20px;
+}
+.invite-calendar-label{ color: var(--burgundy); }
 .invite-calendar-links{
   display: flex;
-  gap: 28px;
-  margin: 22px 0 0;
+  flex-wrap: wrap;
+  gap: 4px 28px;
 }
-
-/* ------------------------------------------------------------
-   Tooltip — reused by any [data-tooltip] element; currently the
-   two invite CTAs above. Pure CSS, no JS beyond app.js swapping
-   the data-tooltip text per language (see data-i18n-tooltip).
------------------------------------------------------------- */
-
-[data-tooltip]{
-  position: relative;
-}
-
-[data-tooltip]::before,
-[data-tooltip]::after{
-  z-index: 20;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .25s var(--ease), transform .25s var(--ease);
-}
-
-[data-tooltip]::after{
-  content: attr(data-tooltip);
-
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 11px);
-
-  transform: translateX(-50%) translateY(4px);
-  white-space: nowrap;
-
-  padding: 7px 13px;
-
-  background: var(--wine);
-  color: var(--cream);
-
-  font-family: var(--sans);
-  font-size: .625rem;
+.invite-calendar-links .invite-link{
+  min-height: 44px;
+  align-items: center;
+  font-size: var(--fs-small);
   font-weight: 500;
-  letter-spacing: .06em;
-  text-transform: none;
 }
 
-[data-tooltip]::before{
-  content: "";
-
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 7px);
-
-  width: 6px;
-  height: 6px;
-
-  transform: translateX(-50%) rotate(45deg);
-  background: var(--wine);
-}
-
-[data-tooltip]:hover::after,
-[data-tooltip]:focus-visible::after{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-[data-tooltip]:hover::before,
-[data-tooltip]:focus-visible::before{
-  opacity: 1;
+/* Tooltip — pointer devices only; touch users get the visible link
+   styling and arrow instead of a hover-only hint. */
+@media (hover: hover) and (pointer: fine){
+  [data-tooltip]{ position: relative; }
+  [data-tooltip]::after{
+    content: attr(data-tooltip);
+    position: absolute;
+    z-index: 20;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    padding: 7px 12px;
+    background: var(--wine);
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: .75rem;
+    font-weight: 400;
+    letter-spacing: .02em;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 4px);
+    transition: opacity .25s var(--ease), transform .25s var(--ease);
+  }
+  [data-tooltip]:hover::after,
+  [data-tooltip]:focus-visible::after{ opacity: 1; transform: translate(-50%, 0); }
 }
 
 
 /* ============================================================
-   10. RESPONSE / RSVP
-   An editorial extension of the invitation, not a separate
-   "form" section — same page, same typographic voice.
+   9. RSVP
 ============================================================ */
 
 .response-experience{
-  width: min(780px, 78vw);
-  margin: 66px 0 0;
-  padding: 48px 0 0;
-
-  border-top: 1px solid rgba(79,24,31,.52);
+  min-width: 0;
+  padding-left: clamp(48px, 6vw, 104px);
+  border-left: 1px solid var(--line);
+  scroll-margin-top: calc(var(--nav-h) + 24px);
 }
+.response-experience:focus{ outline: none; }
 
-.response-intro{
-  margin: 0 0 31px;
+.response-intro{ margin-bottom: clamp(28px, 4.4vh, 40px); }
+
+.response-kicker{
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--wine);
 }
-
-.response-index{
-  /* index number retained for markup/i18n hooks, not displayed */
-  display: none;
-}
-
-/* .response-kicker ("RSVP") removed from the markup — the subtitle
-   now carries this intro on its own. */
+.response-kicker:lang(ka){ line-height: 1.25; letter-spacing: 0; }
 
 .response-subtitle{
-  margin: 0;
-  color: var(--burgundy);
-  font-family: var(--sans);
-  font-size: var(--type-small);
-  line-height: 1.6;
+  margin-top: 12px;
+  font-size: var(--fs-body);
+  color: var(--muted);
 }
 
-
-/* ------------------------------------------------------------
-   Form status
------------------------------------------------------------- */
+.rsvp-form{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.rsvp-form[hidden]{ display: none; }
 
 .rsvp-form-status{
   display: none;
-  margin: 0 0 22px;
-  padding: 12px 16px;
-
-  font-family: var(--sans);
-  font-size: var(--type-label);
-  letter-spacing: .02em;
-
-  background: rgba(113,47,60,.1);
-  border-left: 2px solid var(--burgundy);
-  color: var(--wine);
+  padding: 14px 16px;
+  border-left: 2px solid var(--error);
+  background: rgba(140, 29, 43, .07);
+  color: var(--error);
+  font-size: var(--fs-small);
+  line-height: 1.5;
 }
+.rsvp-form-status.is-visible{ display: block; }
 
-.rsvp-form-status.is-visible{
-  display: block;
-}
-
-
-/* ------------------------------------------------------------
-   Fields
------------------------------------------------------------- */
-
-.rsvp-form--editorial{
-  display: flex;
-  flex-direction: column;
-  gap: 29px;
-}
-
-/* FIX: the browser's built-in [hidden]{display:none} is a user-agent
-   rule, so this class's own display:flex was winning the cascade —
-   app.js sets rsvpForm.hidden = true on a successful RSVP and the form
-   simply stayed on screen underneath the thank-you panel. Same pattern
-   already used by .wish-step[hidden] and .response-success[hidden]. */
-.rsvp-form--editorial[hidden]{
-  display: none !important;
-}
-
-.editorial-field > label,
-.editorial-field > legend{
-  display: block;
-  width: 100%;
-  margin: 0 0 11px;
-  padding: 0;
-
-  color: var(--burgundy);
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: var(--tracking-label);
-  /* These are the actual questions being asked, not decoration —
-     overrides the shared 9px micro-label default. */
-  font-size: var(--type-label);
-}
-
-.req-mark{
-  margin-left: 3px;
-  color: var(--wine);
-  text-decoration: none;
-}
-
-/* Real people never see this — off-screen, out of the tab order,
-   and aria-hidden. A filled-in value means a bot filled the form. */
 .hp-field{
   position: absolute;
+  left: -9999px;
   width: 1px;
   height: 1px;
   overflow: hidden;
-  left: -9999px;
 }
 
-.editorial-field input[type="text"]{
-  width: 52%;
-  height: 36px;
-  padding: 4px 0 9px;
+.field{ display: flex; flex-direction: column; }
 
-  border: 0;
-  border-bottom: 1px solid rgba(79,24,31,.38);
-  border-radius: 0;
-  outline: none;
-  background: transparent;
-
+.field > label,
+.field > legend{
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: var(--fs-micro);
+  font-weight: 600;
   color: var(--wine);
-  font-family: var(--sans);
-  font-size: var(--type-label);
-  font-weight: 400;
-
-  transition: border-color .3s;
 }
 
-.editorial-field input[type="text"]:focus{
+.req-mark{ color: var(--burgundy); }
+
+.field-optional{
+  font-weight: 400;
+  letter-spacing: .08em;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.field input[type="text"]{
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;           /* 16px: no iOS zoom on focus */
+  line-height: 1.4;
+  outline: none;
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: border-color .25s, box-shadow .25s;
+}
+.field input[type="text"]:focus{
   border-bottom-color: var(--wine);
+  box-shadow: inset 0 -1px 0 var(--wine);
 }
 
 .field-error{
   display: none;
-  margin-top: 6px;
-  color: var(--burgundy);
-  font-family: var(--sans);
-  font-size: .5rem;
+  margin-top: 8px;
+  color: var(--error);
+  font-size: .8125rem;
+  line-height: 1.4;
 }
-
-.field-error.is-visible{
-  display: block;
-}
-
-.has-error > label,
-.has-error > legend{
-  color: var(--wine);
-}
+.field-error.is-visible{ display: block; }
 
 .has-error input[type="text"]{
-  border-bottom-color: var(--wine);
+  border-bottom-color: var(--error);
+  box-shadow: inset 0 -1px 0 var(--error);
 }
 
-
-/* ------------------------------------------------------------
-   Attendance
------------------------------------------------------------- */
-
-.editorial-options{
-  display: flex;
-  align-items: center;
-  gap: 45px;
-  flex-wrap: wrap;
+/* Attendance — two clear, full-size choices */
+.choice-options{
+  display: grid;
+  gap: 10px;
 }
 
-.editorial-options label{
+.choice{
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 14px;
+  min-height: 54px;
+  padding: 12px 18px;
+  border: 1px solid var(--line-strong);
   cursor: pointer;
+  transition: border-color .25s, background-color .25s;
 }
+.choice:hover{ border-color: var(--wine); }
 
-.editorial-options input{
-  /* -webkit- prefix needed for iOS/older Safari — without it, those
-     browsers ignore the unprefixed property and fall back to the
-     native radio control, which clashes with the wine ring style
-     below. */
-  -webkit-appearance: none;
-  appearance: none;
-
-  width: 14px;
-  height: 14px;
+.choice input{
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
   margin: 0;
+}
 
-  border: 1px solid rgba(79,24,31,.62);
+.choice-mark{
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--wine);
   border-radius: 50%;
-  background: transparent;
-
-  cursor: pointer;
+  transition: box-shadow .25s, background-color .25s;
 }
-
-.editorial-options input:checked{
+.choice input:checked + .choice-mark{
   background: var(--wine);
-  box-shadow: inset 0 0 0 3px var(--ivory);
+  box-shadow: inset 0 0 0 4px var(--paper);
 }
-
-.editorial-options span{
-  color: var(--wine);
-  font-weight: 500;
-  letter-spacing: .1em;
-  font-size: var(--type-label);
+.choice:has(input:checked){
+  border-color: var(--wine);
+  background: rgba(79, 24, 31, .05);
 }
-
-
-/* Top 3 designer field now reuses the single-line
-   .editorial-field input[type="text"] treatment (see Fields
-   above) — the old 3-input grid and its rules are removed. */
-
-/* .rsvp-divider is intentionally unstyled — matches current build */
-
-
-/* ------------------------------------------------------------
-   Wish step
------------------------------------------------------------- */
-
-.wish-step{
-  width: 100%;
+.choice input:focus-visible + .choice-mark{
+  outline: 2px solid var(--wine);
+  outline-offset: 3px;
 }
-
-.wish-step[hidden]{
-  display: none !important;
+.choice:has(input:focus-visible){
+  outline: 2px solid var(--wine);
+  outline-offset: 2px;
 }
+.choice:has(input:focus-visible) .choice-mark{ outline: none; }
 
-.wish-kicker{
-  margin: 0 0 10px;
-  color: var(--wine);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: .27em;
-}
-
-/* Sans, not the display serif — this sits inside the form, one step
-   below "You are invited." in the hierarchy, and needs to read as
-   part of the same DM Sans / uppercase-label system as the fields
-   around it rather than as a second, competing headline. */
-.wish-title{
-  margin: 0 0 18px;
-  color: var(--wine);
-
-  font-family: var(--sans);
-  font-size: clamp(1.0625rem, 2.2vw, 1.375rem);
-  font-weight: 500;
-  font-style: normal;
-  letter-spacing: .008em;
+.choice-label{
+  font-size: var(--fs-body);
   line-height: 1.35;
+  color: var(--ink);
 }
 
-/* NOTE: the markup nests a <form class="wish-form"> inside the
-   outer #rsvpForm. The HTML parser drops a <form> start tag while
-   another is already open, so .wish-form never exists as a real
-   element — its children (textarea + submit button) land directly
-   inside .wish-step. Scoping to .wish-step (not .wish-form) below
-   is what actually reaches them; left as-is since app.js already
-   relies on this same flattening (one #rsvpForm, one submit). */
+.has-error .choice{ border-color: var(--error); }
+
+/* Wish */
+.wish-step{
+  display: flex;
+  flex-direction: column;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+.wish-kicker{
+  margin-bottom: 10px;
+  color: var(--burgundy);
+}
+.wish-title{
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 16px;
+  font-family: var(--display);
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  font-weight: 380;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  color: var(--wine);
+}
+.wish-title .field-optional{
+  font-family: var(--sans);
+  font-size: var(--fs-micro);
+  letter-spacing: .08em;
+}
+.wish-title:lang(ka){ line-height: 1.4; letter-spacing: 0; }
 
 .wish-step textarea{
-  display: block;
   width: 100%;
-  min-height: 92px;
-  margin: 0 0 25px;
-  padding: 16px 18px;
-
-  resize: none;
-
-  border: 1px solid rgba(79,24,31,.34);
+  min-height: 120px;
+  padding: 14px 16px;
+  resize: vertical;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, .35);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.55;
   outline: none;
-  background: rgba(79,24,31,.045);
-
-  color: var(--wine);
-  font-family: var(--sans);
-  font-size: var(--type-small);
-  line-height: 1.5;
-
-  transition: border-color .3s, background-color .3s;
+  transition: border-color .25s, box-shadow .25s;
 }
-
 .wish-step textarea:focus{
   border-color: var(--wine);
-  background: rgba(79,24,31,.075);
+  box-shadow: 0 0 0 1px var(--wine);
 }
-
-.wish-step textarea::placeholder{
-  color: var(--burgundy);
-  opacity: .45;
-}
-
-
-/* ------------------------------------------------------------
-   Submit
------------------------------------------------------------- */
 
 .response-submit{
-  display: inline-flex;
-  align-items: center;
-
-  width: max-content;
-  margin: 0;
-  padding: 0;
-
-  border: 0;
-  background: transparent;
-
-  color: var(--wine);
-  font-weight: 600;
-  letter-spacing: .27em;
-
-  cursor: pointer;
+  align-self: flex-start;
+  min-width: 220px;
 }
-
-.response-submit .btn-arrow{
-  /* arrow removed per request — kept in the DOM/JS hooks, just
-     not rendered, so the hover/loading-state JS below stays inert
-     rather than needing changes. */
+.btn-spinner{
   display: none;
-}
-
-.response-submit:hover .btn-arrow{
-  transform: translateX(7px);
-}
-
-.response-submit .btn-spinner{
-  display: none;
-  margin-left: 14px;
-
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(251, 248, 242, .35);
+  border-top-color: var(--cream);
   border-radius: 50%;
-
-  border: 2px solid rgba(79,24,31,.28);
-  border-top-color: var(--wine);
-
   animation: spin .7s linear infinite;
 }
+.response-submit.is-loading .btn-spinner{ display: inline-block; }
+.response-submit.is-loading .btn-label{ opacity: .75; }
+@keyframes spin{ to{ transform: rotate(360deg); } }
 
-.response-submit.is-loading .btn-label,
-.response-submit.is-loading .btn-arrow{
-  opacity: .5;
-}
-
-.response-submit.is-loading .btn-spinner{
-  display: inline-block;
-}
-
-.response-submit:disabled{
-  cursor: progress;
-}
-
-@keyframes spin{
-  to{ transform: rotate(360deg); }
-}
-
-
-/* ------------------------------------------------------------
-   Success
------------------------------------------------------------- */
-
+/* Success */
 .response-success{
-  width: 100%;
-  padding: 20px 0;
+  padding: clamp(24px, 6vh, 64px) 0;
   text-align: center;
 }
-
-.response-success[hidden]{
-  display: none !important;
-}
-
-.response-success > img{
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 22px;
-}
-
-.response-success-eyebrow{
-  margin: 0 0 10px;
-  color: var(--burgundy);
-  letter-spacing: .25em;
-}
-
-/* Sans to match .wish-title — the success state is still part of the
-   same form, not a new editorial heading moment. */
+.response-success[hidden]{ display: none; }
+.response-success:focus{ outline: none; }
+.response-success > img{ width: 56px; height: 56px; margin: 0 auto 26px; }
+.response-success-eyebrow{ margin-bottom: 14px; color: var(--burgundy); }
 .response-success-title{
-  margin: 0 0 15px;
+  margin-bottom: 16px;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(1.875rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -.02em;
   color: var(--wine);
-
-  font-family: var(--sans);
-  font-size: clamp(1.375rem, 3vw, 1.75rem);
-  font-weight: 500;
-  letter-spacing: .006em;
-  line-height: 1.25;
 }
-
+.response-success-title:lang(ka){ line-height: 1.35; letter-spacing: 0; }
 .response-success-note{
-  margin: 0 auto 25px;
-  max-width: 34ch;
-
-  color: var(--burgundy);
-  font-family: var(--sans);
-  font-weight: 300;
-  font-size: var(--type-small);
-  line-height: 1.6;
-  letter-spacing: .008em;
-}
-
-/* "Submit another response" reuses .text-link's family/weight but
-   needs its own layout (centred, no border) inside the success state */
-.response-success .text-link{
-  border: 0;
-  padding: 0;
-  color: var(--wine);
-  cursor: pointer;
+  max-width: 36ch;
+  margin: 0 auto 24px;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--muted);
 }
 
 
 /* ============================================================
-   11. FOOTER
+   10. FOOTER
 ============================================================ */
 
 .site-footer{
+  padding: clamp(80px, 12vh, 128px) var(--gutter) calc(clamp(32px, 5vh, 48px) + env(safe-area-inset-bottom));
   background: var(--wine-dark);
   color: var(--cream);
-
-  padding: 12vh var(--gutter) 5vh;
   text-align: center;
 }
 
-.site-footer-top{
-  margin-bottom: 6vh;
-}
-
-.site-footer-top img{
-  margin: 0 auto 20px;
-  opacity: .9;
-}
-
-.site-footer-top .display-md{
-  color: var(--cream);
-  margin-bottom: 0;
-}
+.site-footer-top{ margin-bottom: clamp(36px, 6vh, 56px); }
+.site-footer-top img{ width: 44px; height: 44px; margin: 0 auto 22px; opacity: .9; }
+.site-footer-top .display-md{ color: var(--cream); }
 
 .site-footer-meta{
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 26px;
   flex-wrap: wrap;
-
-  letter-spacing: var(--tracking-label-wide);
-  opacity: .5;
-
-  padding-bottom: 4vh;
-  border-bottom: 1px solid rgba(251,248,242,.14);
-  margin-bottom: 3vh;
+  gap: 8px 32px;
+  max-width: 1180px;
+  margin: 0 auto 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line-light);
 }
-
-.site-footer-fine{
-  letter-spacing: .08em;
-  opacity: .35;
+.site-footer-meta span{ opacity: .7; }
+.site-footer-meta a{
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  text-decoration-color: rgba(251, 248, 242, .4);
 }
+.site-footer-meta a:hover{ text-decoration-color: currentColor; }
 
-.site-footer-credit{
-  margin-top: 6px;
-  font-size: var(--type-micro);
-  letter-spacing: .08em;
-  opacity: .28;
-}
-
-
-/* ============================================================
-   12. UTILITIES
-============================================================ */
-
-.sr-only{
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.site-footer-fine{ letter-spacing: .14em; opacity: .55; }
+.site-footer-credit{ margin-top: 10px; letter-spacing: .14em; opacity: .55; }
+.site-footer-credit a{
+  display: inline-block;
+  padding: 14px 6px;
+  margin: -14px -6px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
 
 /* ============================================================
-   13. RESPONSIVE
+   11. RESPONSIVE
 ============================================================ */
 
-/* ------------------------------------------------------------
-   13.1 — Tablet transition (801–1180px)
------------------------------------------------------------- */
-
-@media (min-width: 801px) and (max-width: 1180px){
-  .ad-canvas{ min-height: 2760px; }
-
-  .display-xl{ font-size: clamp(52px, 8vw, 100px); }
-  .display-lg{ font-size: clamp(42px, 6.4vw, 76px); }
+/* Large desktop — keep the composition from drifting apart. */
+@media (min-width: 1680px){
+  :root{ --gutter: 88px; }
 }
 
+/* Laptops / landscape tablets */
+@media (max-width: 1180px){
+  .invite-aside{ display: none; }
+  .site-controls{ padding-left: 20px; }
+}
 
-/* ------------------------------------------------------------
-   13.2 — Mobile (≤800px)
------------------------------------------------------------- */
-
-@media (max-width: 800px){
-
-  :root{
-    --nav-h: 66px;
-  }
-
-  /* nav */
-  .nav-links{ display: none; }
-  .nav-toggle{ display: flex; }
-
-  .site-controls{ display: none; }
-
-  .nav-lang-mobile{
-    display: flex;
-    margin-left: auto;
-    font-size: .6875rem;
-  }
-
-  .mobile-controls{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    margin-top: 42px;
-  }
-
-  .mobile-controls .sound-label{ display: inline; }
-  .mobile-controls .language-switcher{ font-size: .6875rem; }
-  .mobile-controls .sound-toggle{ font-size: var(--type-micro); }
-
-  /* type */
-  .display-xl{ font-size: clamp(3.1rem, 15vw, 6.4rem); line-height: .86; letter-spacing: -.06em; }
-  .display-lg{ font-size: clamp(2.7rem, 13vw, 5.4rem); line-height: .88; letter-spacing: -.055em; }
-  .display-md{ font-size: clamp(28px, 9vw, 42px); letter-spacing: -.04em; }
-  .lede{ font-size: 13px; line-height: 1.75; }
-
-  /* teaser */
-  .frame-title{ max-width: 76vw; font-size: clamp(25px, 7.2vw, 34px); line-height: .9; letter-spacing: -.045em; }
-  .frame-title--1{ top: 10%; }
-  .frame-title--2{ top: 15%; }
-  .frame-title--3{ bottom: 13%; }
-  .frame-title--4{ bottom: 11%; }
-  .frame-title--5{ top: 36%; max-width: 64vw; }
-
-  /* coming soon */
-  .coming-soon-date{ font-size: clamp(5rem, 25vw, 10rem); letter-spacing: -.075em; }
-  .coming-soon-title{ font-size: .5rem; letter-spacing: .4em; }
-  .coming-soon-place{ font-size: .4375rem; letter-spacing: .34em; }
-
-  /* reveal brand */
-  .reveal-languages{ top: 18px; right: 18px; font-size: .4375rem; }
-
-  .reveal-hero-brand{
-    left: 18px;
-    bottom: 64px;
-    width: calc(100% - 36px);
-  }
-
-  .reveal-lockup{ width: min(205px, 58vw); }
-  .reveal-brand-rule{ width: 100%; }
-
-  .reveal-season,
-  .reveal-manifesto{ font-size: .4375rem; letter-spacing: .22em; }
-  .reveal-year{ font-size: .4375rem; letter-spacing: .26em; }
-
-  /* digital ad */
-  .section-intro{ margin-bottom: 10vh; }
-
-  .ad{ padding: 16vh 0 14vh; }
-  .ad-canvas{ min-height: 2500px; padding: 0; }
-
-  .ad-copy h3{ font-size: clamp(21px, 6.2vw, 29px); line-height: .92; overflow-wrap: break-word; }
-  .ad-copy p{ font-size: 11.5px; line-height: 1.7; overflow-wrap: break-word; }
-
-  /* Each caption's max-width is sized to its photo's width on the
-     opposite side (100% − figure width − 18px inset − 16px gap),
-     so the text box can never overlap the image — it wraps inside
-     its own lane instead. */
-
-  .ad-figure--a{ width: 52%; height: 380px; right: 0; }
-  .ad-copy--a{   left: 18px; top: 90px;  max-width: calc(48% - 34px); }
-
-  .ad-figure--b{ width: 58%; height: 420px; left: 0; top: 430px; }
-  .ad-copy--b{   right: 18px; top: 780px; max-width: calc(42% - 34px); }
-
-  .ad-marquee{ top: 990px; }
-
-  .ad-figure--c{ width: 46%; height: 400px; right: 0; top: 1150px; }
-  .ad-copy--c{   left: 18px; top: 1290px; max-width: calc(54% - 34px); }
-
-  .ad-figure--d{ width: 56%; height: 440px; left: 0; top: 1580px; }
-  .ad-copy--d{   right: 18px; top: 1760px; max-width: calc(44% - 34px); }
-
-  .ad-figure--e{ width: 46%; height: 380px; right: 0; top: 2060px; }
-  .ad-copy--e{   left: 18px; top: 2180px; max-width: calc(54% - 34px); }
-
-  /* invitation */
+/* Tablet & below: one column RSVP, menu navigation */
+@media (max-width: 1023px){
   .invite-card{
-    max-width: calc(100% - 20px);
-    margin: 48px auto;
-    padding: 72px 27px 65px;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px;
+  }
+  .response-experience{
+    margin-top: clamp(48px, 7vh, 72px);
+    padding: clamp(40px, 6vh, 56px) 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
   }
 
-  .invite-card::before,
-  .invite-card::after{
-    height: 48px;
-  }
+  .ad-chapter{ row-gap: 28px; }
+  .ad-chapter .ad-figure,
+  .ad-chapter .ad-copy{ grid-row: auto; align-self: start; margin: 0; }
 
-  .invite .chapter-mark{ top: 25px; left: 27px; font-size: .4375rem; letter-spacing: .19em; }
+  .ad-chapter--a .ad-figure{ grid-column: 4 / -1; }
+  .ad-chapter--b .ad-figure{ grid-column: 1 / span 10; }
+  .ad-chapter--c .ad-figure{ grid-column: 5 / -1; }
+  .ad-chapter--d .ad-figure{ grid-column: 1 / span 9; }
+  .ad-chapter--e .ad-figure{ grid-column: 3 / -1; }
 
-  .invite-card-mark{ top: 20px; right: 22px; width: 51px; height: 51px; }
-
-  #invite-heading{
-    width: 100%;
-    margin: 78px 0 42px;
-    font-size: clamp(51px, 15vw, 78px);
-    line-height: .84;
-    letter-spacing: -.04em;
-  }
-
-  .invite-lede{
-    width: 100%;
-    max-width: 340px;
-    margin-bottom: 34px;
-    font-size: 13px;
-    line-height: 1.65;
-  }
-
-  .invite-meta{ gap: 14px; }
-  /* Kept at the same readable floor as desktop (var(--type-label)) —
-     the old .5rem (8px) override undid the AA contrast/size fix on
-     the viewport most guests will actually RSVP from. */
-  .invite-meta dd{ font-size: var(--type-label); letter-spacing: .16em; }
-
-  .invite-calendar-links{ margin-top: 20px; gap: 22px; }
-
-  .invite::after{ display: none; }
-
-  /* rsvp */
-  .response-experience{ width: 100%; margin-top: 45px; padding-top: 31px; }
-  .rsvp-form--editorial{ gap: 27px; }
-
-  .editorial-field input[type="text"]{ width: 100%; }
-
-  .editorial-options{ gap: 17px; }
-  .editorial-options span{ font-size: .6875rem; letter-spacing: .05em; }
-
-  /* footer */
-  .site-footer{ padding: 10vh 18px 5vh; }
+  .ad-chapter--a .ad-copy,
+  .ad-chapter--c .ad-copy,
+  .ad-chapter--e .ad-copy{ grid-column: 1 / span 10; }
+  .ad-chapter--b .ad-copy,
+  .ad-chapter--d .ad-copy{ grid-column: 3 / -1; }
 }
 
+@media (max-width: 900px){
+  :root{ --nav-h: 64px; }
 
-/* ------------------------------------------------------------
-   13.3 — Small phones (≤480px)
------------------------------------------------------------- */
+  .nav-links,
+  .site-controls{ display: none; }
+  .nav-lang-mobile,
+  .nav-toggle{ display: flex; }
+  .nav-lang-mobile{ margin-right: 2px; }
 
-@media (max-width: 480px){
+  .site-nav{ gap: 10px; }
+  .site-nav.is-solid{ --nav-h: 58px; }
+}
 
-  .site-nav{ padding: 0 18px; }
-  .nav-mark span{ font-size: .5rem; letter-spacing: .22em; }
-  .nav-mark-glyph{ width: 19px; height: 19px; }
-
-  .mobile-controls{ margin-top: 34px; }
-  .mobile-controls .sound-label{ font-size: .5rem; letter-spacing: .15em; }
-
-  .title-card img{ width: 72px; }
-
-  .frame-title{ font-size: clamp(24px, 8.5vw, 32px); letter-spacing: -.05em; }
-  .frame-title-rule{ width: 26px; margin-bottom: 10px; }
-
-  .coming-soon-eyebrow{ font-size: .4375rem; letter-spacing: .34em; }
-  .coming-soon-date{ font-size: clamp(5rem, 25vw, 8.5rem); }
-  .coming-soon-title{ font-size: .4375rem; letter-spacing: .32em; }
-  .coming-soon-place{ font-size: .375rem; letter-spacing: .28em; }
-
-  .section-intro{ padding: 0 18px; }
-
-  .display-xl{ font-size: clamp(44px, 16vw, 68px); }
-  .display-lg{ font-size: clamp(38px, 14vw, 58px); }
-
-  .ad-copy h3{ font-size: 22px; }
-  .ad-copy p{ font-size: 11px; }
-
-  .invite-card{ max-width: calc(100% - 12px); margin: 28px auto; padding: 56px 21px 46px; }
-  .invite-card::before,
-  .invite-card::after{ height: 34px; }
-
-  /* Shrunk from the ≤800px block's 51px so "You are invited." (the
-     text is uppercased via text-transform) reads on one line down
-     to a 320px-wide phone instead of wrapping to two — also lets
-     us pull in the generous top/bottom margins around it, which
-     were sized for the two-line wrap. */
-  #invite-heading{
-    margin: 46px 0 28px;
-    font-size: clamp(28px, 9vw, 38px);
-    letter-spacing: -.03em;
+/* Portrait screens (phones, portrait tablets): stack image + caption */
+@media (orientation: portrait){
+  .frame{
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
   }
+  .frame .frame-media{
+    grid-column: 1;
+    grid-row: 1;
+    padding: calc(var(--nav-h) + 8px) var(--gutter) 0;
+  }
+  .frame .frame-title{
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: stretch;
+    max-width: none;
+    padding: clamp(20px, 3.4vh, 36px) var(--gutter) calc(clamp(88px, 12vh, 120px) + env(safe-area-inset-bottom));
+    font-size: clamp(2rem, 8.4vw, 3.5rem);
+    text-align: left;
+  }
+  .frame .frame-title-rule{ margin-left: 0; transform-origin: left center; }
 
-  .invite-lede{ margin-bottom: 26px; font-size: 12px; }
+  .reveal-hero{
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .reveal-art{
+    grid-column: 1;
+    grid-row: 1;
+    padding: calc(var(--nav-h) + 4px) var(--gutter) 0;
+  }
+  .reveal-hero-brand{
+    grid-column: 1;
+    grid-row: 2;
+    max-width: none;
+    padding: clamp(20px, 3vh, 32px) var(--gutter) calc(clamp(80px, 11vh, 104px) + env(safe-area-inset-bottom));
+    background: var(--hero-paper);
+  }
+  .reveal-lockup{ width: clamp(140px, 38vw, 240px); }
+  .reveal-brand-rule{ max-width: none; margin: 16px 0 14px; }
+}
 
-  .invite-meta dd{ font-size: .4375rem; }
+/* Short portrait phones: give the illustration room above the brand. */
+@media (orientation: portrait) and (max-height: 700px){
+  .reveal-lockup{ width: clamp(104px, 20vh, 180px); }
+  .reveal-hero-brand{ padding-top: 12px; padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .reveal-brand-rule{ margin: 10px 0; }
+  .reveal-season, .reveal-manifesto{ margin-bottom: 6px; }
+  .reveal-hero-scroll{ bottom: max(14px, calc(env(safe-area-inset-bottom) + 8px)); }
+}
 
-  .response-experience{ margin-top: 32px; padding-top: 24px; }
-  .rsvp-form--editorial{ gap: 22px; }
+/* Phones */
+@media (max-width: 640px){
+  .reveal-manifesto .reveal-sep{ display: none; }
+  .reveal-manifesto span:not(.reveal-sep){ display: block; }
+
+  :root{ --fs-body: .9375rem; }
+
+  .nav-mark span{ display: none; }
+  .nav-mark-glyph{ width: 28px; height: 28px; }
+
+  .display-xl{ font-size: clamp(2.75rem, 13vw, 4.25rem); }
+  .display-lg{ font-size: clamp(2.25rem, 10.5vw, 3.5rem); }
+
+  .ad-chapters{ gap: 88px; }
+  .ad-chapter{ row-gap: 22px; }
+  .ad-chapter--a .ad-figure{ grid-column: 2 / -1; }
+  .ad-chapter--b .ad-figure{ grid-column: 1 / span 11; }
+  .ad-chapter--c .ad-figure{ grid-column: 3 / -1; }
+  .ad-chapter--d .ad-figure{ grid-column: 1 / span 11; }
+  .ad-chapter--e .ad-figure{ grid-column: 2 / -1; }
+
+  .ad-chapter .ad-copy{ grid-column: 1 / -1; padding-right: 8%; }
+  .ad-chapter--b .ad-copy,
+  .ad-chapter--d .ad-copy{ grid-column: 2 / -1; padding-right: 0; }
+
+  .invite{ padding-left: 10px; padding-right: 10px; }
+  .invite > .chapter-mark{ padding: 0 calc(var(--gutter) - 10px); }
+  .invite-card{ padding: 56px 26px 48px; }
+  .invite-card-mark{ width: 52px; height: 52px; margin-bottom: 32px; }
+  .invite-heading{ font-size: clamp(2.5rem, 12vw, 3.5rem); }
+  .invite-heading:lang(ka){ font-size: clamp(1.75rem, 8vw, 2.25rem); }
+
+  .invite-meta-place{ flex-basis: 100%; }
+  .invite-meta dd{ font-size: 1.125rem; }
+
+  .invite-calendar{ align-items: flex-start; flex-direction: column; gap: 4px; }
+
+  .response-submit{ align-self: stretch; }
+
+  .site-footer-meta{ flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 360px){
+  .language-switcher button{ min-width: 30px; }
+  .invite-card{ padding: 48px 20px 40px; }
+}
+
+/* Short landscape screens (phones on their side) */
+@media (orientation: landscape) and (max-height: 520px){
+  :root{ --nav-h: 56px; }
+  .frame-title{ font-size: clamp(1.75rem, 7vh, 2.5rem); }
+  .frame-title-rule{ margin-bottom: 14px; }
+  .reveal-hero-brand{ padding-bottom: 76px; }
+  .reveal-lockup{ width: clamp(120px, 30vh, 180px); }
+  .reveal-brand-rule{ margin: 12px 0 10px; }
+  .film-progress{ bottom: 24px; }
+  .mobile-menu{ justify-content: flex-start; gap: 24px; overflow-y: auto; }
+  .mobile-menu-nav a{ font-size: 1.75rem; padding: 8px 0; }
+  .mobile-menu-foot{ display: none; }
 }
 
 
 /* ============================================================
-   14. REDUCED MOTION / NO-JS FALLBACK / NAV STATE
+   12. MOTION PREFERENCES & FALLBACKS
 ============================================================ */
 
 @media (prefers-reduced-motion: reduce){
-  html{ scroll-behavior: auto; }
-
+  *, *::before, *::after{
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
   .ad-marquee-track{ animation: none; }
-
-  .reveal-up,
-  .mask-lines .mask-in{
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .response-submit .btn-spinner{ animation: none; }
-
-  .coming-soon.is-signal .coming-soon-content,
-  .coming-soon.is-signal .signal-noise,
-  .coming-soon.is-signal .signal-scanlines,
-  .coming-soon.is-signal .signal-slice{
-    animation: none;
-  }
+  .reveal-hero-scroll-line::after{ animation: none; transform: none; }
+  .js .reveal-up,
+  .js .mask-lines .mask-in{ opacity: 1 !important; transform: none !important; }
+  .ad-photo{ transform: none; }
 }
 
-/* JS toggles this class on <html> when GSAP failed to load, so the
-   scroll-reveal states resolve to their visible end-state instead
-   of staying hidden. */
+/* GSAP unavailable (blocked/failed): every animated element resolves
+   to its final, readable state. */
 html.no-gsap .reveal-up,
-html.no-gsap .mask-lines .mask-in{
-  opacity: 1 !important;
-  transform: none !important;
-}
+html.no-gsap .mask-lines .mask-in{ opacity: 1 !important; transform: none !important; }
+html.no-gsap .ad-curtain{ display: none; }
+html.no-gsap .title-card,
+html.no-gsap .film,
+html.no-gsap .film-progress,
+html.no-gsap .coming-soon,
+html.no-gsap .opener-skip{ display: none !important; }
+html.no-gsap .reveal-hero{ opacity: 1 !important; visibility: visible !important; }
+html.no-gsap .reveal-hero *{ opacity: 1; transform: none; }
 
-html.no-gsap [data-rule-draw]{
-  transform: scaleX(1) !important;
-}
-
-/* FIX: targeted .ad-curtain, which is now just the centering box —
-   the element that actually needs hiding is .ad-curtain-fill. Also
-   split by axis so the vertical pair (b/d) collapse the right way
-   without JS. */
-html.no-gsap .ad-curtain-fill{
-  transform: scaleX(0);
-}
-
-html.no-gsap .ad-curtain--vertical .ad-curtain-fill{
-  transform: scaleY(0);
-}
-
-html.no-gsap .ad-curtain-mark,
-html.no-gsap .ad-curtain-word{
-  display: none;
-}
-
-html.no-gsap .opener-skip{
-  display: none;
-}
-
-/* Nav flips from "difference" blend (over the dark teaser) to a
-   normal wine-on-ivory treatment once the opener has resolved. */
-body.opener-revealed .site-nav{
-  color: var(--wine);
-  mix-blend-mode: normal;
-}
-
-body.opener-revealed .nav-links a::after{
-  background: var(--wine);
-}
-
-/* The teaser frames and the 12.09 numerals carry will-change for the
-   duration of the opening sequence. Once the opener has resolved they
-   are never animated again, but the promoted compositor layers were
-   being held for the whole session — real memory on mobile, for
-   nothing. Released here; the animation itself is untouched. */
+/* Promoted layers are only needed while the opener plays. */
 body.opener-revealed .frame,
-body.opener-revealed .coming-soon-date{
-  will-change: auto;
-}
-
-
-/* ============================================================
-   END — CASA GELSO
-============================================================ */
-/* ============================================================
-   INVITATION / RSVP — TYPOGRAPHY REFINEMENT
-   Smaller, minimal type with natural letter spacing.
-============================================================ */
-
-.invite-card,
-.response-experience{
-  letter-spacing: normal;
-}
-
-/* Main invitation small labels */
-.invite-eyebrow,
-.invite-meta dt,
-.invite-meta dd,
-.invite-calendar,
-.response-eyebrow,
-.response-label,
-.editorial-field label,
-.editorial-choice legend,
-.editorial-choice label,
-.wish-kicker,
-.wish-form label,
-.response-error{
-  letter-spacing: .04em;
-}
-
-/* Invitation body */
-.invite-lede{
-  letter-spacing: 0;
-}
-
-/* RSVP questions */
-.response-experience h3,
-.editorial-choice legend,
-.wish-title{
-  letter-spacing: -.01em;
-}
-
-/* Input text */
-.editorial-field input,
-.editorial-field textarea,
-.wish-form textarea{
-  letter-spacing: 0;
-}
-
-/* Yes / No options */
-.editorial-choice label{
-  letter-spacing: .025em;
-}
-
-/* Submit button — IMPORTANT:
-   do not use wide tracking here */
-.response-submit{
-  letter-spacing: .02em;
-}
-
-.response-submit .btn-label{
-  letter-spacing: .02em !important;
-  word-spacing: normal;
-}
-
-/* Success / secondary links */
-.response-success,
-.response-success .text-link{
-  letter-spacing: .01em;
-}
-
-/* Footer link */
-.site-footer-meta a{
-  letter-spacing: .04em;
-}
+body.opener-revealed .coming-soon-date{ will-change: auto; }

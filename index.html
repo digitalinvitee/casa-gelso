@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#4F181F">
+<meta name="theme-color" content="#33100F">
 <title>Casa Gelso — Opening in Tbilisi, 12 September 2026</title>
 <meta name="description" content="Casa Gelso — a new luxury fashion destination opening in Tbilisi on 12 September 2026. Accessible refinement. Curated individuality. Quiet confidence.">
 
-<!-- TODO: replace with the live production domain before launch —
-     canonical + og:url + og:image must be absolute URLs for link
-     previews (Facebook/WhatsApp/iMessage/X) to resolve reliably. -->
+<!-- canonical + og:url + og:image must be absolute URLs for link
+     previews to resolve; update if the production domain changes. -->
 <link rel="canonical" href="https://www.casagelso.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.casagelso.com/">
@@ -17,141 +16,64 @@
 <meta property="og:title" content="Casa Gelso — Opening in Tbilisi">
 <meta property="og:description" content="A new luxury fashion destination opens in Tbilisi, 12 September 2026.">
 <meta property="og:image" content="https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="1179">
+<meta property="og:image:height" content="1475">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Casa Gelso — Opening in Tbilisi">
 <meta name="twitter:description" content="A new luxury fashion destination opens in Tbilisi, 12 September 2026.">
 <meta name="twitter:image" content="https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg">
 
-<link rel="icon" href="assets/logo/monogram-wine.png">
-<link rel="apple-touch-icon" href="assets/logo/monogram-wine.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Single consolidated Google Fonts request — every family/weight the
-     CSS actually uses lives in one link now (Fraunces replaces the old,
-     mostly-unused Bodoni Moda load, and the CSS @import that duplicated
-     this request has been removed from style.css). -->
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+Georgian:wght@400;500&family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
-<!-- FIX: the true first-painted content is the opener's monogram
-     (title-card img, fades in ~0-1.3s after load) — the teaser's
-     first campaign frame (01-shoe.jpg) only appears once "Enter" is
-     pressed, several seconds later at the earliest, and is a much
-     larger asset. Preloading the shoe photo at fetchpriority=high
-     was competing with the actually-critical logo for early
-     bandwidth; the logo now gets the priority hint instead, and the
-     shoe frame is still preloaded (it's needed soon) just without
-     jumping the queue ahead of first paint. -->
-<link rel="preload" as="image" href="assets/logo/monogram-wine.png" fetchpriority="high">
-<link rel="preload" as="image" href="assets/teaser/01-shoe.jpg">
+<link rel="icon" href="assets/img/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/logo/favicon-180.png">
+
+<!-- Self-hosted fonts: no third-party connection on the critical path.
+     Only the two faces needed for first paint are preloaded; italic and
+     Georgian files download on demand (unicode-range / first use). -->
+<link rel="preload" href="assets/fonts/dm-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/fraunces-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/img/logo/monogram-ivory-160.webp" as="image" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/style.css">
 
-<!-- FIX (slow / unstable connections): <body> ships with class
-     "is-locked", which sets overflow:hidden + touch-action:none. Only
-     app.js ever removes it. If app.js (or the GSAP/Lenis CDN scripts
-     that run before it, in order, via defer) is slow, blocked or
-     never arrives, the page stayed permanently scroll-locked on the
-     title card — a dead site, not a degraded one.
-
-     This failsafe waits for app.js to announce itself (it sets
-     window.__casaAppReady on its first line). If that hasn't happened
-     after 9s, it unlocks the body and resolves the opener straight to
-     the brand reveal — exactly the same end-state app.js's own
-     reduced-motion / no-GSAP fallback produces. When everything loads
-     normally it does nothing at all. It never fires while app.js is
-     merely waiting for the user to press "Enter". -->
+<!-- Boot: (1) apply the saved language before first paint, so Georgian
+     typography never flashes in Latin fonts; (2) failsafe — if app.js
+     never arrives (blocked, very slow network), unlock the page after
+     9s and resolve the opener to the brand reveal instead of leaving a
+     scroll-locked title card. Does nothing when app.js loads. -->
 <script>
 (function () {
   "use strict";
+  var root = document.documentElement;
+  root.className += " js";
+  try {
+    var saved = window.localStorage.getItem("casa-gelso-language");
+    if (saved === "ka" || saved === "it") root.lang = saved;
+  } catch (_) {}
 
-  var BOOT_TIMEOUT = 9000;
-
-  function revealFallback() {
+  setTimeout(function () {
     if (window.__casaAppReady) return;
-
-    var doc = document;
-    var body = doc.body;
-
+    var body = document.body;
     if (!body) return;
-
-    doc.documentElement.className += " no-gsap";
-    body.className = body.className.replace(/\bis-locked\b/g, "");
-
-    if (body.className.indexOf("opener-revealed") === -1) {
-      body.className += " opener-revealed";
-    }
-
-    var opener = doc.querySelector("[data-opener]");
-    if (!opener) return;
-
-    var hideSelectors = [
-      "[data-title-card]",
-      "[data-film]",
-      "[data-coming-soon]",
-      "[data-skip-intro]"
-    ];
-
-    for (var i = 0; i < hideSelectors.length; i++) {
-      var dead = opener.querySelector(hideSelectors[i]);
-      if (dead) dead.style.display = "none";
-    }
-
-    var hero = opener.querySelector("[data-reveal-hero]");
-    if (!hero) return;
-
-    hero.style.opacity = "1";
-    hero.style.visibility = "visible";
-
-    var parts = hero.querySelectorAll(
-      ".reveal-lockup, .reveal-brand-rule, .reveal-season, .reveal-manifesto, .reveal-year, .reveal-languages"
-    );
-
-    for (var j = 0; j < parts.length; j++) {
-      parts[j].style.opacity = "1";
-      parts[j].style.transform = "none";
-      parts[j].style.visibility = "visible";
-    }
-  }
-
-  setTimeout(revealFallback, BOOT_TIMEOUT);
+    root.className += " no-gsap";
+    body.className = body.className.replace(/\bis-locked\b/g, "") + " opener-revealed";
+  }, 9000);
 })();
 </script>
 
-<!-- Same end-state, for visitors with JavaScript disabled entirely:
-     without this the is-locked class kept the page unscrollable and
-     the opener never resolved past the (invisible) monogram. -->
 <noscript>
 <style>
   body.is-locked{ overflow: visible; height: auto; touch-action: auto; }
-  .title-card,
-  .film,
-  .coming-soon,
-  .opener-skip{ display: none !important; }
-  .reveal-hero{ opacity: 1 !important; visibility: visible !important; }
-  .reveal-lockup,
-  .reveal-season,
-  .reveal-manifesto,
-  .reveal-year,
-  .reveal-languages{ opacity: 1 !important; transform: none !important; }
-  .reveal-brand-rule{ transform: scaleX(1) !important; }
-  .reveal-up,
-  .mask-lines .mask-in{ opacity: 1 !important; transform: none !important; }
-  .ad-curtain-fill{ transform: scaleX(0) !important; }
-  .ad-curtain--vertical .ad-curtain-fill{ transform: scaleY(0) !important; }
-  .ad-curtain-mark{ display: none !important; }
-  .site-nav{ color: var(--wine); mix-blend-mode: normal; }
+  .title-card, .film, .coming-soon, .opener-skip, .film-progress{ display: none !important; }
+  .reveal-hero, .reveal-hero *{ opacity: 1 !important; visibility: visible !important; transform: none !important; }
 </style>
 </noscript>
 
-<!-- Event structured data — lets Google surface this as a rich event
-     result (date, time, location) rather than a plain blue link. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Event",
   "name": "Casa Gelso — Opening",
-  "startDate": "2026-09-12T19:00:00+04:00",
-  "endDate": "2026-09-12T22:00:00+04:00",
+  "startDate": "2026-09-12T17:00:00+04:00",
+  "endDate": "2026-09-12T20:00:00+04:00",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "location": {
@@ -166,756 +88,454 @@
   },
   "image": ["https://www.casagelso.com/assets/teaser/04-black-gold-dress.jpg"],
   "description": "Casa Gelso — a new luxury fashion destination opening in Tbilisi. Accessible refinement. Curated individuality. Quiet confidence.",
-  "organizer": {
-    "@type": "Organization",
-    "name": "Casa Gelso"
-  }
+  "organizer": { "@type": "Organization", "name": "Casa Gelso" }
 }
 </script>
 </head>
 <body class="is-locked">
-<!-- FIX: the page had no <h1> anywhere — every heading (chapter
-     marks, "You are invited.", etc.) is an h2, and the brand name
-     itself is only ever an <img alt="Casa Gelso">, never a heading
-     element. Screen-reader users and SEO crawlers rely on exactly
-     one h1 to identify what a page is; added visually-hidden
-     (reuses the existing .sr-only utility, so nothing on screen
-     changes) rather than promoting an existing visual heading and
-     disturbing the section-by-section h2/h3 hierarchy below it. -->
+<a class="skip-link" href="#main" data-i18n="ui.skipToContent">Skip to content</a>
 <h1 class="sr-only">Casa Gelso — Opening in Tbilisi, 12 September 2026</h1>
-<audio id="casaGelsoAudio" preload="metadata" loop playsinline src="assets/audio/mp3.mp3"></audio>
-<a class="skip-link" href="#main">Skip to content</a>
+<audio id="casaGelsoAudio" preload="none" loop playsinline src="assets/audio/mp3.mp3"></audio>
 <div class="film-grain" aria-hidden="true"></div>
 
 <!-- ============================================================
      NAVIGATION
 ============================================================ -->
 <header class="site-nav" data-nav>
-  <a class="nav-mark" href="#top" aria-label="Casa Gelso — back to top">
-    <img src="assets/logo/monogram-wine.png" alt="" class="nav-mark-glyph">
+  <a class="nav-mark" href="#top" data-i18n-aria="nav.homeLabel" aria-label="Casa Gelso — back to top">
+    <img src="assets/img/logo/monogram-wine-240.webp" alt="" class="nav-mark-glyph" width="24" height="24">
     <span>Casa Gelso</span>
   </a>
 
-  <nav class="nav-links" aria-label="Primary">
-    <a href="#digital-ad" data-nav-label="digital">Digital&nbsp;Ad</a>
-    <a href="#invitation" data-nav-label="invitation">Invitation</a>
-      </nav>
-  <div class="site-controls" aria-label="Site controls">
-    <div class="language-switcher" data-language-switcher>
-      <button type="button" data-lang="en" aria-pressed="true">EN</button>
-      <span class="lang-sep" aria-hidden="true"></span>
-      <button type="button" data-lang="ka" aria-pressed="false">KA</button>
-      <span class="lang-sep" aria-hidden="true"></span>
-      <button type="button" data-lang="it" aria-pressed="false">IT</button>
+  <nav class="nav-links" data-i18n-aria="nav.primaryLabel" aria-label="Primary">
+    <a href="#digital-ad" data-i18n="nav.digital">Digital Ad</a>
+    <a href="#invitation" data-i18n="nav.invitation">Invitation</a>
+    <a href="#rsvp" class="nav-cta" data-i18n="nav.rsvp">RSVP</a>
+  </nav>
+
+  <div class="site-controls">
+    <div class="language-switcher" role="group" data-i18n-aria="nav.languageLabel" aria-label="Language">
+      <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ka" lang="ka" aria-label="ქართული" aria-pressed="false">KA</button>
+      <button type="button" data-lang="it" lang="it" aria-label="Italiano" aria-pressed="false">IT</button>
     </div>
-    <button class="sound-toggle" type="button" data-sound-toggle aria-pressed="false" aria-label="Sound off">
-      <span class="sound-label">SOUND OFF</span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <button class="sound-toggle" type="button" data-sound-toggle aria-pressed="false">
+      <span class="sound-label">Sound off</span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </div>
 
-  <div class="language-switcher nav-lang-mobile" data-language-switcher aria-label="Language">
-    <button type="button" data-lang="en" aria-pressed="true">EN</button>
-    <span class="lang-sep" aria-hidden="true"></span>
-    <button type="button" data-lang="ka" aria-pressed="false">KA</button>
-    <span class="lang-sep" aria-hidden="true"></span>
-    <button type="button" data-lang="it" aria-pressed="false">IT</button>
+  <div class="language-switcher nav-lang-mobile" role="group" data-i18n-aria="nav.languageLabel" aria-label="Language">
+    <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button>
+    <button type="button" data-lang="ka" lang="ka" aria-label="ქართული" aria-pressed="false">KA</button>
+    <button type="button" data-lang="it" lang="it" aria-label="Italiano" aria-pressed="false">IT</button>
   </div>
 
-  <button class="nav-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
+  <button class="nav-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" data-i18n-aria="nav.menuOpen" aria-label="Open menu">
     <span class="nav-toggle-bars" aria-hidden="true"></span>
   </button>
 </header>
 
-<div class="mobile-menu" id="mobileMenu" data-mobile-menu aria-hidden="true">
-  <button class="mobile-menu-close" type="button" data-menu-close aria-label="Close menu">&times;</button>
-  <nav aria-label="Mobile">
-    <a href="#digital-ad" style="--i:0" data-nav-label="digital">Digital Ad</a>
-    <a href="#invitation" style="--i:1" data-nav-label="invitation">Invitation</a>
+<div class="mobile-menu" id="mobileMenu" data-mobile-menu role="dialog" aria-modal="true" data-i18n-aria="nav.menuLabel" aria-label="Menu" hidden>
+  <button class="mobile-menu-close" type="button" data-menu-close data-i18n-aria="nav.menuClose" aria-label="Close menu"><span aria-hidden="true"></span></button>
+  <nav class="mobile-menu-nav" data-i18n-aria="nav.mobileLabel" aria-label="Main menu">
+    <a href="#digital-ad" style="--i:0"><span class="mobile-menu-index">01</span><span data-i18n="nav.digital">Digital Ad</span></a>
+    <a href="#invitation" style="--i:1"><span class="mobile-menu-index">02</span><span data-i18n="nav.invitation">Invitation</span></a>
+    <a href="#rsvp" style="--i:2"><span class="mobile-menu-index">03</span><span data-i18n="nav.rsvp">RSVP</span></a>
   </nav>
   <div class="mobile-controls">
-    <div class="language-switcher" data-language-switcher>
-      <button type="button" data-lang="en" aria-pressed="true">EN</button><span class="lang-sep" aria-hidden="true"></span>
-      <button type="button" data-lang="ka" aria-pressed="false">KA</button><span class="lang-sep" aria-hidden="true"></span>
-      <button type="button" data-lang="it" aria-pressed="false">IT</button>
+    <div class="language-switcher" role="group" data-i18n-aria="nav.languageLabel" aria-label="Language">
+      <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ka" lang="ka" aria-label="ქართული" aria-pressed="false">KA</button>
+      <button type="button" data-lang="it" lang="it" aria-label="Italiano" aria-pressed="false">IT</button>
     </div>
-    <button class="sound-toggle sound-toggle--mobile" type="button" data-sound-toggle aria-pressed="false" aria-label="Sound off">
-      <span class="sound-label">SOUND OFF</span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <button class="sound-toggle" type="button" data-sound-toggle aria-pressed="false">
+      <span class="sound-label">Sound off</span><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </div>
   <div class="mobile-menu-foot">
-    <span>Tbilisi</span>
+    <span data-i18n="footer.city">Tbilisi</span>
     <span>12 / 09 / 2026</span>
   </div>
 </div>
 
 <!-- ============================================================
-     OPENING SEQUENCE — teaser · coming soon · brand reveal
+     OPENING SEQUENCE — title card · five campaign frames ·
+     12.09 coming soon · brand reveal. Campaign copy is English
+     in every language by design.
 ============================================================ -->
-<section id="top" class="opener" data-opener aria-label="Casa Gelso opening film" data-language="en-only">
+<section id="top" class="opener" data-opener aria-label="Casa Gelso opening film">
 
-  <button class="opener-skip" type="button" data-skip-intro>Skip intro</button>
+  <button class="opener-skip" type="button" data-skip-intro data-i18n="opener.skip">Skip intro</button>
 
-  <!-- Beat 0 — monogram title card. Not aria-hidden: it now holds a
-       real "Enter" control (see the OPEN GATE block in app.js) that
-       keyboard/screen-reader users need to be able to reach — the
-       rest of the sequence, and any chance of the music starting
-       (browsers refuse unmuted audio without a real user gesture),
-       waits for it to be pressed. -->
   <div class="title-card" data-title-card>
-    <img src="assets/logo/monogram-wine.png" alt="">
+    <img src="assets/img/logo/monogram-ivory-160.webp" alt="" width="96" height="96">
     <button type="button" class="title-card-enter" data-open-intro>
-      <span class="title-card-enter-label">Enter</span>
+      <span data-i18n="opener.enter">Enter</span>
     </button>
   </div>
 
-  <!-- Beats 1–5 — the five campaign frames -->
-  <div class="film" data-film aria-hidden="true">
-    <figure class="frame" data-frame="1">
-      <img src="assets/teaser/01-shoe.jpg" decoding="async" alt="A strappy heel poised on a pedestal edge — the first frame of the Casa Gelso campaign.">
-      <figcaption class="frame-title frame-title--1">
-        <span class="frame-title-rule"></span>Something is coming
-      </figcaption>
+  <div class="film" data-film aria-hidden="true" lang="en">
+    <figure class="frame frame--media-right" data-frame="1" style="--paper:#F7EADB">
+      <picture class="frame-media">
+        <source type="image/avif" srcset="assets/img/teaser/01-shoe-640.avif 640w, assets/img/teaser/01-shoe-800.avif 800w, assets/img/teaser/01-shoe-1023.avif 1023w" sizes="(orientation: portrait) 100vw, 50vw">
+        <source type="image/webp" srcset="assets/img/teaser/01-shoe-640.webp 640w, assets/img/teaser/01-shoe-800.webp 800w, assets/img/teaser/01-shoe-1023.webp 1023w" sizes="(orientation: portrait) 100vw, 50vw">
+        <img src="assets/teaser/01-shoe.jpg" width="1023" height="1537" decoding="async" alt="">
+      </picture>
+      <figcaption class="frame-title"><span class="frame-title-rule"></span><span class="frame-title-line">Something is coming</span></figcaption>
     </figure>
 
-    <figure class="frame" data-frame="2">
-      <img src="assets/teaser/02-heart-bag.jpg" decoding="async" alt="A hand reaching for a heart-shaped Moschino bag.">
-      <figcaption class="frame-title frame-title--2">
-        <span class="frame-title-rule"></span>Something to love
-      </figcaption>
+    <figure class="frame frame--media-left" data-frame="2" style="--paper:#F7EADA">
+      <picture class="frame-media">
+        <source type="image/avif" srcset="assets/img/teaser/02-heart-bag-640.avif 640w, assets/img/teaser/02-heart-bag-800.avif 800w, assets/img/teaser/02-heart-bag-1023.avif 1023w" sizes="(orientation: portrait) 100vw, 50vw">
+        <source type="image/webp" srcset="assets/img/teaser/02-heart-bag-640.webp 640w, assets/img/teaser/02-heart-bag-800.webp 800w, assets/img/teaser/02-heart-bag-1023.webp 1023w" sizes="(orientation: portrait) 100vw, 50vw">
+        <img src="assets/teaser/02-heart-bag.jpg" fetchpriority="low" width="1023" height="1537" decoding="async" alt="">
+      </picture>
+      <figcaption class="frame-title"><span class="frame-title-rule"></span><span class="frame-title-line">Something to love</span></figcaption>
     </figure>
 
-    <figure class="frame" data-frame="3">
-      <img src="assets/teaser/03-black-dress.jpg" decoding="async" alt="A woman in a black halter gown with a heart brooch at the neckline.">
-      <figcaption class="frame-title frame-title--3">
-        <span class="frame-title-rule"></span>Something to desire
-      </figcaption>
+    <figure class="frame frame--media-right" data-frame="3" style="--paper:#F8EFE3">
+      <picture class="frame-media">
+        <source type="image/avif" srcset="assets/img/teaser/03-black-dress-640.avif 640w, assets/img/teaser/03-black-dress-800.avif 800w, assets/img/teaser/03-black-dress-924.avif 924w" sizes="(orientation: portrait) 100vw, 50vw">
+        <source type="image/webp" srcset="assets/img/teaser/03-black-dress-640.webp 640w, assets/img/teaser/03-black-dress-800.webp 800w, assets/img/teaser/03-black-dress-924.webp 924w" sizes="(orientation: portrait) 100vw, 50vw">
+        <img src="assets/teaser/03-black-dress.jpg" fetchpriority="low" width="924" height="1600" decoding="async" alt="">
+      </picture>
+      <figcaption class="frame-title"><span class="frame-title-rule"></span><span class="frame-title-line">Something to desire</span></figcaption>
     </figure>
 
-    <figure class="frame" data-frame="4">
-      <img src="assets/teaser/04-black-gold-dress.jpg" decoding="async" alt="A woman in a black gown printed with gold hearts, standing beside a vintage microphone.">
-      <figcaption class="frame-title frame-title--4">
-        <span class="frame-title-rule"></span>Make it yours
-      </figcaption>
+    <figure class="frame frame--media-left" data-frame="4" style="--paper:#F7F3EE">
+      <picture class="frame-media">
+        <source type="image/avif" srcset="assets/img/teaser/04-black-gold-dress-640.avif 640w, assets/img/teaser/04-black-gold-dress-800.avif 800w, assets/img/teaser/04-black-gold-dress-1179.avif 1179w" sizes="(orientation: portrait) 100vw, 50vw">
+        <source type="image/webp" srcset="assets/img/teaser/04-black-gold-dress-640.webp 640w, assets/img/teaser/04-black-gold-dress-800.webp 800w, assets/img/teaser/04-black-gold-dress-1179.webp 1179w" sizes="(orientation: portrait) 100vw, 50vw">
+        <img src="assets/teaser/04-black-gold-dress.jpg" fetchpriority="low" width="1179" height="1475" decoding="async" alt="">
+      </picture>
+      <figcaption class="frame-title"><span class="frame-title-rule"></span><span class="frame-title-line">Make it yours</span></figcaption>
     </figure>
 
-    <figure class="frame" data-frame="5">
-      <img src="assets/teaser/05-red-suit.jpg" decoding="async" alt="A woman in a tailored red suit with heart-shaped hardware.">
-      <figcaption class="frame-title frame-title--5">
-        <span class="frame-title-rule"></span>Wear the moment
-      </figcaption>
+    <figure class="frame frame--media-right" data-frame="5" style="--paper:#F8F1E9">
+      <picture class="frame-media">
+        <source type="image/avif" srcset="assets/img/teaser/05-red-suit-640.avif 640w, assets/img/teaser/05-red-suit-800.avif 800w, assets/img/teaser/05-red-suit-1179.avif 1179w" sizes="(orientation: portrait) 100vw, 50vw">
+        <source type="image/webp" srcset="assets/img/teaser/05-red-suit-640.webp 640w, assets/img/teaser/05-red-suit-800.webp 800w, assets/img/teaser/05-red-suit-1179.webp 1179w" sizes="(orientation: portrait) 100vw, 50vw">
+        <img src="assets/teaser/05-red-suit.jpg" fetchpriority="low" width="1179" height="1475" decoding="async" alt="">
+      </picture>
+      <figcaption class="frame-title"><span class="frame-title-rule"></span><span class="frame-title-line">Wear the moment</span></figcaption>
     </figure>
   </div>
 
-  <!-- Beat 6 — 12.09 / Coming Soon: analog broken-TV signal -->
-  <div class="coming-soon" data-coming-soon aria-hidden="true">
-    <div class="signal-noise" aria-hidden="true"></div>
-    <div class="signal-scanlines" aria-hidden="true"></div>
-    <div class="signal-slice signal-slice--a" aria-hidden="true"></div>
-    <div class="signal-slice signal-slice--b" aria-hidden="true"></div>
+  <div class="film-progress" data-film-progress aria-hidden="true">
+    <span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span>
+  </div>
+
+  <div class="coming-soon" data-coming-soon aria-hidden="true" lang="en">
+    <div class="signal-noise"></div>
+    <div class="signal-scanlines"></div>
+    <div class="signal-slice signal-slice--a"></div>
+    <div class="signal-slice signal-slice--b"></div>
     <div class="coming-soon-content">
       <p class="coming-soon-eyebrow">Casa Gelso</p>
-      <div class="coming-soon-date">12.09</div>
-      <h2 class="coming-soon-title">Coming Soon</h2>
+      <p class="coming-soon-date">12.09</p>
+      <p class="coming-soon-title">Coming Soon</p>
       <p class="coming-soon-place">Tbilisi · MMXXVI</p>
-
     </div>
   </div>
 
-  <!-- Beat 7 — main brand page, based on the supplied Casa Gelso reference -->
   <div class="reveal-hero" data-reveal-hero>
-    <picture class="reveal-background" aria-hidden="true">
-      <source media="(max-width: 800px)" srcset="assets/reveal/cover4.png">
-      <img src="assets/reveal/cover4.png" alt="" decoding="async">
+    <picture class="reveal-art">
+      <source type="image/avif" srcset="assets/img/cover/cover4-640.avif 640w, assets/img/cover/cover4-1122.avif 1122w" sizes="(orientation: portrait) 100vw, 56vw">
+      <source type="image/webp" srcset="assets/img/cover/cover4-640.webp 640w, assets/img/cover/cover4-1122.webp 1122w" sizes="(orientation: portrait) 100vw, 56vw">
+      <img src="assets/img/cover/cover4-1122.jpg" fetchpriority="low" width="1122" height="1402" decoding="async" alt="Illustration of a woman in a tailored red suit, seen from behind.">
     </picture>
-    <div class="reveal-atmosphere" aria-hidden="true"></div>
-    <div class="reveal-shadow" aria-hidden="true"></div>
 
-
-    <div class="reveal-languages" aria-label="Language selection">
-
-    </div>
-
-    <div class="reveal-hero-brand">
-      <img src="assets/logo/lockup-wine.png" alt="Casa Gelso" class="reveal-lockup">
+    <div class="reveal-hero-brand" lang="en">
+      <img src="assets/img/logo/lockup-wine-720.webp" alt="Casa Gelso" class="reveal-lockup" fetchpriority="low" width="720" height="635">
       <div class="reveal-brand-rule"></div>
-      <p class="reveal-season">AUTUMN&nbsp;&nbsp;—&nbsp;&nbsp;WINTER</p>
-      <p class="reveal-manifesto">QUIET CONFIDENCE&nbsp;&nbsp;·&nbsp;&nbsp;CURATED INDIVIDUALITY</p>
+      <p class="reveal-season">Autumn — Winter</p>
+      <p class="reveal-manifesto"><span>Quiet confidence</span><span class="reveal-sep" aria-hidden="true"> · </span><span>Curated individuality</span></p>
       <p class="reveal-year">MMXXVI</p>
     </div>
 
-
+    <a class="reveal-hero-scroll" href="#digital-ad">
+      <span data-i18n="opener.discover">Discover</span>
+      <span class="reveal-hero-scroll-line" aria-hidden="true"></span>
+    </a>
   </div>
 </section>
 
-<main id="main">
+<main id="main" tabindex="-1">
 
 <!-- ============================================================
-     DIGITAL AD — editorial campaign chapters
+     DIGITAL AD — editorial campaign chapters (English by design)
 ============================================================ -->
-<section id="digital-ad" class="ad" aria-labelledby="ad-heading" data-language="en-only">
-  <p class="chapter-mark" aria-hidden="true">01</p>
+<section id="digital-ad" class="ad" aria-labelledby="ad-heading" lang="en">
 
-  <div class="section-intro">
-    <p class="eyebrow reveal-up">Chapter One </p>
+  <header class="section-intro">
+    <p class="eyebrow reveal-up">Chapter One</p>
     <h2 id="ad-heading" class="display-xl mask-lines">
       <span class="mask"><span class="mask-in">Accessible Luxury</span></span>
-      
     </h2>
     <p class="lede reveal-up">A curated world of fashion, now in Tbilisi.</p>
-  </div>
+  </header>
 
-  <div class="ad-canvas">
+  <div class="ad-chapters">
 
-    <figure class="ad-figure ad-figure--a" data-parallax>
-      <img src="assets/reveal/add1.JPG" alt="Detail of a strappy black heel, part of the Casa Gelso opening edit." loading="lazy" decoding="async">
-      <span class="ad-curtain" aria-hidden="true">
-        <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
-      </span>
-    </figure>
-    <div class="ad-copy ad-copy--a reveal-up">
-      <span class="ad-copy-index">01</span>
-      <h3>The fashion you dreamed of, <br>now in your city</h3>
-      <p>Ferragamo. Moschino. Tom Ford. Bottega&nbsp;Veneta. Casa Gelso brings the icons of Italian style to a single house in Tbilisi.</p>
-    </div>
+    <article class="ad-chapter ad-chapter--a">
+      <figure class="ad-figure" data-parallax>
+        <picture>
+          <source type="image/avif" srcset="assets/img/ad/add1-480.avif 480w, assets/img/ad/add1-800.avif 800w, assets/img/ad/add1-1200.avif 1200w, assets/img/ad/add1-1600.avif 1600w" sizes="(min-width: 1024px) min(36vw, 560px), 88vw">
+          <source type="image/webp" srcset="assets/img/ad/add1-480.webp 480w, assets/img/ad/add1-800.webp 800w, assets/img/ad/add1-1200.webp 1200w, assets/img/ad/add1-1600.webp 1600w" sizes="(min-width: 1024px) min(36vw, 560px), 88vw">
+          <img class="ad-photo" src="assets/img/ad/add1-1200.jpg" width="1200" height="1800" loading="lazy" decoding="async" alt="A black leather heeled bootie with gold buckle hardware and a sculpted gold heel, displayed on a white plinth.">
+        </picture>
+        <span class="ad-curtain" aria-hidden="true"><span class="ad-curtain-fill"></span><img class="ad-curtain-mark" src="assets/img/logo/monogram-ivory-160.webp" alt="" width="46" height="46" loading="lazy"></span>
+      </figure>
+      <div class="ad-copy reveal-up">
+        <span class="ad-copy-index">01</span>
+        <h3>The fashion you dreamed of, now in your city</h3>
+        <p>Ferragamo. Moschino. Tom Ford. Bottega&nbsp;Veneta. Casa Gelso brings the icons of Italian style to a single house in Tbilisi.</p>
+      </div>
+    </article>
 
-    <figure class="ad-figure ad-figure--b" data-parallax>
-      <img src="assets/reveal/add2.JPG" alt="A hand reaching for a heart-shaped Moschino bag." loading="lazy" decoding="async">
-      <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
-        <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
-      </span>
-    </figure>
-    <div class="ad-copy ad-copy--b reveal-up">
-      <span class="ad-copy-index">02</span>
-      <h3>Shop Tbilisi.<br>Feel Milan.</h3>
-    </div>
+    <article class="ad-chapter ad-chapter--b">
+      <figure class="ad-figure" data-parallax>
+        <picture>
+          <source type="image/avif" srcset="assets/img/ad/add2-480.avif 480w, assets/img/ad/add2-800.avif 800w, assets/img/ad/add2-1200.avif 1200w, assets/img/ad/add2-1600.avif 1600w" sizes="(min-width: 1024px) min(42vw, 640px), 88vw">
+          <source type="image/webp" srcset="assets/img/ad/add2-480.webp 480w, assets/img/ad/add2-800.webp 800w, assets/img/ad/add2-1200.webp 1200w, assets/img/ad/add2-1600.webp 1600w" sizes="(min-width: 1024px) min(42vw, 640px), 88vw">
+          <img class="ad-photo" src="assets/img/ad/add2-1200.jpg" width="1200" height="1800" loading="lazy" decoding="async" alt="Hands holding a glossy red heart-shaped Moschino bag against denim.">
+        </picture>
+        <span class="ad-curtain ad-curtain--vertical" aria-hidden="true"><span class="ad-curtain-fill"></span><img class="ad-curtain-mark" src="assets/img/logo/monogram-ivory-160.webp" alt="" width="46" height="46" loading="lazy"></span>
+      </figure>
+      <div class="ad-copy reveal-up">
+        <span class="ad-copy-index">02</span>
+        <h3>Shop Tbilisi.<br>Feel Milan.</h3>
+      </div>
+    </article>
 
-    <div class="ad-marquee" role="note" aria-label="Selected houses at Casa Gelso">
+    <div class="ad-marquee" role="note" aria-label="Selected houses at Casa Gelso: Ferragamo, Moschino, Tom Ford, Bottega Veneta">
       <div class="ad-marquee-track" aria-hidden="true">
         <span>Ferragamo</span><i>·</i><span>Moschino</span><i>·</i><span>Tom Ford</span><i>·</i><span>Bottega Veneta</span><i>·</i>
         <span>Ferragamo</span><i>·</i><span>Moschino</span><i>·</i><span>Tom Ford</span><i>·</i><span>Bottega Veneta</span><i>·</i>
+        <span>Ferragamo</span><i>·</i><span>Moschino</span><i>·</i><span>Tom Ford</span><i>·</i><span>Bottega Veneta</span><i>·</i>
+        <span>Ferragamo</span><i>·</i><span>Moschino</span><i>·</i><span>Tom Ford</span><i>·</i><span>Bottega Veneta</span><i>·</i>
       </div>
     </div>
 
-    <figure class="ad-figure ad-figure--c" data-parallax>
-      <img src="assets/reveal/add3.JPG" alt="A woman in a black halter gown with a heart brooch." loading="lazy" decoding="async">
-      <span class="ad-curtain" aria-hidden="true">
-        <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
-      </span>
-    </figure>
-    <div class="ad-copy ad-copy--c reveal-up">
-      <span class="ad-copy-index">03</span>
-      <h3>Iconic names.<br>One destination.</h3>
-      <p>Pieces curated for the moments that matter — chosen, not mass-produced.</p>
-    </div>
+    <article class="ad-chapter ad-chapter--c">
+      <figure class="ad-figure" data-parallax>
+        <picture>
+          <source type="image/avif" srcset="assets/img/ad/add3-480.avif 480w, assets/img/ad/add3-800.avif 800w, assets/img/ad/add3-1200.avif 1200w, assets/img/ad/add3-1600.avif 1600w" sizes="(min-width: 1024px) min(34vw, 520px), 88vw">
+          <source type="image/webp" srcset="assets/img/ad/add3-480.webp 480w, assets/img/ad/add3-800.webp 800w, assets/img/ad/add3-1200.webp 1200w, assets/img/ad/add3-1600.webp 1600w" sizes="(min-width: 1024px) min(34vw, 520px), 88vw">
+          <img class="ad-photo" src="assets/img/ad/add3-1200.jpg" width="1200" height="1800" loading="lazy" decoding="async" alt="A Moschino bag with a bold yellow, pink and violet graphic print on a soft studio backdrop.">
+        </picture>
+        <span class="ad-curtain" aria-hidden="true"><span class="ad-curtain-fill"></span><img class="ad-curtain-mark" src="assets/img/logo/monogram-ivory-160.webp" alt="" width="46" height="46" loading="lazy"></span>
+      </figure>
+      <div class="ad-copy reveal-up">
+        <span class="ad-copy-index">03</span>
+        <h3>Iconic names.<br>One destination.</h3>
+        <p>Pieces curated for the moments that matter — chosen, not mass-produced.</p>
+      </div>
+    </article>
 
-    <figure class="ad-figure ad-figure--d" data-parallax>
-      <img src="assets/reveal/add4.JPG" alt="A woman in a tailored red suit with heart-shaped hardware." loading="lazy" decoding="async">
-      <span class="ad-curtain ad-curtain--vertical" aria-hidden="true">
-        <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
-      </span>
-    </figure>
-    <div class="ad-copy ad-copy--d reveal-up">
-      <span class="ad-copy-index">04</span>
-      <h3>Closer than<br>it has ever been.</h3>
-    </div>
+    <article class="ad-chapter ad-chapter--d">
+      <figure class="ad-figure" data-parallax>
+        <picture>
+          <source type="image/avif" srcset="assets/img/ad/add4-480.avif 480w, assets/img/ad/add4-800.avif 800w, assets/img/ad/add4-1200.avif 1200w, assets/img/ad/add4-1600.avif 1600w" sizes="(min-width: 1024px) min(40vw, 620px), 88vw">
+          <source type="image/webp" srcset="assets/img/ad/add4-480.webp 480w, assets/img/ad/add4-800.webp 800w, assets/img/ad/add4-1200.webp 1200w, assets/img/ad/add4-1600.webp 1600w" sizes="(min-width: 1024px) min(40vw, 620px), 88vw">
+          <img class="ad-photo" src="assets/img/ad/add4-1200.jpg" width="1200" height="1507" loading="lazy" decoding="async" alt="A model in a black ribbed tank top and white layered trousers, hands in pockets.">
+        </picture>
+        <span class="ad-curtain ad-curtain--vertical" aria-hidden="true"><span class="ad-curtain-fill"></span><img class="ad-curtain-mark" src="assets/img/logo/monogram-ivory-160.webp" alt="" width="46" height="46" loading="lazy"></span>
+      </figure>
+      <div class="ad-copy reveal-up">
+        <span class="ad-copy-index">04</span>
+        <h3>Closer than<br>it has ever been.</h3>
+      </div>
+    </article>
 
-    <figure class="ad-figure ad-figure--e" data-parallax>
-      <img src="assets/reveal/add5.JPG" alt="A woman in a black gown printed with gold hearts." loading="lazy" decoding="async">
-      <span class="ad-curtain" aria-hidden="true">
-        <span class="ad-curtain-fill"></span>
-        <img class="ad-curtain-mark" src="assets/logo/monogram-ivory.webp" alt="">
-      </span>
-    </figure>
-    <div class="ad-copy ad-copy--e reveal-up">
-      <span class="ad-copy-index">05</span>
-      <h3>Come and<br>see it in person.</h3>
-      <p>Discover the full collection at the Casa Gelso opening.</p>
-    </div>
+    <article class="ad-chapter ad-chapter--e">
+      <figure class="ad-figure" data-parallax>
+        <picture>
+          <source type="image/avif" srcset="assets/img/ad/add5-480.avif 480w, assets/img/ad/add5-800.avif 800w, assets/img/ad/add5-1200.avif 1200w, assets/img/ad/add5-1600.avif 1600w" sizes="(min-width: 1024px) min(36vw, 560px), 88vw">
+          <source type="image/webp" srcset="assets/img/ad/add5-480.webp 480w, assets/img/ad/add5-800.webp 800w, assets/img/ad/add5-1200.webp 1200w, assets/img/ad/add5-1600.webp 1600w" sizes="(min-width: 1024px) min(36vw, 560px), 88vw">
+          <img class="ad-photo" src="assets/img/ad/add5-1200.jpg" width="1200" height="1596" loading="lazy" decoding="async" alt="A model in a red and black bustier suit beside a rail of clothes.">
+        </picture>
+        <span class="ad-curtain" aria-hidden="true"><span class="ad-curtain-fill"></span><img class="ad-curtain-mark" src="assets/img/logo/monogram-ivory-160.webp" alt="" width="46" height="46" loading="lazy"></span>
+      </figure>
+      <div class="ad-copy reveal-up">
+        <span class="ad-copy-index">05</span>
+        <h3>Come and<br>see it in person.</h3>
+        <p>Discover the full collection at the Casa Gelso opening.</p>
+      </div>
+    </article>
 
   </div>
 
-  <div class="section-outro">
+  <footer class="section-outro">
     <p class="eyebrow reveal-up">Casa Gelso · Tbilisi</p>
     <h2 class="display-lg mask-lines">
       <span class="mask"><span class="mask-in">See the collection, in real life</span></span>
-      
     </h2>
     <p class="lede reveal-up">12 September 2026</p>
-    <a class="text-link reveal-up" href="#invitation">Continue to the invitation <span aria-hidden="true"></span></a>
-  </div>
+    <a class="btn btn--outline reveal-up" href="#invitation" data-i18n="ad.continue" data-i18n-lang>Continue to the invitation</a>
+  </footer>
 </section>
 
 <!-- ============================================================
-     INVITATION + RSVP
+     INVITATION + RSVP  (EN / KA / IT)
 ============================================================ -->
+<section id="invitation" class="invite" aria-labelledby="invite-heading">
 
-<section
-  id="invitation"
-  class="invite invite--combined"
-  aria-labelledby="invite-heading"
-  data-translatable-section="invitation"
->
+  <p class="chapter-mark" data-i18n="invite.chapter">Chapter Two · Invitation &amp; RSVP</p>
+  <p class="invite-aside" aria-hidden="true" data-i18n="invite.aside">Thank you. We look forward to welcoming you.</p>
 
-  <p class="chapter-mark chapter-mark--light" aria-hidden="true">
-    03 — INVITATION &amp; RSVP
-  </p>
+  <div class="invite-card">
 
+    <div class="invite-main">
+      <img class="invite-card-mark reveal-up" src="assets/img/logo/monogram-wine-240.webp" alt="" width="64" height="64" loading="lazy">
 
-  <!-- The single-column paper-card layout (see .invite-card in the CSS)
-       retired the image/text split this section used to have. The old
-       .invite-media image stayed in the DOM as a permanently
-       display:none element — a full-resolution photo downloaded on
-       every visit for nothing. Removed outright; restore it (and its
-       CSS) if the split layout ever comes back. -->
+      <p class="eyebrow reveal-up" data-i18n="invite.eyebrow">Private opening · Tbilisi</p>
 
-  <!-- RIGHT / INVITATION + RSVP -->
-  <div class="invite-panel">
-
-    <div class="invite-card">
-
-
-      <!-- MONOGRAM -->
-      <img
-        class="invite-card-mark reveal-up"
-        src="assets/logo/monogram-wine.png"
-        alt=""
-        width="72"
-        height="72"
-      >
-
-
-      <!-- INVITATION -->
-      <p
-        class="eyebrow reveal-up"
-        data-i18n="invite.eyebrow"
-      >
-        Private opening · Tbilisi
-      </p>
-
-
-      <h2
-        id="invite-heading"
-        class="display-lg mask-lines"
-      >
-        <span class="mask">
-          <span
-            class="mask-in mask-in--italic"
-            data-i18n="invite.title"
-          >
-            You are invited.
-          </span>
-        </span>
+      <h2 id="invite-heading" class="invite-heading mask-lines">
+        <span class="mask"><span class="mask-in" data-i18n="invite.title">You are invited.</span></span>
       </h2>
 
-
-      <!-- Two paragraphs, in every language. The paragraph break is a
-           real newline inside the string (both here and in the three
-           translations in app.js) — .invite-lede carries
-           white-space: pre-line so it renders as a break instead of
-           collapsing to a space. Keep this text flush-left and keep
-           the blank line: with pre-line, source line breaks inside a
-           paragraph would show up as breaks on screen. -->
-      <p
-        class="invite-lede reveal-up"
-        data-i18n="invite.lede"
-      >Join us for the opening evening of Casa Gelso — an evening that brings together distinctive pieces, considered details, and the people for whom style is part of who they are.
+      <p class="invite-lede reveal-up" data-i18n="invite.lede">Join us for the opening evening of Casa Gelso — an evening that brings together distinctive pieces, considered details, and the people for whom style is part of who they are.
 
 Discover Casa Gelso — a space where every piece is chosen with taste, and every detail is made to give your everyday a character of its own.</p>
 
-
-      <!-- DATE / TIME / PLACE -->
       <dl class="invite-meta reveal-up">
-
         <div>
           <dt data-i18n="invite.dateLabel">Date</dt>
-          <dd data-i18n="invite.date">
-            12 September 2026
-          </dd>
+          <dd data-i18n="invite.date">12 September 2026</dd>
         </div>
-
         <div>
           <dt data-i18n="invite.timeLabel">Time</dt>
-          <dd data-i18n="invite.time">
-            19:00
-          </dd>
+          <dd data-i18n="invite.time">17:00</dd>
         </div>
-
-        <div>
+        <div class="invite-meta-place">
           <dt data-i18n="invite.placeLabel">Place</dt>
           <dd>
-            <a
-              class="invite-cta"
-              href="https://www.google.com/maps/search/?api=1&query=Kostava+St+67%2C+Tbilisi%2C+Georgia"
-              target="_blank"
-              rel="noopener"
-              data-tooltip="Click to see location in Google Maps"
-              data-i18n-tooltip="invite.placeTooltip"
-            ><span data-i18n="invite.place">Kostava St 67, Tbilisi</span></a>
+            <a class="invite-link"
+               href="https://www.google.com/maps/search/?api=1&amp;query=Kostava+St+67%2C+Tbilisi%2C+Georgia"
+               target="_blank" rel="noopener"
+               data-tooltip="Open in Google Maps" data-i18n-tooltip="invite.placeTooltip"><span data-i18n="invite.place">Kostava St 67, Tbilisi</span><span class="invite-link-arrow" aria-hidden="true">↗</span><span class="sr-only" data-i18n="ui.newTab">(opens in a new tab)</span></a>
           </dd>
         </div>
-
       </dl>
 
-      <div class="invite-calendar-links reveal-up">
-        <a
-          class="invite-cta"
-          data-cal-google
-          href="#"
-          target="_blank"
-          rel="noopener"
-          data-tooltip="Click to save in calendar"
-          data-i18n-tooltip="invite.calendarTooltip"
-        ><span data-i18n="invite.calendar">Add to calendar</span></a>
+      <div class="invite-calendar reveal-up">
+        <p class="invite-calendar-label" data-i18n="invite.calendar">Add to calendar</p>
+        <div class="invite-calendar-links">
+          <a class="invite-link" data-cal-google href="https://calendar.google.com/calendar/render?action=TEMPLATE" target="_blank" rel="noopener"
+             data-tooltip="Save to Google Calendar" data-i18n-tooltip="invite.calendarTooltip"><span>Google</span><span class="invite-link-arrow" aria-hidden="true">↗</span><span class="sr-only" data-i18n="ui.newTab">(opens in a new tab)</span></a>
+          <a class="invite-link" href="assets/casa-gelso-opening.ics" download="casa-gelso-opening.ics"><span data-i18n="invite.calendarIcs">Apple / Outlook</span><span class="invite-link-arrow" aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RSVP -->
+    <div class="response-experience reveal-up" id="rsvp" data-response-experience tabindex="-1" aria-labelledby="rsvp-heading">
+
+      <div class="response-intro">
+        <h3 class="response-kicker" id="rsvp-heading" data-i18n="response.kicker">RSVP</h3>
+        <p class="response-subtitle" data-i18n="response.subtitle">Kindly confirm your attendance.</p>
       </div>
 
+      <form class="rsvp-form" id="rsvpForm" novalidate aria-describedby="rsvpFormStatus">
 
-      <!-- ========================================================
-           RSVP
-      ========================================================= -->
+        <p class="rsvp-form-status" id="rsvpFormStatus" role="alert" aria-live="assertive"></p>
 
-      <div
-        class="response-experience reveal-up"
-        data-response-experience
-      >
-
-        <div class="response-intro">
-
-          <span class="response-index">
-            03
-          </span>
-
-          <p class="response-subtitle" data-i18n="response.subtitle">
-            Kindly confirm your attendance.
-          </p>
-
+        <!-- Honeypot: off-screen, out of tab order. A filled value means a bot. -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="rsvpWebsite">Leave this field blank</label>
+          <input type="text" id="rsvpWebsite" name="website" tabindex="-1" autocomplete="off">
         </div>
 
-
-        <form
-          class="rsvp-form rsvp-form--editorial"
-          id="rsvpForm"
-          novalidate
-        >
-
-          <p
-            class="rsvp-form-status"
-            id="rsvpFormStatus"
-            role="alert"
-            aria-live="assertive"
-          ></p>
-
-          <!-- Honeypot — invisible to people, irresistible to bots.
-               Real users never see or reach this field (off-screen,
-               aria-hidden, removed from tab order); anything that
-               fills it in gets silently dropped in app.js. -->
-          <div class="hp-field" aria-hidden="true">
-            <label for="rsvpWebsite">Leave this field blank</label>
-            <input type="text" id="rsvpWebsite" name="website" tabindex="-1" autocomplete="off">
-          </div>
-
-
-          <!-- NAME -->
-          <div class="editorial-field">
-
-            <label
-              for="rsvpName"
-            >
-              <span data-i18n="response.name">Name &amp; surname</span>
-              <abbr class="req-mark" title="Required" aria-hidden="true">*</abbr>
-            </label>
-
-            <input
-              type="text"
-              id="rsvpName"
-              name="name"
-              autocomplete="name"
-              required
-            >
-
-            <span
-              class="field-error"
-              data-error-for="name"
-            ></span>
-
-          </div>
-
-
-          <!-- ATTENDANCE -->
-          <fieldset
-            class="editorial-field editorial-choice"
-          >
-
-            <legend>
-              <span data-i18n="response.attending">Will you be joining us?</span>
-              <abbr class="req-mark" title="Required" aria-hidden="true">*</abbr>
-            </legend>
-
-            <div class="editorial-options">
-
-              <label>
-
-                <input
-                  type="radio"
-                  name="attending"
-                  value="yes"
-                  required
-                >
-
-                <span data-i18n="response.yes">
-                  Yes, I'll be there
-                </span>
-
-              </label>
-
-
-              <label>
-
-                <input
-                  type="radio"
-                  name="attending"
-                  value="no"
-                >
-
-                <span data-i18n="response.no">
-                  I won't be able to make it
-                </span>
-
-              </label>
-
-            </div>
-
-            <span
-              class="field-error"
-              data-error-for="attending"
-            ></span>
-
-          </fieldset>
-
-
-          <!-- TOP 3 -->
-          <div
-            class="editorial-field editorial-designers"
-          >
-
-            <label
-              for="rsvpDesigners"
-              data-i18n="response.designers"
-            >
-              Top 3 designer / fashion house
-            </label>
-
-            <input
-              type="text"
-              id="rsvpDesigners"
-              name="designers"
-              autocomplete="off"
-              aria-label="Top 3 designer or fashion house"
-            >
-
-          </div>
-
-
-          <!-- DIVIDER BEFORE WISHES -->
-          <div class="rsvp-divider"></div>
-
-
-          <!-- ====================================================
-               ONE LAST THING
-          ===================================================== -->
-
-          <div
-            class="wish-step"
-            id="wishStep"
-          >
-
-            <p
-              class="wish-kicker"
-              data-i18n="wish.kicker"
-            >
-              One last thing
-            </p>
-
-
-            <h3
-              class="wish-title"
-              data-i18n="wish.title"
-            >
-              What do you wish for Casa Gelso?
-            </h3>
-
-
-            <label
-              class="sr-only"
-              for="casaWish"
-              data-i18n="wish.label"
-            >
-              Your wish for Casa Gelso
-            </label>
-
-
-            <!-- Was a nested <form>, which HTML doesn't allow — the
-                 browser silently dropped the inner tag and these
-                 fields ended up as plain children of #rsvpForm anyway
-                 (that's the only reason it ever worked). Now that's
-                 explicit: one <div>, one real <form> for the whole
-                 RSVP + wish flow, one submit button. -->
-            <div class="wish-form">
-
-              <textarea
-                id="casaWish"
-                name="wish"
-                rows="2"
-                placeholder=""
-                data-i18n-placeholder="wish.placeholder"
-              ></textarea>
-
-
-              <button
-                class="response-submit"
-                type="submit"
-              >
-
-                <span
-                  class="btn-label"
-                  data-i18n="wish.send"
-                >
-                  Submit
-                </span>
-
-                <span
-                  class="btn-arrow"
-                  aria-hidden="true"
-                >
-                  ⟶
-                </span>
-
-                <span
-                  class="btn-spinner"
-                  aria-hidden="true"
-                ></span>
-
-              </button>
-
-            </div>
-
-          </div>
-
-
-        </form>
-
-
-        <!-- SUCCESS — FIX: this block used to sit INSIDE #rsvpForm.
-             On a successful RSVP app.js hides the form
-             (rsvpForm.hidden = true) and unhides this panel, but a
-             child of a hidden element is hidden too, so the success
-             state could never appear where the form had been. Moved
-             out to be the form's sibling; it is still inside
-             .response-experience, so it renders in exactly the same
-             place, with the same styles. (See also the matching
-             .rsvp-form--editorial[hidden] rule added to style.css —
-             the form's own display:flex was overriding the browser's
-             [hidden] rule, so hiding it did nothing at all.) -->
-        <div
-          class="response-success"
-          id="rsvpSuccess"
-          hidden
-          tabindex="-1"
-        >
-
-          <img
-            src="assets/logo/monogram-wine.png"
-            alt=""
-            width="56"
-            height="56"
-          >
-
-          <p
-            class="response-success-eyebrow"
-            data-success-eyebrow
-          >
-            Thank you.
-          </p>
-
-          <h3
-            class="response-success-title"
-            data-i18n="success.title"
-          >
-            See you at Casa Gelso.
-          </h3>
-
-          <p
-            class="response-success-note"
-            data-success-note
-          >
-            We look forward to welcoming you.
-          </p>
-
-          <button
-            class="text-link"
-            type="button"
-            data-rsvp-again
-            data-i18n="success.again"
-          >
-            Submit another response
-          </button>
-
+        <div class="field" data-field="name">
+          <label for="rsvpName">
+            <span data-i18n="response.name">Name &amp; surname</span>
+            <span class="req-mark" aria-hidden="true">*</span>
+          </label>
+          <input type="text" id="rsvpName" name="name" autocomplete="name" required maxlength="120" aria-describedby="rsvpNameError">
+          <span class="field-error" id="rsvpNameError" data-error-for="name"></span>
         </div>
 
+        <fieldset class="field field--choice" data-field="attending" aria-describedby="rsvpAttendingError">
+          <legend>
+            <span data-i18n="response.attending">Will you be joining us?</span>
+            <span class="req-mark" aria-hidden="true">*</span>
+          </legend>
+          <div class="choice-options">
+            <label class="choice">
+              <input type="radio" name="attending" value="yes" required>
+              <span class="choice-mark" aria-hidden="true"></span>
+              <span class="choice-label" data-i18n="response.yes">Yes, I'll be there</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="attending" value="no">
+              <span class="choice-mark" aria-hidden="true"></span>
+              <span class="choice-label" data-i18n="response.no">I won't be able to make it</span>
+            </label>
+          </div>
+          <span class="field-error" id="rsvpAttendingError" data-error-for="attending"></span>
+        </fieldset>
+
+        <div class="field">
+          <label for="rsvpDesigners">
+            <span data-i18n="response.designers">Top 3 designers / fashion houses</span>
+            <span class="field-optional" data-i18n="response.optional">Optional</span>
+          </label>
+          <input type="text" id="rsvpDesigners" name="designers" autocomplete="off" maxlength="200">
+        </div>
+
+        <div class="wish-step" id="wishStep">
+          <p class="wish-kicker" data-i18n="wish.kicker">One last thing</p>
+          <label class="wish-title" for="casaWish">
+            <span data-i18n="wish.title">What do you wish for Casa Gelso?</span>
+            <span class="field-optional" data-i18n="response.optional">Optional</span>
+          </label>
+          <textarea id="casaWish" name="wish" rows="3" maxlength="600" placeholder="" data-i18n-placeholder="wish.placeholder"></textarea>
+        </div>
+
+        <button class="btn btn--solid response-submit" type="submit">
+          <span class="btn-label" data-i18n="wish.send">Send RSVP</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <div class="response-success" id="rsvpSuccess" hidden tabindex="-1">
+        <img src="assets/img/logo/monogram-wine-240.webp" alt="" width="56" height="56" loading="lazy">
+        <p class="response-success-eyebrow" data-success-eyebrow>Thank you.</p>
+        <h3 class="response-success-title" data-i18n="success.title">See you at Casa Gelso.</h3>
+        <p class="response-success-note" data-success-note>We look forward to welcoming you.</p>
+        <button class="text-link" type="button" data-rsvp-again data-i18n="success.again">Submit another response</button>
       </div>
-
     </div>
 
   </div>
-
-
 </section>
 
 </main>
 
-<!-- ============================================================
-     FOOTER — a sibling of <main>, not nested inside it. The
-     original markup never closed <main>, so the footer landmark
-     was silently swallowed into the main landmark — invisible
-     visually, but it breaks landmark navigation for screen reader
-     users, who rely on "main" containing only the primary content.
-============================================================ -->
 <footer class="site-footer">
   <div class="site-footer-top">
-    <img src="assets/logo/monogram-wine.png" alt="" width="46" height="46">
+    <img src="assets/img/logo/monogram-ivory-160.webp" alt="" width="44" height="44" loading="lazy">
     <p class="display-md">Casa Gelso</p>
   </div>
 
-
-
   <div class="site-footer-meta">
-    <span>Tbilisi, Georgia</span>
-    <span>12 September 2026</span>
+    <span data-i18n="footer.location">Tbilisi, Georgia</span>
+    <span data-i18n="invite.date">12 September 2026</span>
     <a href="#top" data-i18n="footer.back">Back to top ↑</a>
   </div>
 
-<p class="site-footer-fine">© 2026 Casa Gelso. All rights reserved.</p>
-<p class="site-footer-credit">
-  Created by <a href="https://invitee.ge/" target="_blank" rel="noopener noreferrer">INVITÉ</a>
-</p>
+  <p class="site-footer-fine" data-i18n="footer.rights">© 2026 Casa Gelso. All rights reserved.</p>
+  <p class="site-footer-credit">
+    <span data-i18n="footer.createdBy">Created by</span> <a href="https://invitee.ge/" target="_blank" rel="noopener noreferrer">INVITÉ</a>
+  </p>
 </footer>
 
-<!-- defer (not async) on all four: keeps them non-render-blocking
-     while preserving strict execution order (gsap → ScrollTrigger →
-     lenis → app.js, each depending on the one before it) — async
-     would let them run in whatever order they happen to finish
-     downloading, which could run app.js before gsap exists. -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js" defer></script>
-<!-- LANGUAGE SCOPE:
-     Teaser / Opening Sequence / Digital Ad are ALWAYS English.
-     KA/IT translation is allowed ONLY inside Invitation + RSVP.
-     app.js should scope translation to [data-translatable-section].
--->
-<script src="js/app.js" defer></script>
+<!-- Self-hosted, version-pinned (GSAP 3.13.0, Lenis 1.3.27). defer keeps
+     them non-blocking while preserving execution order. -->
+<script src="js/vendor/gsap.min.js" defer fetchpriority="high"></script>
+<script src="js/vendor/ScrollTrigger.min.js" defer fetchpriority="high"></script>
+<script src="js/vendor/lenis.min.js" defer fetchpriority="high"></script>
+<script src="js/app.js" defer fetchpriority="high"></script>
 </body>
 </html>
