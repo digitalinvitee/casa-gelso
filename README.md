@@ -1,120 +1,111 @@
-# Casa Gelso — Digital Campaign
+# Casa Gelso
 
-Campaign site for the Casa Gelso opening in Tbilisi on 12 September 2026.
-A digital experience by [INVITÉ](https://invitee.ge/).
+Campaign site for the Casa Gelso opening in Tbilisi on 12 September 2026,
+made by [INVITÉ](https://invitee.ge/).
 
-Static HTML, CSS and JavaScript. No build step, no framework; it deploys to
-GitHub Pages as-is.
+Plain HTML, CSS and JavaScript. There is no build step, so the folder
+deploys to GitHub Pages as it is.
 
-## Running it
+## Run it locally
 
 ```
 python3 -m http.server 8000
 ```
 
-then open `http://localhost:8000`. (Opening `index.html` straight from disk
-also works, but the RSVP request and font loading behave more like
-production through a local server.)
+Then open http://localhost:8000.
 
-## The experience
+## How the page works
 
-1. **Opening film** — monogram title card; *Enter* starts the soundtrack and
-   five illustrated campaign frames, a `12.09 / Coming Soon` signal beat,
-   then the brand reveal. *Skip intro* (or Esc) jumps straight to the
-   reveal. The intro is skipped automatically for visitors who prefer
-   reduced motion, and on a reload in the same tab.
-2. **Digital Ad** — five editorial chapters pairing campaign photography
-   with copy, the house marquee, and a link on to the invitation.
-3. **Invitation & RSVP** — the invitation card with date, time, place
-   (Google Maps) and calendar links, beside the RSVP form.
+1. **Opening film.** The monogram appears with an Enter button. Enter starts
+   the music and the film: five illustrated frames, the 12.09 Coming Soon
+   card, then the brand reveal. Skip intro (or Esc) goes straight to the
+   brand reveal. Visitors who ask their device for reduced motion get the
+   brand reveal without the film.
+2. **Digital Ad.** Five chapters of campaign photography and copy, the
+   brand marquee and a link to the invitation.
+3. **Invitation and RSVP.** Date, time, place (Google Maps), calendar links
+   and the RSVP form.
 
-## Structure
+## Music
+
+Browsers only play sound after the visitor taps, clicks or presses a key.
+The soundtrack starts with the first of these: Enter, Skip intro, or any
+interaction on the page when the film was not shown. It pauses when the tab
+or app goes to the background and resumes on return. If the visitor turns
+the sound off, it stays off until they turn it on again.
+
+## Files
 
 ```
-index.html                    markup, structured data, boot failsafe
-css/style.css                 design system: tokens, type, every section, responsive, motion
-js/app.js                     opener, scroll reveals, navigation, i18n, RSVP, sound
-js/vendor/                    GSAP 3.13.0, ScrollTrigger 3.13.0, Lenis 1.3.27 (pinned, self-hosted)
-assets/fonts/                 Fraunces, DM Sans, Noto Serif/Sans Georgian (woff2, self-hosted)
-assets/img/                   optimised images the page serves (generated — see below)
-assets/teaser/ reveal/ logo/  original masters (not served, except teaser JPEG fallbacks)
-assets/audio/mp3.mp3          soundtrack (loads only when sound starts)
-assets/casa-gelso-opening.ics calendar file for Apple Calendar / Outlook
-tools/build-images.py         regenerates assets/img from the masters
+index.html                    page markup and event data for search engines
+css/style.css                 all styles
+js/app.js                     film, scrolling, menu, music, languages, RSVP
+js/vendor/                    GSAP 3.13.0, ScrollTrigger 3.13.0, Lenis 1.3.27
+assets/fonts/                 Fraunces, DM Sans, Noto Serif and Noto Sans Georgian
+assets/img/                   the images the page uses (made by the tool below)
+assets/teaser, reveal, logo   original files, kept as masters
+assets/audio/mp3.mp3          soundtrack
+assets/casa-gelso-opening.ics calendar file for Apple Calendar and Outlook
+tools/build-images.py         rebuilds assets/img from the masters
 ```
 
 ## Languages
 
-English, Georgian and Italian. The interface (navigation, menu, opener
-controls, buttons, footer) and the whole Invitation & RSVP section are
-translated. The campaign itself — film captions, brand reveal and the
-Digital Ad copy — stays in English in every language by design; those blocks
-carry `lang="en"` so screen readers pronounce them correctly.
+English, Georgian and Italian. Navigation, menus, buttons, the footer and
+the whole Invitation and RSVP section change with the language. The
+campaign text (film captions, brand reveal, Digital Ad) stays in English,
+as in the original project.
 
-All strings live in the `translations` object at the top of `js/app.js`.
-Elements opt in with `data-i18n` (text), `data-i18n-placeholder`,
-`data-i18n-tooltip` and `data-i18n-aria` (aria-label). The chosen language
-is remembered in `localStorage` and applied before first paint.
+All texts are in the `translations` object at the top of `js/app.js`. The
+chosen language is remembered for the next visit.
 
 ## RSVP
 
-The form posts to the existing Google Apps Script endpoint (`RSVP_ENDPOINT`
-in `js/app.js`) as `text/plain` JSON:
+The form sends this to the Google Apps Script address in `RSVP_ENDPOINT`
+(`js/app.js`):
 
 ```json
-{ "name": "…", "attending": "yes" | "no", "designers": "…", "wish": "…" }
+{ "name": "...", "attending": "yes", "designers": "...", "wish": "..." }
 ```
 
-Name and attendance are required. Validation messages, loading and error
-states are translated; a honeypot field silently drops bots; a second submit
-while one is in flight is ignored. The request uses `no-cors`, so the page
-can detect network failures but cannot read the script's response.
+`attending` is `yes` or `no`. Name and attendance are required. A hidden
+field catches spam bots, and a second click while sending is ignored.
 
-## Event details
+## Changing the date or time
 
-The date and time appear in four places. Change them together:
+The date and time are written in four places:
 
-- `EVENT` in `js/app.js` (Google Calendar link; times in UTC — 17:00 in
-  Tbilisi is 13:00 UTC)
-- the `time` / `date` strings in each language in `translations`
+- `EVENT` in `js/app.js`, in UTC (17:00 in Tbilisi is 13:00 UTC)
+- the `date` and `time` texts for each language in `translations`
 - `assets/casa-gelso-opening.ics`
-- the `application/ld+json` block in `index.html`
+- the event data block (`application/ld+json`) in `index.html`
 
-## Images
+## Changing photos
 
-Photographs are never served from the masters (some are 60-megapixel camera
-files of up to 15 MB). `tools/build-images.py` produces AVIF and WebP at
-several widths plus a JPEG fallback, applying EXIF rotation. After replacing
-or adding a photo:
+The page never loads the original camera files, some of which are 15 MB.
+After replacing or adding a photo, rebuild the web versions:
 
 ```
 pip install "pillow>=11.3"
 python3 tools/build-images.py
 ```
 
-If you add a width in the script, add the matching `srcset` entry in
-`index.html`. Each Digital Ad photo has its own frame ratio and focal point
-(`--ratio` / `--focus` per chapter in `css/style.css`), chosen for that
-image; check the crop on desktop and phone when swapping one.
+Each Digital Ad photo has its own frame shape and focal point (`--ratio`
+and `--focus` in `css/style.css`). Check the crop on a laptop and a phone
+after swapping one.
 
-## Resilience
+## If something fails to load
 
-- **No JavaScript**: the brand reveal and all content render, scrollable.
-- **Scripts blocked or very slow**: a failsafe in `<head>` unlocks the page
-  and resolves the opener after 9 seconds.
-- **Slow connections**: the film waits (up to 4 s per frame) for an image
-  that has not arrived instead of cutting to an empty frame; below-the-fold
-  photos load lazily; the italic display face loads only as the invitation
-  approaches.
-- **Reduced motion**: no intro, no parallax or marquee; everything visible.
+- Without JavaScript, the page shows the brand reveal and all content.
+- If the scripts never arrive, the page unlocks itself after 9 seconds.
+- On a slow connection the film waits up to 4 seconds for a frame that has
+  not loaded yet.
 
 ## Licences
 
-GSAP is distributed under its standard licence
-(<https://gsap.com/standard-license>); Lenis is MIT. Fraunces, DM Sans and
-the Noto Georgian families are under the SIL Open Font License.
+GSAP: https://gsap.com/standard-license. Lenis: MIT. Fraunces, DM Sans and
+Noto Georgian: SIL Open Font License.
 
-## History
+## Earlier version
 
-The version before the 2026 UI/UX and performance upgrade is commit
-`3a66bfd` ("Replace Casa Gelso with updated version").
+The site before this update is commit `3a66bfd`.

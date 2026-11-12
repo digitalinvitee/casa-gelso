@@ -1,20 +1,16 @@
-/* ============================================================
-   CASA GELSO — DIGITAL CAMPAIGN · app.js
+/*
+  Casa Gelso campaign site.
 
-   Language scope
-   - Campaign content (opening film, brand reveal, Digital Ad copy)
-     is English in every language, by design.
-   - Interface (navigation, menus, buttons, opener controls, footer)
-     and the Invitation / RSVP are translated: EN / KA / IT.
-
-   Every block below is isolated in its own try/catch so one failure
-   can never leave the page locked or the RSVP unusable.
-============================================================ */
+  The campaign itself (opening film, brand reveal, Digital Ad) is English
+  in every language. The interface and the Invitation / RSVP are also
+  available in Georgian and Italian. Each part runs in its own try/catch,
+  so a failure in one can never lock the page or break the RSVP.
+*/
 
 (function () {
   "use strict";
 
-  /* Tells the boot failsafe in <head> that the app is running. */
+  // Tells the failsafe in <head> that the app has started.
   window.__casaAppReady = true;
 
   const root = document.documentElement;
@@ -31,20 +27,19 @@
     if (window.console) console.error("[Casa Gelso] " + where + ":", err);
   }
 
-  function storageGet(store, key) {
-    try { return window[store].getItem(key); } catch (_) { return null; }
+  function storageGet(key) {
+    try { return window.localStorage.getItem(key); } catch (_) { return null; }
   }
 
-  function storageSet(store, key, value) {
-    try { window[store].setItem(key, value); } catch (_) { /* non-critical */ }
+  function storageSet(key, value) {
+    try { window.localStorage.setItem(key, value); } catch (_) { /* optional */ }
   }
 
   const $ = (sel, scope = document) => scope.querySelector(sel);
   const $$ = (sel, scope = document) => Array.from(scope.querySelectorAll(sel));
 
-  /* ============================================================
-     TRANSLATIONS
-  ============================================================ */
+
+  /* Translations */
 
   const translations = {
     en: {
@@ -56,7 +51,7 @@
         digital: "Digital Ad",
         invitation: "Invitation",
         rsvp: "RSVP",
-        homeLabel: "Casa Gelso — back to top",
+        homeLabel: "Casa Gelso, back to top",
         primaryLabel: "Primary",
         mobileLabel: "Main menu",
         languageLabel: "Language",
@@ -76,8 +71,8 @@
         aside: "Thank you. We look forward to welcoming you.",
         eyebrow: "Private opening · Tbilisi",
         title: "You are invited.",
-        /* Two paragraphs: the \n\n is a real break (white-space: pre-line). */
-        lede: "Join us for the opening evening of Casa Gelso — an evening that brings together distinctive pieces, considered details, and the people for whom style is part of who they are.\n\nDiscover Casa Gelso — a space where every piece is chosen with taste, and every detail is made to give your everyday a character of its own.",
+        // Two paragraphs: \n\n is shown as a break (white-space: pre-line).
+        lede: "Join us for the opening evening of Casa Gelso, an evening that brings together distinctive pieces, considered details and the people for whom style is part of who they are.\n\nDiscover Casa Gelso, a space where every piece is chosen with taste and every detail is made to give your everyday a character of its own.",
         dateLabel: "Date",
         date: "12 September 2026",
         timeLabel: "Time",
@@ -104,7 +99,7 @@
         title: "What do you wish for Casa Gelso?",
         placeholder: "",
         send: "Send RSVP",
-        sending: "Sending…"
+        sending: "Sending"
       },
       success: {
         title: "See you at Casa Gelso.",
@@ -113,7 +108,7 @@
         reservedNote: "We look forward to welcoming you, {name}.",
         reservedNoteNoName: "We look forward to welcoming you.",
         declinedEyebrow: "Thank you for letting us know",
-        declinedNote: "We'll miss you at the opening — we hope to see you at Casa Gelso soon."
+        declinedNote: "We'll miss you at the opening. We hope to see you at Casa Gelso soon."
       },
       errors: {
         name: "Please tell us your name and surname.",
@@ -124,7 +119,7 @@
       footer: {
         city: "Tbilisi",
         location: "Tbilisi, Georgia",
-        back: "Back to top ↑",
+        back: "Back to top",
         rights: "© 2026 Casa Gelso. All rights reserved.",
         createdBy: "Created by"
       }
@@ -139,7 +134,7 @@
         digital: "ციფრული რეკლამა",
         invitation: "მოწვევა",
         rsvp: "RSVP",
-        homeLabel: "Casa Gelso — თავში დაბრუნება",
+        homeLabel: "Casa Gelso, თავში დაბრუნება",
         primaryLabel: "მთავარი ნავიგაცია",
         mobileLabel: "მთავარი მენიუ",
         languageLabel: "ენა",
@@ -159,7 +154,8 @@
         aside: "გმადლობთ. მოუთმენლად გელით.",
         eyebrow: "კერძო გახსნა · თბილისი",
         title: "თქვენ მოწვეული ხართ.",
-        lede: "გელოდებით Casa Gelso-\u2060ს გახსნის საღამოზე — საღამოზე, რომელიც აერთიანებს გამორჩეულ ნივთებს, დახვეწილ დეტალებს და ადამიანებს, ვისთვისაც სტილი ინდივიდუალობის ნაწილია.\n\nაღმოაჩინეთ Casa Gelso — სივრცე, სადაც თითოეული ნივთი გემოვნებით არის შერჩეული და თითოეული დეტალი იმისთვისაა შექმნილი, რომ თქვენს ყოველდღიურობას საკუთარი ხასიათი შესძინოს.",
+        // ⁠ keeps "Gelso-ს" from breaking across lines.
+        lede: "გელოდებით Casa Gelso-⁠ს გახსნის საღამოზე, რომელიც აერთიანებს გამორჩეულ ნივთებს, დახვეწილ დეტალებს და ადამიანებს, ვისთვისაც სტილი ინდივიდუალობის ნაწილია.\n\nაღმოაჩინეთ Casa Gelso. აქ თითოეული ნივთი გემოვნებით არის შერჩეული და თითოეული დეტალი იმისთვისაა შექმნილი, რომ თქვენს ყოველდღიურობას საკუთარი ხასიათი შესძინოს.",
         dateLabel: "თარიღი",
         date: "12 სექტემბერი 2026",
         timeLabel: "დრო",
@@ -183,19 +179,19 @@
       },
       wish: {
         kicker: "და ბოლოს",
-        title: "რას უსურვებდით Casa Gelso-\u2060ს?",
+        title: "რას უსურვებდით Casa Gelso-⁠ს?",
         placeholder: "",
         send: "პასუხის გაგზავნა",
-        sending: "იგზავნება…"
+        sending: "იგზავნება"
       },
       success: {
-        title: "გელით Casa Gelso-\u2060ში.",
+        title: "გელით Casa Gelso-⁠ში.",
         again: "სხვა პასუხის გაგზავნა",
         reservedEyebrow: "თქვენი ადგილი დაჯავშნილია",
         reservedNote: "{name}, მოუთმენლად ველით თქვენს სტუმრობას.",
         reservedNoteNoName: "მოუთმენლად ველით თქვენს სტუმრობას.",
         declinedEyebrow: "გმადლობთ, რომ შეგვატყობინეთ",
-        declinedNote: "სამწუხაროა, რომ გახსნაზე ვერ გნახავთ — იმედი გვაქვს, მალე გესტუმრებით Casa Gelso-\u2060ში."
+        declinedNote: "სამწუხაროა, რომ გახსნაზე ვერ შევხვდებით. იმედი გვაქვს, მალე გნახავთ Casa Gelso-⁠ში."
       },
       errors: {
         name: "გთხოვთ, მიუთითოთ სახელი და გვარი.",
@@ -206,7 +202,7 @@
       footer: {
         city: "თბილისი",
         location: "თბილისი, საქართველო",
-        back: "თავში დაბრუნება ↑",
+        back: "თავში დაბრუნება",
         rights: "© 2026 Casa Gelso. ყველა უფლება დაცულია.",
         createdBy: "შემქმნელი:"
       }
@@ -221,7 +217,7 @@
         digital: "Digital Ad",
         invitation: "Invito",
         rsvp: "RSVP",
-        homeLabel: "Casa Gelso — torna all'inizio",
+        homeLabel: "Casa Gelso, torna all'inizio",
         primaryLabel: "Navigazione principale",
         mobileLabel: "Menu principale",
         languageLabel: "Lingua",
@@ -241,7 +237,7 @@
         aside: "Grazie. Saremo lieti di accoglierti.",
         eyebrow: "Inaugurazione privata · Tbilisi",
         title: "Un invito per te.",
-        lede: "Ti aspettiamo alla serata inaugurale di Casa Gelso — una serata che riunisce pezzi distintivi, dettagli ricercati e persone per cui lo stile è parte di ciò che sono.\n\nScopri Casa Gelso — uno spazio in cui ogni pezzo è scelto con gusto e ogni dettaglio è pensato per dare alla tua quotidianità un carattere tutto suo.",
+        lede: "Ti aspettiamo alla serata inaugurale di Casa Gelso, una serata che riunisce pezzi distintivi, dettagli ricercati e persone per cui lo stile è parte di ciò che sono.\n\nScopri Casa Gelso, uno spazio in cui ogni pezzo è scelto con gusto e ogni dettaglio è pensato per dare alla tua quotidianità un carattere tutto suo.",
         dateLabel: "Data",
         date: "12 settembre 2026",
         timeLabel: "Ora",
@@ -268,7 +264,7 @@
         title: "Cosa auguri a Casa Gelso?",
         placeholder: "",
         send: "Invia la risposta",
-        sending: "Invio in corso…"
+        sending: "Invio in corso"
       },
       success: {
         title: "Ti aspettiamo da Casa Gelso.",
@@ -277,7 +273,7 @@
         reservedNote: "Non vediamo l'ora di accoglierti, {name}.",
         reservedNoteNoName: "Non vediamo l'ora di accoglierti.",
         declinedEyebrow: "Grazie per avercelo fatto sapere",
-        declinedNote: "Ci mancherai all'inaugurazione — speriamo di vederti presto da Casa Gelso."
+        declinedNote: "Ci mancherai all'inaugurazione. Speriamo di vederti presto da Casa Gelso."
       },
       errors: {
         name: "Inserisci il tuo nome e cognome.",
@@ -288,7 +284,7 @@
       footer: {
         city: "Tbilisi",
         location: "Tbilisi, Georgia",
-        back: "Torna all'inizio ↑",
+        back: "Torna all'inizio",
         rights: "© 2026 Casa Gelso. Tutti i diritti riservati.",
         createdBy: "Realizzato da"
       }
@@ -296,9 +292,8 @@
   };
 
   const SUPPORTED = ["en", "ka", "it"];
-  let currentLang = SUPPORTED.indexOf(storageGet("localStorage", "casa-gelso-language")) > -1
-    ? storageGet("localStorage", "casa-gelso-language")
-    : "en";
+  const savedLang = storageGet("casa-gelso-language");
+  let currentLang = SUPPORTED.indexOf(savedLang) > -1 ? savedLang : "en";
 
   function t(path) {
     const pick = (lang) => path.split(".").reduce(
@@ -309,9 +304,131 @@
     return value !== undefined ? value : pick("en");
   }
 
-  /* ============================================================
-     SCROLL ENGINE (Lenis) + LOCKING
-  ============================================================ */
+
+  /* Sound
+     Browsers only allow sound after a tap, click or key press. The
+     soundtrack starts with the visitor's first one: normally Enter or
+     Skip intro, otherwise the first interaction anywhere on the page.
+     Once the visitor switches it off, nothing turns it back on. */
+
+  const audio = document.getElementById("casaGelsoAudio");
+  const soundButtons = $$("[data-sound-toggle]");
+  const GESTURES = ["touchend", "click", "keydown"];
+  let soundOffByVisitor = false;
+  let pausedByVisibility = false;
+
+  function syncSoundUI() {
+    const on = !!audio && !audio.paused && !audio.muted;
+    const label = on ? t("sound.on") : t("sound.off");
+    soundButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(on));
+      const text = $(".sound-label", button);
+      if (text) text.textContent = label;
+    });
+  }
+
+  function hideSoundControls() {
+    soundButtons.forEach((button) => { button.hidden = true; });
+  }
+
+  function onGesture(event) {
+    if (event.type === "keydown" && event.key === "Escape") return;
+    // The sound button handles its own clicks.
+    if (event.target instanceof Element && event.target.closest("[data-sound-toggle]")) return;
+    startSound();
+  }
+
+  function listenForGesture(on) {
+    GESTURES.forEach((type) => {
+      if (on) window.addEventListener(type, onGesture, { capture: true, passive: true });
+      else window.removeEventListener(type, onGesture, { capture: true });
+    });
+  }
+
+  function playSound() {
+    if (!audio) return Promise.resolve(false);
+    audio.muted = false;
+    let attempt;
+    try { attempt = audio.play(); } catch (err) { attempt = Promise.reject(err); }
+    return Promise.resolve(attempt).then(
+      () => {
+        listenForGesture(false);
+        syncSoundUI();
+        return true;
+      },
+      () => {
+        if (audio.error) hideSoundControls();
+        else if (!soundOffByVisitor) listenForGesture(true);   // retry on the next gesture
+        syncSoundUI();
+        return false;
+      }
+    );
+  }
+
+  // Must be called from inside a tap, click or key handler.
+  function startSound() {
+    if (!audio || soundOffByVisitor || !audio.paused) return;
+    playSound();
+  }
+
+  try {
+    if (audio) {
+      try { audio.volume = 0.42; } catch (_) { /* read-only on iOS */ }
+      audio.addEventListener("error", hideSoundControls);
+      ["play", "pause", "volumechange"].forEach((name) => audio.addEventListener(name, syncSoundUI));
+
+      soundButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          pausedByVisibility = false;
+          if (audio.paused || audio.muted) {
+            soundOffByVisitor = false;
+            playSound();
+          } else {
+            soundOffByVisitor = true;
+            listenForGesture(false);
+            audio.pause();
+          }
+          syncSoundUI();
+        });
+      });
+
+      // Pause in a background tab or app, carry on when the visitor returns.
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          if (!audio.paused) {
+            audio.pause();
+            pausedByVisibility = true;
+          }
+        } else if (pausedByVisibility) {
+          pausedByVisibility = false;
+          if (!soundOffByVisitor) playSound();
+        }
+      });
+
+      window.addEventListener("pageshow", (event) => {
+        if (event.persisted && pausedByVisibility && !soundOffByVisitor) {
+          pausedByVisibility = false;
+          playSound();
+        }
+      });
+
+      listenForGesture(true);
+
+      // Fetch the start of the track once the page has loaded, so the
+      // music follows Enter without a wait. Before that it would compete
+      // with the images.
+      const warmUp = () => { if (audio.preload === "none") audio.preload = "metadata"; };
+      if (document.readyState === "complete") warmUp();
+      else window.addEventListener("load", warmUp, { once: true });
+    } else {
+      hideSoundControls();
+    }
+  } catch (err) {
+    logError("Sound setup failed", err);
+  }
+
+
+  /* Smooth scrolling */
 
   let lenis = null;
 
@@ -332,7 +449,7 @@
     return nav ? nav.getBoundingClientRect().height : 0;
   }
 
-  /* Layout position, unaffected by reveal transforms. */
+  // Layout position, ignoring reveal transforms.
   function pageTop(el) {
     let y = 0;
     for (let node = el; node; node = node.offsetParent) y += node.offsetTop;
@@ -350,13 +467,12 @@
     }
   }
 
-  /* ============================================================
-     OPENING SEQUENCE
-  ============================================================ */
+
+  /* Opening film */
 
   const opener = $("[data-opener]");
   let openerDone = false;
-  let skipIntro = null;      /* set by runOpener; callable from nav links */
+  let skipIntro = null;   // set by runOpener, also used by in-page links
 
   function finishOpener() {
     if (openerDone) return;
@@ -365,7 +481,7 @@
     body.classList.remove("is-locked");
     body.classList.add("opener-revealed");
     if (lenis) {
-      lenis.resize();   /* limits were measured while the page was locked */
+      lenis.resize();   // its limits were measured while the page was locked
       lenis.start();
     }
 
@@ -375,7 +491,6 @@
       skipBtn.hidden = true;
     }
 
-    storageSet("sessionStorage", "casa-gelso-intro-seen", "1");
     document.dispatchEvent(new CustomEvent("casa:opener-finished"));
     if (hasScrollTrigger) ScrollTrigger.refresh();
   }
@@ -383,7 +498,7 @@
   function runOpener() {
     if (!opener) { finishOpener(); return; }
 
-    /* The head failsafe already resolved the page — leave it alone. */
+    // The failsafe in <head> already showed the brand reveal.
     if (body.classList.contains("opener-revealed")) { finishOpener(); return; }
 
     const titleCard = $("[data-title-card]", opener);
@@ -420,24 +535,23 @@
       }
     }
 
-    const seenThisSession = storageGet("sessionStorage", "casa-gelso-intro-seen") === "1";
-
-    /* Reduced motion, no GSAP, missing beats, or a repeat visit in the
-       same session: go straight to the brand reveal. */
-    if (reduceMotion || !hasGSAP || !titleCard || !hero || !comingSoon || seenThisSession) {
+    // Reduced motion or no animation library: straight to the brand reveal.
+    if (reduceMotion || !hasGSAP || !titleCard || !hero || !comingSoon) {
       hideBeats();
       showHeroFinal();
       finishOpener();
       return;
     }
 
-    /* The intro plays from the top, with the page locked behind it. */
+    // The film plays from the top with the page locked behind it.
+    // ScrollTrigger restores its own saved setting after every refresh,
+    // so it has to be told as well.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (hasScrollTrigger) ScrollTrigger.clearScrollMemory("manual");
     window.scrollTo(0, 0);
     if (lenis) lenis.stop();
     body.classList.add("is-locked");
 
-    /* Initial states */
     gsap.set(titleMark, { autoAlpha: 0, scale: 1.08, filter: "blur(12px)" });
     gsap.set(frames, { autoAlpha: 0 });
     frames.forEach((frame) => {
@@ -457,7 +571,7 @@
 
     let skipped = false;
 
-    /* Monogram appears, then the Enter control. */
+    // The monogram fades in, then the Enter button appears.
     const tlIntro = gsap.timeline()
       .to(titleMark, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" })
       .call(() => {
@@ -468,8 +582,7 @@
       if (!skipped && skipBtn) skipBtn.classList.add("is-visible");
     });
 
-    /* Main film — paused until Enter (the user gesture that also
-       allows the soundtrack to start). */
+    // The film waits for Enter, the gesture that also starts the music.
     const tl = gsap.timeline({ paused: true, onComplete: finishOpener });
 
     tl.to(titleMark, { autoAlpha: 0, scale: .96, filter: "blur(6px)", duration: .6, ease: "power2.in" })
@@ -477,7 +590,7 @@
       .call(() => opener.setAttribute("data-tone", "light"))
       .to(progress, { autoAlpha: 1, duration: .6 }, "+=0.1");
 
-    const FRAME_STEP = 3.3;   /* seconds each frame owns */
+    const FRAME_STEP = 3.3;   // seconds per frame
     const CROSSFADE = 1.1;
     const frameStart = tl.duration() - .5;
 
@@ -501,12 +614,12 @@
       if (previous) tl.set(previous, { autoAlpha: 0 }, at + CROSSFADE);
     });
 
-    /* The title card sits above the film: dissolve it as frame 1 arrives. */
+    // The title card sits above the film, so it dissolves as frame 1 arrives.
     tl.to(titleCard, { autoAlpha: 0, duration: CROSSFADE, ease: "power2.inOut" }, frameStart);
 
     const filmEnd = frameStart + frames.length * FRAME_STEP;
 
-    /* 12.09 — analog signal cut, then a clean hold */
+    // 12.09: the signal cut, then a clean hold.
     tl.to(progress, { autoAlpha: 0, duration: .3 }, filmEnd - .3)
       .set(comingSoon, { autoAlpha: 1, className: "coming-soon is-signal" }, filmEnd)
       .set(frames, { autoAlpha: 0 }, filmEnd + .05)
@@ -514,7 +627,7 @@
       .set(comingSoon, { className: "coming-soon is-clean" }, filmEnd + 1.15)
       .to(comingSoon, { autoAlpha: 0, duration: .8, ease: "power2.inOut" }, filmEnd + 2.9);
 
-    /* Brand reveal */
+    // Brand reveal.
     const heroAt = filmEnd + 3.3;
     tl.to(hero, { autoAlpha: 1, duration: .9, ease: "power2.out" }, heroAt)
       .to(heroArt || {}, { autoAlpha: 1, y: 0, duration: 1.6, ease: "power3.out" }, heroAt + .1)
@@ -523,9 +636,8 @@
       .to(heroText, { autoAlpha: 1, y: 0, duration: .8, stagger: .1, ease: "power3.out" }, heroAt + 1.05)
       .to(heroScroll || {}, { autoAlpha: 1, duration: .6 }, heroAt + 1.5);
 
-    /* Slow connections: never cut to an empty sheet. Before each frame
-       (and the brand reveal) the film holds — up to a few seconds —
-       until that image has actually arrived. */
+    // On a slow connection the film waits (up to 4 seconds) for an image
+    // that has not arrived yet, instead of fading to an empty frame.
     function whenLoaded(img, maxWait) {
       if (!img || (img.complete && img.naturalWidth > 0)) return Promise.resolve();
       return new Promise((resolve) => {
@@ -552,7 +664,7 @@
     function openIntro() {
       if (introOpened || skipped) return;
       introOpened = true;
-      primeAudio();   /* synchronous: this click is the audio gesture */
+      startSound();
       tl.play();
     }
 
@@ -569,23 +681,22 @@
 
     if (openBtn) {
       openBtn.addEventListener("click", openIntro);
-      /* Focus Enter as soon as it exists for keyboard users. */
+      // Keyboard users land on Enter as soon as it appears.
       tlIntro.call(() => { if (!skipped && document.activeElement === body) openBtn.focus({ preventScroll: true }); });
     }
 
     if (skipBtn) {
       skipBtn.addEventListener("click", () => {
-        primeAudio();
+        startSound();
         skipIntro();
-        const main = $("#main");
-        if (main && document.activeElement === skipBtn) {
+        if (document.activeElement === skipBtn) {
           const heroLink = $(".reveal-hero-scroll");
           if (heroLink) heroLink.focus({ preventScroll: true });
         }
       });
     }
 
-    /* Esc also skips the intro. */
+    // Esc skips the intro too.
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !openerDone && skipIntro && !$("[data-mobile-menu].is-open")) skipIntro();
     });
@@ -594,7 +705,7 @@
   try {
     runOpener();
   } catch (err) {
-    logError("Opener failed — recovering", err);
+    logError("Opener failed, showing the brand reveal", err);
     if (opener) {
       ["[data-title-card]", "[data-film]", "[data-film-progress]", "[data-coming-soon]"].forEach((sel) => {
         const el = $(sel, opener);
@@ -607,11 +718,10 @@
     finishOpener();
   }
 
-  /* ============================================================
-     SCROLL REVEALS · DIGITAL AD · NAV STATE
-  ============================================================ */
 
-  const revealTweens = new Map();   /* element → its scroll reveal tween */
+  /* Scroll reveals, Digital Ad photos, nav state */
+
+  const revealTweens = new Map();   // element -> its scroll reveal
 
   try {
     if (hasGSAP) {
@@ -640,7 +750,7 @@
           });
         });
 
-        /* Photograph reveal: curtain wipes away, image settles. */
+        // Each photo: the curtain wipes away and the image settles.
         gsap.utils.toArray("[data-parallax]").forEach((fig, i) => {
           const picture = $("picture", fig);
           const img = $(".ad-photo", fig);
@@ -670,7 +780,7 @@
             });
         });
 
-        /* Scroll spy */
+        // Highlight the nav link of the section in view.
         const navLinks = $$(".nav-links a:not(.nav-cta)");
         $$("main section[id]").forEach((section) => {
           ScrollTrigger.create({
@@ -697,7 +807,8 @@
     root.classList.add("no-gsap");
   }
 
-  /* Request the italic display face only as the invitation approaches. */
+  // The italic face is only needed for the invitation heading, so it is
+  // requested as the invitation comes near.
   try {
     const invite = document.getElementById("invitation");
     if (invite && "IntersectionObserver" in window) {
@@ -715,7 +826,7 @@
     root.classList.add("italic-ready");
   }
 
-  /* Solid nav once the hero is behind us. */
+  // Solid nav once the hero has scrolled away.
   try {
     const nav = $("[data-nav]");
     if (nav && opener) {
@@ -735,9 +846,8 @@
     logError("Nav state failed", err);
   }
 
-  /* ============================================================
-     MOBILE MENU
-  ============================================================ */
+
+  /* Mobile menu */
 
   const menuToggle = $("[data-menu-toggle]");
   const mobileMenu = $("[data-mobile-menu]");
@@ -754,7 +864,7 @@
       const openMenu = () => {
         clearTimeout(hideTimer);
         mobileMenu.hidden = false;
-        void mobileMenu.offsetWidth;   /* commit before transitioning */
+        void mobileMenu.offsetWidth;   // apply before the fade starts
         mobileMenu.classList.add("is-open");
         menuToggle.setAttribute("aria-expanded", "true");
         root.classList.add("menu-open");
@@ -802,7 +912,7 @@
         }
       });
 
-      /* Back to a desktop layout with the menu open: close it. */
+      // Close the menu if the window grows into the desktop layout.
       window.matchMedia("(min-width: 901px)").addEventListener("change", (mq) => {
         if (mq.matches) closeMobileMenu(false);
       });
@@ -811,9 +921,8 @@
     logError("Mobile menu failed", err);
   }
 
-  /* ============================================================
-     IN-PAGE LINKS — smooth, offset for the nav, intro-aware
-  ============================================================ */
+
+  /* In-page links: smooth, offset for the nav, and they skip the intro */
 
   try {
     document.addEventListener("click", (event) => {
@@ -828,23 +937,22 @@
 
       event.preventDefault();
 
-      const fromMenu = mobileMenu && mobileMenu.contains(link);
-      if (fromMenu) closeMobileMenu(false);
+      if (mobileMenu && mobileMenu.contains(link)) closeMobileMenu(false);
 
       const go = () => {
         scrollToTarget(target);
-        if (target.id !== "top") {
-          /* Move keyboard/screen-reader focus with the scroll. A target
-             still waiting for its reveal can't take focus, so reveal it. */
-          const reveal = revealTweens.get(target);
-          if (reveal && reveal.progress() === 0) {
-            if (reveal.scrollTrigger) reveal.scrollTrigger.kill(false, true);   /* keep the tween */
-            reveal.progress(1);
-            if (!reduceMotion) gsap.fromTo(target, { opacity: .001, y: 16 }, { opacity: 1, y: 0, duration: .8, ease: "power2.out" });
-          }
-          if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
-          target.focus({ preventScroll: true });
+        if (target.id === "top") return;
+
+        // Focus follows the scroll. A target still waiting for its reveal
+        // cannot take focus, so its reveal is completed first.
+        const reveal = revealTweens.get(target);
+        if (reveal && reveal.progress() === 0) {
+          if (reveal.scrollTrigger) reveal.scrollTrigger.kill(false, true);   // keep the tween
+          reveal.progress(1);
+          if (!reduceMotion) gsap.fromTo(target, { opacity: .001, y: 16 }, { opacity: 1, y: 0, duration: .8, ease: "power2.out" });
         }
+        if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
       };
 
       if (!openerDone && skipIntro && target.id !== "top") {
@@ -855,19 +963,18 @@
       }
     });
   } catch (err) {
-    logError("Anchor navigation failed", err);
+    logError("In-page links failed", err);
   }
 
-  /* ============================================================
-     EVENT DATA & CALENDAR
-     Single source of truth for the event time: 17:00 Tbilisi
-     (UTC+4) = 13:00 UTC. Matches the invitation copy, the .ics file
-     and the structured data in index.html.
-  ============================================================ */
+
+  /* Event and calendar
+     17:00 in Tbilisi (UTC+4) is 13:00 UTC. The same time is in the
+     translations, assets/casa-gelso-opening.ics and the structured data
+     in index.html. */
 
   const EVENT = {
-    title: "Casa Gelso — Opening",
-    details: "Casa Gelso opening in Tbilisi — accessible refinement, curated individuality, quiet confidence.",
+    title: "Casa Gelso Opening",
+    details: "Casa Gelso opening in Tbilisi. Accessible refinement, curated individuality, quiet confidence.",
     location: "Kostava St 67, Tbilisi, Georgia",
     startUTC: "20260912T130000Z",
     endUTC: "20260912T160000Z"
@@ -887,10 +994,10 @@
     logError("Calendar setup failed", err);
   }
 
-  /* ============================================================
-     RSVP — Google Apps Script endpoint (unchanged).
-     Payload: { name, attending, designers, wish } as text/plain JSON.
-  ============================================================ */
+
+  /* RSVP
+     Posts { name, attending, designers, wish } as text/plain JSON to the
+     Google Apps Script endpoint. */
 
   const RSVP_ENDPOINT =
     "https://script.google.com/macros/s/AKfycbxXpXlditvFs1H1dWB1iJyb_zy-y68-buSaxUceW5ZCiA-fp6GSuvZhTYiLFviBcEh_/exec";
@@ -942,7 +1049,7 @@
         };
       }
 
-      /* Returns the first invalid control, or null. */
+      // Returns the first invalid control, or null.
       function validate(data) {
         let firstInvalid = null;
         setError("name", "");
@@ -959,8 +1066,7 @@
         return firstInvalid;
       }
 
-      /* Errors clear as soon as the guest fixes a field; after a failed
-         submit, they re-validate live so feedback stays accurate. */
+      // After a failed submit, fields re-check as the guest corrects them.
       VALIDATED.forEach((name) => {
         $$('[name="' + name + '"]', rsvpForm).forEach((el) => {
           const handler = () => {
@@ -1032,11 +1138,11 @@
 
       rsvpForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        if (isSubmitting) return;   /* Enter in a field while sending */
+        if (isSubmitting) return;   // Enter pressed again while sending
 
         const data = readForm();
 
-        if (data.website) {          /* honeypot: drop silently */
+        if (data.website) {          // honeypot filled in: a bot, drop it
           renderSuccess({ name: data.name, attending: "yes" });
           return;
         }
@@ -1077,7 +1183,7 @@
         });
       }
 
-      /* Re-translate visible feedback when the language changes. */
+      // Messages already on screen follow a language change.
       document.addEventListener("casa:language-changed", () => {
         if (showErrors) validate(readForm());
         if (statusEl && statusEl.classList.contains("is-visible")) {
@@ -1093,97 +1199,16 @@
       });
     }
   } catch (err) {
-    logError("RSVP failed to initialize", err);
+    logError("RSVP failed to start", err);
   }
 
-  /* ============================================================
-     SOUND
-  ============================================================ */
 
-  const audio = document.getElementById("casaGelsoAudio");
-  const soundButtons = $$("[data-sound-toggle]");
-  let audioUnlocked = false;
-  let pausedByVisibility = false;
-
-  function syncSoundUI() {
-    const on = !!audio && !audio.paused && !audio.muted;
-    const label = on ? t("sound.on") : t("sound.off");
-    soundButtons.forEach((button) => {
-      button.setAttribute("aria-pressed", String(on));
-      const text = $(".sound-label", button);
-      if (text) text.textContent = label;
-    });
-  }
-
-  function markAudioUnavailable() {
-    soundButtons.forEach((button) => { button.hidden = true; });
-  }
-
-  function primeAudio() {
-    if (!audio || audioUnlocked) return;
-    audioUnlocked = true;
-    audio.muted = false;
-    try {
-      const playing = audio.play();
-      if (playing && typeof playing.then === "function") {
-        playing.then(syncSoundUI).catch(() => {
-          audioUnlocked = false;
-          syncSoundUI();
-        });
-      }
-    } catch (_) {
-      audioUnlocked = false;
-    }
-    syncSoundUI();
-  }
-
-  try {
-    if (audio) {
-      try { audio.volume = 0.42; } catch (_) { /* read-only on iOS */ }
-      audio.addEventListener("error", markAudioUnavailable);
-      ["play", "pause", "volumechange"].forEach((name) => audio.addEventListener(name, syncSoundUI));
-
-      soundButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          if (audio.paused || audio.muted) {
-            audio.muted = false;
-            audioUnlocked = true;
-            const playing = audio.play();
-            if (playing && typeof playing.catch === "function") {
-              playing.catch(() => { if (audio.error) markAudioUnavailable(); syncSoundUI(); });
-            }
-          } else {
-            audio.pause();
-          }
-          pausedByVisibility = false;
-          syncSoundUI();
-        });
-      });
-
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden && !audio.paused) {
-          audio.pause();
-          pausedByVisibility = true;
-        } else if (!document.hidden && pausedByVisibility) {
-          pausedByVisibility = false;
-          audio.play().catch(() => syncSoundUI());
-        }
-      });
-    } else {
-      markAudioUnavailable();
-    }
-  } catch (err) {
-    logError("Sound setup failed", err);
-  }
-
-  /* ============================================================
-     LANGUAGE
-  ============================================================ */
+  /* Language */
 
   function applyLanguage(lang) {
     currentLang = SUPPORTED.indexOf(lang) > -1 ? lang : "en";
     root.lang = currentLang;
-    storageSet("localStorage", "casa-gelso-language", currentLang);
+    storageSet("casa-gelso-language", currentLang);
 
     $$("[data-lang]").forEach((button) => {
       button.setAttribute("aria-pressed", String(button.dataset.lang === currentLang));

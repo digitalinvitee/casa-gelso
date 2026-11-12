@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Casa Gelso — responsive image builder.
+Casa Gelso responsive image builder.
 
 Regenerates every optimised image the site serves (assets/img/) from the
 original masters, which stay untouched in assets/teaser, assets/reveal and
@@ -28,7 +28,7 @@ except ImportError:
     sys.exit("Pillow is required:  pip install 'pillow>=11.3'")
 
 if not features.check("avif"):
-    sys.exit("This Pillow build has no AVIF support — upgrade:  pip install -U 'pillow>=11.3'")
+    sys.exit("This Pillow build has no AVIF support. Upgrade it:  pip install -U 'pillow>=11.3'")
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "img"
@@ -52,7 +52,7 @@ PHOTOS = {
     "ad/add5":                    ("assets/reveal/add5.JPG",                [480, 800, 1200, 1600], 1200),
 }
 
-# name: (master, width) — transparent logos, WebP
+# name: (master, width), transparent logos saved as WebP
 LOGOS = {
     "logo/monogram-wine-240":  ("assets/logo/monogram-wine.png", 240),
     "logo/lockup-wine-720":    ("assets/logo/lockup-wine.png", 720),
@@ -98,7 +98,7 @@ def build_logos():
 
 
 if __name__ == "__main__":
-    print("Building responsive images →", OUT.relative_to(ROOT))
+    print("Building responsive images in", OUT.relative_to(ROOT))
     build_photos()
     build_logos()
     print("Done.")

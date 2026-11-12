@@ -1,32 +1,10 @@
-/* ============================================================
-   CASA GELSO — DIGITAL CAMPAIGN
-   Editorial design system
-
-   Display  Fraunces (opsz)        · Noto Serif Georgian for KA glyphs
-   Text     DM Sans                · Noto Sans Georgian for KA glyphs
-   Georgian faces carry a Georgian-only unicode-range, so Latin text
-   always renders in Fraunces / DM Sans and the Georgian files are
-   only downloaded when Georgian text is on screen.
-
-   CONTENTS
-   1.  Fonts & tokens
-   2.  Base, accessibility, utilities
-   3.  Typography & shared components (labels, buttons, links)
-   4.  Navigation & mobile menu
-   5.  Opener — title card, campaign film, coming soon
-   6.  Brand reveal (hero)
-   7.  Digital ad
-   8.  Invitation
-   9.  RSVP
-   10. Footer
-   11. Responsive
-   12. Motion preferences, no-JS / no-GSAP fallbacks
-============================================================ */
+/*
+  Casa Gelso campaign site styles.
+  Fraunces and DM Sans, with Noto Serif and Noto Sans Georgian for Georgian text.
+*/
 
 
-/* ============================================================
-   1. FONTS & TOKENS
-============================================================ */
+/* Fonts and tokens */
 
 @font-face{
   font-family: "Fraunces";
@@ -102,8 +80,8 @@
   --fs-lede:    clamp(1rem, .95rem + .2vw, 1.125rem);
   --fs-body:    .9375rem;   /* 15px */
   --fs-small:   .875rem;    /* 14px */
-  --fs-label:   .75rem;     /* 12px — uppercase labels with content */
-  --fs-micro:   .6875rem;   /* 11px — the smallest text on the site */
+  --fs-label:   .75rem;     /* 12px, labels that carry content */
+  --fs-micro:   .6875rem;   /* 11px, the smallest text on the site */
 
   --track-label: .22em;
   --track-wide:  .32em;
@@ -119,9 +97,7 @@
 }
 
 
-/* ============================================================
-   2. BASE, ACCESSIBILITY, UTILITIES
-============================================================ */
+/* Base */
 
 *,
 *::before,
@@ -219,8 +195,7 @@ main:focus,
 }
 .skip-link:focus{ transform: none; }
 
-/* Restrained paper grain. A plain low-opacity layer (no blend mode),
-   so it never forces the page to re-composite while scrolling. */
+/* Light paper grain. No blend mode, so scrolling stays cheap. */
 .film-grain{
   position: fixed;
   inset: 0;
@@ -231,11 +206,9 @@ main:focus,
 }
 
 
-/* ============================================================
-   3. TYPOGRAPHY & SHARED COMPONENTS
-============================================================ */
+/* Type, buttons and links */
 
-/* Uppercase tracked labels — one recipe across the whole site. */
+/* Uppercase tracked labels share one recipe. */
 .eyebrow,
 .chapter-mark,
 .nav-mark span,
@@ -350,7 +323,7 @@ main:focus,
   transform: translateY(24px);
 }
 
-/* Buttons — square, editorial, one height everywhere. */
+/* Buttons: square, one height everywhere. */
 .btn{
   position: relative;
   display: inline-flex;
@@ -400,9 +373,7 @@ main:focus,
 }
 
 
-/* ============================================================
-   4. NAVIGATION
-============================================================ */
+/* Navigation */
 
 .site-nav{
   position: fixed;
@@ -429,8 +400,8 @@ body.opener-revealed .site-nav{
   mix-blend-mode: normal;
 }
 
-/* Solid bar once the hero has scrolled away — keeps the nav readable
-   over photography and over the wine invitation section. */
+/* Solid bar once the hero has scrolled away, so the nav stays readable
+   over photos and over the wine invitation. */
 .site-nav.is-solid{
   --nav-h: 64px;
   background: rgba(243, 238, 229, .94);
@@ -515,7 +486,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
   min-width: 40px;
   min-height: 44px;
   padding: 0 4px;
-  opacity: .74;   /* inactive state still ≥ 4.5:1 */
+  opacity: .74;   /* inactive languages keep 4.5:1 contrast */
   transition: opacity .3s;
 }
 .language-switcher button::after{
@@ -591,7 +562,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 
 
-/* Mobile menu ------------------------------------------------- */
+/* Mobile menu */
 
 .mobile-menu{
   position: fixed;
@@ -689,9 +660,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 
 
-/* ============================================================
-   5. OPENER
-============================================================ */
+/* Opening film */
 
 .opener{
   position: relative;
@@ -724,7 +693,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 .opener-skip.is-visible:hover,
 .opener-skip.is-visible:focus-visible{ opacity: 1; }
 
-/* Title card ------------------------------------------------- */
+/* Title card */
 
 .title-card{
   position: absolute;
@@ -760,7 +729,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 .title-card-enter:hover,
 .title-card-enter:focus-visible{ background: var(--cream); color: var(--wine-dark); border-color: var(--cream); }
 
-/* Campaign film ---------------------------------------------- */
+/* Campaign film */
 
 .film{
   position: absolute;
@@ -780,9 +749,8 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 .js .frame{ opacity: 0; visibility: hidden; }
 
-/* The illustrations are full-length figures on paper. They are shown
-   whole (never cover-cropped) on a ground matched to their own paper
-   tone, with a soft feathered edge so the sheet melts into the frame. */
+/* The illustrations are shown whole, never cropped, on a ground that
+   matches their paper, with a soft edge. */
 .frame-media{
   grid-row: 1;
   display: flex;
@@ -841,7 +809,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 
 .frame-title-line{ display: block; }
 
-/* Film progress — five segments, quietly filling as frames play. */
+/* Film progress: five segments that fill as the frames play. */
 .film-progress{
   position: absolute;
   z-index: 45;
@@ -868,7 +836,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
   transform-origin: left center;
 }
 
-/* Coming soon ------------------------------------------------- */
+/* Coming soon */
 
 .coming-soon{
   position: absolute;
@@ -982,9 +950,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 
 
-/* ============================================================
-   6. BRAND REVEAL (HERO)
-============================================================ */
+/* Brand reveal */
 
 .reveal-hero{
   position: absolute;
@@ -998,8 +964,8 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 .js .reveal-hero{ opacity: 0; visibility: hidden; }
 
-/* Shown whole and anchored to the floor of the frame; the paper of
-   the illustration is the same tone as the hero, so its edges vanish. */
+/* Shown whole and anchored to the bottom. The paper matches the hero,
+   so the edges disappear. */
 .reveal-art{
   grid-column: 2;
   grid-row: 1;
@@ -1080,9 +1046,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 }
 
 
-/* ============================================================
-   7. DIGITAL AD
-============================================================ */
+/* Digital Ad */
 
 .ad{
   position: relative;
@@ -1116,8 +1080,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
   align-items: center;
 }
 
-/* Each photograph has its own frame ratio and focal point, chosen for
-   that image — none is forced into a shared crop. */
+/* Each photo has its own frame ratio and focal point. */
 .ad-figure{
   position: relative;
   grid-row: 1;
@@ -1195,7 +1158,7 @@ body.opener-revealed .nav-links .nav-cta:hover{ background: var(--wine); color: 
 .ad-chapter--e .ad-figure{ grid-column: 7 / span 5; --ratio: 3 / 4;  --focus: 50% 50%; }
 .ad-chapter--e .ad-copy{   grid-column: 2 / span 4; align-self: end; margin-bottom: 8%; }
 
-/* Curtain — covers the photo, then wipes away as it enters view. */
+/* Curtain: covers the photo, then wipes away as it enters view. */
 .ad-curtain{
   position: absolute;
   inset: 0;
@@ -1260,9 +1223,7 @@ html:not(.js) .ad-curtain{ display: none; }
 .section-outro .lede{ margin: 22px auto 40px; }
 
 
-/* ============================================================
-   8. INVITATION
-============================================================ */
+/* Invitation */
 
 .invite{
   position: relative;
@@ -1335,9 +1296,8 @@ html:not(.js) .ad-curtain{ display: none; }
 .invite-heading .mask-in{
   color: var(--burgundy);
 }
-/* The italic face (80 KB) is only requested as the invitation nears the
-   viewport (app.js adds .italic-ready); the heading is still masked and
-   hidden until then, so the swap is never seen. */
+/* The italic face loads only when app.js adds .italic-ready, as the
+   invitation comes near. Until then the heading is still hidden. */
 html:not(.js) .invite-heading .mask-in,
 .italic-ready .invite-heading .mask-in{ font-style: italic; }
 /* Noto Serif Georgian has no italic: never synthesise a fake slant. */
@@ -1351,7 +1311,7 @@ html:not(.js) .invite-heading .mask-in,
   font-weight: 350;
   line-height: 1.75;
   color: var(--ink);
-  white-space: pre-line;   /* the copy holds a real paragraph break */
+  white-space: pre-line;   /* the text holds a real paragraph break */
   text-wrap: pretty;
 }
 
@@ -1392,12 +1352,6 @@ html:not(.js) .invite-heading .mask-in,
   margin: -11px 0;
 }
 
-.invite-link-arrow{
-  font-family: var(--sans);
-  font-size: .8em;
-  text-decoration: none;
-}
-
 .invite-calendar{
   display: flex;
   align-items: center;
@@ -1418,8 +1372,7 @@ html:not(.js) .invite-heading .mask-in,
   font-weight: 500;
 }
 
-/* Tooltip — pointer devices only; touch users get the visible link
-   styling and arrow instead of a hover-only hint. */
+/* Tooltips only on devices with a mouse or trackpad. */
 @media (hover: hover) and (pointer: fine){
   [data-tooltip]{ position: relative; }
   [data-tooltip]::after{
@@ -1447,9 +1400,7 @@ html:not(.js) .invite-heading .mask-in,
 }
 
 
-/* ============================================================
-   9. RSVP
-============================================================ */
+/* RSVP */
 
 .response-experience{
   min-width: 0;
@@ -1561,7 +1512,7 @@ html:not(.js) .invite-heading .mask-in,
   box-shadow: inset 0 -1px 0 var(--error);
 }
 
-/* Attendance — two clear, full-size choices */
+/* Attendance choices */
 .choice-options{
   display: grid;
   gap: 10px;
@@ -1717,9 +1668,7 @@ html:not(.js) .invite-heading .mask-in,
 }
 
 
-/* ============================================================
-   10. FOOTER
-============================================================ */
+/* Footer */
 
 .site-footer{
   padding: clamp(80px, 12vh, 128px) var(--gutter) calc(clamp(32px, 5vh, 48px) + env(safe-area-inset-bottom));
@@ -1767,11 +1716,9 @@ html:not(.js) .invite-heading .mask-in,
 }
 
 
-/* ============================================================
-   11. RESPONSIVE
-============================================================ */
+/* Responsive */
 
-/* Large desktop — keep the composition from drifting apart. */
+/* Large screens */
 @media (min-width: 1680px){
   :root{ --gutter: 88px; }
 }
@@ -1938,9 +1885,7 @@ html:not(.js) .invite-heading .mask-in,
 }
 
 
-/* ============================================================
-   12. MOTION PREFERENCES & FALLBACKS
-============================================================ */
+/* Reduced motion and fallbacks */
 
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{
@@ -1955,8 +1900,7 @@ html:not(.js) .invite-heading .mask-in,
   .ad-photo{ transform: none; }
 }
 
-/* GSAP unavailable (blocked/failed): every animated element resolves
-   to its final, readable state. */
+/* Without GSAP, everything is shown in its final state. */
 html.no-gsap .reveal-up,
 html.no-gsap .mask-lines .mask-in{ opacity: 1 !important; transform: none !important; }
 html.no-gsap .ad-curtain{ display: none; }
